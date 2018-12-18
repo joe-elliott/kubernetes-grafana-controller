@@ -1,11 +1,13 @@
 package main
 
 import (
+	"kubernetes-grafana-controller/pkg/signals"
 	"os"
+	"time"
 
 	logging "github.com/op/go-logging"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -33,15 +35,14 @@ func main() {
 		_log.Fatalf("rest.InClusterConfig failed: %v", err)
 	}
 	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
+	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		_log.Fatalf("kubernetes.NewForConfig failed: %v", err)
 	}
 
-	pods, err := clientset.CoreV1().Pods("").List(metav1.ListOptions{})
-	if err != nil {
-		_log.Fatalf("list pods failed: %v", err)
-	}
+	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
-	_log.Infof("There are %d pods in the cluster", len(pods.Items))
+	stopCh := signals.SetupSignalHandler()
+
+	informerFactory.Start(stopCh)
 }
