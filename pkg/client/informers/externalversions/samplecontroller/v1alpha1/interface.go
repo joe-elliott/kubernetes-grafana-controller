@@ -24,8 +24,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// Foos returns a FooInformer.
-	Foos() FooInformer
+	// GrafanaDashboards returns a GrafanaDashboardInformer.
+	GrafanaDashboards() GrafanaDashboardInformer
 }
 
 type version struct {
@@ -39,7 +39,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// Foos returns a FooInformer.
-func (v *version) Foos() FooInformer {
-	return &fooInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// GrafanaDashboards returns a GrafanaDashboardInformer.
+func (v *version) GrafanaDashboards() GrafanaDashboardInformer {
+	return &grafanaDashboardInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
