@@ -46,7 +46,7 @@ func main() {
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
 	controller := NewController(client, kubeClient,
-		informerFactory.Samplecontroller().V1alpha1().Foos())
+		informerFactory.Samplecontroller().V1alpha1().GrafanaDashboards())
 
 	stopCh := signals.SetupSignalHandler()
 

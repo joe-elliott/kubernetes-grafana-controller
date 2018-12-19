@@ -42,27 +42,27 @@ import (
 const controllerAgentName = "sample-controller"
 
 const (
-	// SuccessSynced is used as part of the Event 'reason' when a Foo is synced
+	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
 	SuccessSynced = "Synced"
-	// ErrResourceExists is used as part of the Event 'reason' when a Foo fails
+	// ErrResourceExists is used as part of the Event 'reason' when a GrafanaDashboard fails
 	// to sync due to a Deployment of the same name already existing.
 	ErrResourceExists = "ErrResourceExists"
 
 	// MessageResourceExists is the message used for Events when a resource
 	// fails to sync due to a Deployment already existing
-	MessageResourceExists = "Resource %q already exists and is not managed by Foo"
-	// MessageResourceSynced is the message used for an Event fired when a Foo
+	MessageResourceExists = "Resource %q already exists and is not managed by GrafanaDashboard"
+	// MessageResourceSynced is the message used for an Event fired when a GrafanaDashboard
 	// is synced successfully
-	MessageResourceSynced = "Foo synced successfully"
+	MessageResourceSynced = "GrafanaDashboard synced successfully"
 )
 
-// Controller is the controller implementation for Foo resources
+// Controller is the controller implementation for GrafanaDashboard resources
 type Controller struct {
 	// sampleclientset is a clientset for our own API group
 	sampleclientset clientset.Interface
 
-	foosLister listers.FooLister
-	foosSynced cache.InformerSynced
+	grafanaDashboardsLister listers.GrafanaDashboardLister
+	grafanaDashboardsSynced cache.InformerSynced
 
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
@@ -79,7 +79,7 @@ type Controller struct {
 func NewController(
 	sampleclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
-	fooInformer informers.FooInformer) *Controller {
+	grafanaDashboardInformer informers.GrafanaDashboardInformer) *Controller {
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
@@ -92,19 +92,19 @@ func NewController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &Controller{
-		sampleclientset: sampleclientset,
-		foosLister:      fooInformer.Lister(),
-		foosSynced:      fooInformer.Informer().HasSynced,
-		workqueue:       workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "Foos"),
-		recorder:        recorder,
+		sampleclientset:         sampleclientset,
+		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
+		grafanaDashboardsSynced: grafanaDashboardInformer.Informer().HasSynced,
+		workqueue:               workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "GrafanaDashboards"),
+		recorder:                recorder,
 	}
 
 	klog.Info("Setting up event handlers")
-	// Set up an event handler for when Foo resources change
-	fooInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.enqueueFoo,
+	// Set up an event handler for when GrafanaDashboard resources change
+	grafanaDashboardInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: controller.enqueueGrafanaDashboard,
 		UpdateFunc: func(old, new interface{}) {
-			controller.enqueueFoo(new)
+			controller.enqueueGrafanaDashboard(new)
 		},
 		//DeleteFunc: controller.handleObject,
 	})
@@ -121,16 +121,16 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer c.workqueue.ShutDown()
 
 	// Start the informer factories to begin populating the informer caches
-	klog.Info("Starting Foo controller")
+	klog.Info("Starting GrafanaDashboard controller")
 
 	// Wait for the caches to be synced before starting workers
 	klog.Info("Waiting for informer caches to sync")
-	if ok := cache.WaitForCacheSync(stopCh, c.foosSynced); !ok {
+	if ok := cache.WaitForCacheSync(stopCh, c.grafanaDashboardsSynced); !ok {
 		return fmt.Errorf("failed to wait for caches to sync")
 	}
 
 	klog.Info("Starting workers")
-	// Launch two workers to process Foo resources
+	// Launch two workers to process GrafanaDashboard resources
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(c.runWorker, time.Second, stopCh)
 	}
@@ -184,7 +184,7 @@ func (c *Controller) processNextWorkItem() bool {
 			return nil
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
-		// Foo resource to be synced.
+		// GrafanaDashboard resource to be synced.
 		if err := c.syncHandler(key); err != nil {
 			// Put the item back on the workqueue to handle any transient errors.
 			c.workqueue.AddRateLimited(key)
@@ -206,7 +206,7 @@ func (c *Controller) processNextWorkItem() bool {
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the Foo resource
+// converge the two. It then updates the Status block of the GrafanaDashboard resource
 // with the current status of the resource.
 func (c *Controller) syncHandler(key string) error {
 	// Convert the namespace/name string into a distinct namespace and name
@@ -216,26 +216,17 @@ func (c *Controller) syncHandler(key string) error {
 		return nil
 	}
 
-	// Get the Foo resource with this namespace/name
-	foo, err := c.foosLister.Foos(namespace).Get(name)
+	// Get the GrafanaDashboard resource with this namespace/name
+	grafanaDashboard, err := c.grafanaDashboardsLister.GrafanaDashboards(namespace).Get(name)
 	if err != nil {
-		// The Foo resource may no longer exist, in which case we stop
+		// The GrafanaDashboard resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("foo '%s' in work queue no longer exists", key))
+			utilruntime.HandleError(fmt.Errorf("grafanaDashboard '%s' in work queue no longer exists", key))
 			return nil
 		}
 
 		return err
-	}
-
-	deploymentName := foo.Spec.DeploymentName
-	if deploymentName == "" {
-		// We choose to absorb the error here as the worker would requeue the
-		// resource otherwise. Instead, the next time the resource is updated
-		// the resource will be queued again.
-		utilruntime.HandleError(fmt.Errorf("%s: deployment name must be specified", key))
-		return nil
 	}
 
 	// If an error occurs during Update, we'll requeue the item so we can
@@ -245,35 +236,35 @@ func (c *Controller) syncHandler(key string) error {
 		return err
 	}
 
-	// Finally, we update the status block of the Foo resource to reflect the
+	// Finally, we update the status block of the GrafanaDashboard resource to reflect the
 	// current state of the world
-	err = c.updateFooStatus(foo)
+	err = c.updateGrafanaDashboardStatus(grafanaDashboard)
 	if err != nil {
 		return err
 	}
 
-	c.recorder.Event(foo, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	c.recorder.Event(grafanaDashboard, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil
 }
 
-func (c *Controller) updateFooStatus(foo *samplev1alpha1.Foo) error {
+func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alpha1.GrafanaDashboard) error {
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
-	fooCopy := foo.DeepCopy()
-	fooCopy.Status.AvailableReplicas = 42
+	grafanaDashboardCopy := grafanaDashboard.DeepCopy()
+	grafanaDashboardCopy.Status.Applied = true
 	// If the CustomResourceSubresources feature gate is not enabled,
-	// we must use Update instead of UpdateStatus to update the Status block of the Foo resource.
+	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDashboard resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
-	_, err := c.sampleclientset.SamplecontrollerV1alpha1().Foos(foo.Namespace).Update(fooCopy)
+	_, err := c.sampleclientset.SamplecontrollerV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
 	return err
 }
 
-// enqueueFoo takes a Foo resource and converts it into a namespace/name
+// enqueueGrafanaDashboard takes a GrafanaDashboard resource and converts it into a namespace/name
 // string which is then put onto the work queue. This method should *not* be
-// passed resources of any type other than Foo.
-func (c *Controller) enqueueFoo(obj interface{}) {
+// passed resources of any type other than GrafanaDashboard.
+func (c *Controller) enqueueGrafanaDashboard(obj interface{}) {
 	var key string
 	var err error
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
