@@ -9,7 +9,9 @@ import (
 
 	logging "github.com/op/go-logging"
 
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/klog"
 )
 
 var (
@@ -27,22 +29,34 @@ func init() {
 }
 
 func main() {
-	_log.Infof("Application Starting")
+	klog.Info("Application Starting")
 
 	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		_log.Fatalf("rest.InClusterConfig failed: %v", err)
+		klog.Fatalf("rest.InClusterConfig failed: %v", err)
 	}
 	// creates the clientset
 	client, err := clientset.NewForConfig(config)
 	if err != nil {
-		_log.Fatalf("clientset.NewForConfig failed: %v", err)
+		klog.Fatalf("clientset.NewForConfig failed: %v", err)
+	}
+
+	kubeClient, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
+	controller := NewController(client, kubeClient,
+		informerFactory.Samplecontroller().V1alpha1().Foos())
+
 	stopCh := signals.SetupSignalHandler()
 
 	informerFactory.Start(stopCh)
+
+	if err = controller.Run(2, stopCh); err != nil {
+		klog.Fatalf("Error running controller: %s", err.Error())
+	}
 }
