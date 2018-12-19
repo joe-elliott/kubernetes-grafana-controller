@@ -1,14 +1,14 @@
 package main
 
 import (
+	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
 	"kubernetes-grafana-controller/pkg/signals"
 	"os"
 	"time"
 
 	logging "github.com/op/go-logging"
 
-	"k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
 
@@ -35,9 +35,9 @@ func main() {
 		_log.Fatalf("rest.InClusterConfig failed: %v", err)
 	}
 	// creates the clientset
-	client, err := kubernetes.NewForConfig(config)
+	client, err := clientset.NewForConfig(config)
 	if err != nil {
-		_log.Fatalf("kubernetes.NewForConfig failed: %v", err)
+		_log.Fatalf("clientset.NewForConfig failed: %v", err)
 	}
 
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)

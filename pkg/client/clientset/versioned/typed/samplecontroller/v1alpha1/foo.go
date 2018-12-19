@@ -20,7 +20,7 @@ package v1alpha1
 
 import (
 	v1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
-	scheme "src/kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+	scheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

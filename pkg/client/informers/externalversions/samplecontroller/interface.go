@@ -19,8 +19,8 @@ limitations under the License.
 package samplecontroller
 
 import (
-	internalinterfaces "src/kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "src/kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller/v1alpha1"
+	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

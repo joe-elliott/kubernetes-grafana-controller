@@ -20,9 +20,9 @@ package v1alpha1
 
 import (
 	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
-	versioned "src/kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	internalinterfaces "src/kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "src/kubernetes-grafana-controller/pkg/client/listers/samplecontroller/v1alpha1"
+	versioned "kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "kubernetes-grafana-controller/pkg/client/listers/samplecontroller/v1alpha1"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

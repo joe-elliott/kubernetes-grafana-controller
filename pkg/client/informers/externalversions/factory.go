@@ -19,10 +19,10 @@ limitations under the License.
 package externalversions
 
 import (
+	versioned "kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
+	samplecontroller "kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller"
 	reflect "reflect"
-	versioned "src/kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	internalinterfaces "src/kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
-	samplecontroller "src/kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller"
 	sync "sync"
 	time "time"
 

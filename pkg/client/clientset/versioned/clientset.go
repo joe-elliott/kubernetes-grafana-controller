@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	samplecontrollerv1alpha1 "src/kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1"
+	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1"
 
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"

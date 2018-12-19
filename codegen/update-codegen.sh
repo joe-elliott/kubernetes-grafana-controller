@@ -29,9 +29,9 @@ cp -Rf code-generator $CODEGEN_PKG
 #                  k8s.io/kubernetes. The output-base is needed for the generators to output into the vendor dir
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  src/kubernetes-grafana-controller/pkg/client kubernetes-grafana-controller/pkg/apis \
+  kubernetes-grafana-controller/pkg/client kubernetes-grafana-controller/pkg/apis \
   samplecontroller:v1alpha1 \
-  --output-base "$(dirname ${BASH_SOURCE})/../../.." \
+  --output-base "$(dirname ${BASH_SOURCE})/../../../src" \
   --go-header-file ${SCRIPT_ROOT}/codegen/boilerplate.go.txt
 
 # To use your own boilerplate text use:

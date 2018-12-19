@@ -19,7 +19,7 @@ limitations under the License.
 package internalinterfaces
 
 import (
-	versioned "src/kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	versioned "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
