@@ -11,7 +11,7 @@ fi
 
 docker build .debug -t vscode-go-debug
 
-telepresence --docker-run -v "$(pwd)":/opt/go/src/local/myorg/myapp \
+telepresence --docker-run -v "$(pwd)":/opt/go/src/kubernetes-grafana-controller \
                           -p 2345:2345 -it \
                           --cap-add=SYS_PTRACE \
                           vscode-go-debug \

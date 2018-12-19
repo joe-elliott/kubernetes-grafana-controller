@@ -6,7 +6,7 @@
             "type": "go",
             "request": "launch",
             "mode": "remote",
-            "remotePath": "/opt/go/src/local/myorg/myapp",
+            "remotePath": "/opt/go/src/kubernetes-grafana-controller",
             "port": 2345,
             "host": "127.0.0.1",
             "program": "${workspaceRoot}",
