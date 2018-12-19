@@ -1,41 +1,37 @@
 package main
 
 import (
+	"flag"
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
 	"kubernetes-grafana-controller/pkg/signals"
-	"os"
 	"time"
 
-	logging "github.com/op/go-logging"
-
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog"
 )
 
 var (
-	_log       = logging.MustGetLogger("prometheus-autoscaler")
-	_logFormat = logging.MustStringFormatter(
-		`%{time:15:04:05.000} %{level:.4s} %{message}`,
-	)
+	masterURL  string
+	kubeconfig string
 )
 
 func init() {
-	backend := logging.NewLogBackend(os.Stdout, "", 0)
-	backendFormatted := logging.NewBackendFormatter(backend, _logFormat)
-
-	logging.SetBackend(backendFormatted)
+	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 }
 
 func main() {
 	klog.Info("Application Starting")
 
-	// creates the in-cluster config
-	config, err := rest.InClusterConfig()
+	flag.Parse()
+
+	config, err := clientcmd.BuildConfigFromFlags(masterURL, kubeconfig)
 	if err != nil {
-		klog.Fatalf("rest.InClusterConfig failed: %v", err)
+		klog.Fatalf("Error building kubeconfig: %s", err.Error())
 	}
+
 	// creates the clientset
 	client, err := clientset.NewForConfig(config)
 	if err != nil {

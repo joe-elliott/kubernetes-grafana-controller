@@ -125,6 +125,14 @@
   version = "v0.5.0"
 
 [[projects]]
+  digest = "1:8eb1de8112c9924d59bf1d3e5c26f5eaa2bfc2a5fcbb92dc1c2e4546d695f277"
+  name = "github.com/imdario/mergo"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
+  version = "v0.3.6"
+
+[[projects]]
   digest = "1:3e551bbb3a7c0ab2a2bf4660e7fcad16db089fdcfbb44b0199e62838038623ea"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -147,14 +155,6 @@
   pruneopts = "UT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
-
-[[projects]]
-  digest = "1:5b3b29ce0e569f62935d9541dff2e16cc09df981ebde48e82259076a73a3d0c7"
-  name = "github.com/op/go-logging"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "b2cb9fa56473e98db8caba80237377e83fe44db5"
-  version = "v1"
 
 [[projects]]
   branch = "master"
@@ -400,7 +400,7 @@
   revision = "4d029f0333996cf231080e108e0bd1ece2a94d9f"
 
 [[projects]]
-  digest = "1:b968897e8207798747c913e9154376c27277af4435a2829382b219a381f6c8c7"
+  digest = "1:629be285fe38a79befebc82c1a34d2c11afe8694971ffd0a90b3a3a7ffc1ed11"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -554,8 +554,12 @@
     "rest",
     "rest/watch",
     "testing",
+    "tools/auth",
     "tools/cache",
+    "tools/clientcmd",
     "tools/clientcmd/api",
+    "tools/clientcmd/api/latest",
+    "tools/clientcmd/api/v1",
     "tools/metrics",
     "tools/pager",
     "tools/record",
@@ -565,6 +569,7 @@
     "util/cert",
     "util/connrotation",
     "util/flowcontrol",
+    "util/homedir",
     "util/integer",
     "util/retry",
     "util/workqueue",
@@ -675,7 +680,6 @@
     "github.com/gogo/protobuf/proto",
     "github.com/gogo/protobuf/sortkeys",
     "github.com/gogo/protobuf/vanity/command",
-    "github.com/op/go-logging",
     "github.com/spf13/pflag",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
@@ -693,12 +697,14 @@
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/informers",
+    "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
+    "k8s.io/client-go/tools/clientcmd",
     "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/client-go/util/workqueue",
@@ -734,12 +740,8 @@
     "k8s.io/gengo/types",
     "k8s.io/klog",
     "k8s.io/sample-controller/pkg/apis/samplecontroller/v1alpha1",
-    "k8s.io/sample-controller/pkg/client/clientset/versioned",
     "k8s.io/sample-controller/pkg/client/clientset/versioned/fake",
-    "k8s.io/sample-controller/pkg/client/clientset/versioned/scheme",
     "k8s.io/sample-controller/pkg/client/informers/externalversions",
-    "k8s.io/sample-controller/pkg/client/informers/externalversions/samplecontroller/v1alpha1",
-    "k8s.io/sample-controller/pkg/client/listers/samplecontroller/v1alpha1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
