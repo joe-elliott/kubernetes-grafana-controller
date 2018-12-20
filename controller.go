@@ -37,6 +37,7 @@ import (
 	samplescheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller/v1alpha1"
 	listers "kubernetes-grafana-controller/pkg/client/listers/samplecontroller/v1alpha1"
+	"kubernetes-grafana-controller/pkg/grafana"
 )
 
 const controllerAgentName = "sample-controller"
@@ -64,6 +65,8 @@ type Controller struct {
 	grafanaDashboardsLister listers.GrafanaDashboardLister
 	grafanaDashboardsSynced cache.InformerSynced
 
+	grafanaClient grafana.Interface
+
 	// workqueue is a rate limited work queue. This is used to queue work to be
 	// processed instead of performing it as soon as a change happens. This
 	// means we can ensure we only process a fixed amount of resources at a
@@ -79,6 +82,7 @@ type Controller struct {
 func NewController(
 	sampleclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
+	grafanaClient grafana.Interface,
 	grafanaDashboardInformer informers.GrafanaDashboardInformer) *Controller {
 
 	// Create event broadcaster
@@ -95,6 +99,7 @@ func NewController(
 		sampleclientset:         sampleclientset,
 		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
 		grafanaDashboardsSynced: grafanaDashboardInformer.Informer().HasSynced,
+		grafanaClient:           grafanaClient,
 		workqueue:               workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "GrafanaDashboards"),
 		recorder:                recorder,
 	}
@@ -228,6 +233,8 @@ func (c *Controller) syncHandler(key string) error {
 
 		return err
 	}
+
+	err = c.grafanaClient.PostDashboard(grafanaDashboard.Spec.DashboardJSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a

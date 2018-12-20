@@ -2,10 +2,12 @@ package main
 
 import (
 	"flag"
+	"time"
+
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	"kubernetes-grafana-controller/pkg/grafana"
 	"kubernetes-grafana-controller/pkg/signals"
-	"time"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -15,11 +17,13 @@ import (
 var (
 	masterURL  string
 	kubeconfig string
+	grafanaURL string
 )
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.  Defaults to http://grafana")
 }
 
 func main() {
@@ -43,9 +47,11 @@ func main() {
 		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
+	grafanaClient := grafana.NewGrafanaClient(grafanaURL)
+
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
-	controller := NewController(client, kubeClient,
+	controller := NewController(client, kubeClient, grafanaClient,
 		informerFactory.Samplecontroller().V1alpha1().GrafanaDashboards())
 
 	stopCh := signals.SetupSignalHandler()
