@@ -22,7 +22,7 @@ SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 CODEGEN_PKG=${SCRIPT_ROOT}/vendor/k8s.io/code-generator
 
 # dep ensure nukes the code-generator package.  just copy what we have here over to the vendor folder
-cp -Rf code-generator $CODEGEN_PKG
+cp -Rf code-generator/* $CODEGEN_PKG
 
 # generate the code with:
 # --output-base    because this script should also be able to run inside the vendor dir of
