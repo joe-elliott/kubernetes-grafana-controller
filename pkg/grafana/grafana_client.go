@@ -2,6 +2,7 @@ package grafana
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -26,11 +27,17 @@ func NewGrafanaClient(address string) *GrafanaClient {
 }
 
 func (client *GrafanaClient) PostDashboard(dashboardJSON string) error {
-	resp, err := http.Post(client.address+"/api/dashboards/db", "application/json", strings.NewReader(dashboardJSON))
+	postJSON := fmt.Sprintf(`{
+		"dashboard": %v,
+		"folderId": 0,
+		"overwrite": true
+	}`, dashboardJSON)
+
+	resp, err := http.Post(client.address+"/api/dashboards/db", "application/json", strings.NewReader(postJSON))
 
 	klog.Infof("http response: %v", resp)
 
-	if resp != nil && resp.StatusCode >= 300 {
+	if resp != nil && (resp.StatusCode >= 300 || resp.StatusCode < 200) {
 		return errors.New(resp.Status)
 	}
 
