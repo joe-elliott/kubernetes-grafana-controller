@@ -24,6 +24,8 @@ func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.  Defaults to http://grafana")
+
+	klog.InitFlags(nil)
 }
 
 func main() {
