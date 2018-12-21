@@ -111,7 +111,7 @@ func NewController(
 		UpdateFunc: func(old, new interface{}) {
 			controller.enqueueGrafanaDashboard(new)
 		},
-		//DeleteFunc: controller.handleObject,
+		DeleteFunc: controller.enqueueGrafanaDashboard,
 	})
 
 	return controller
@@ -173,14 +173,11 @@ func (c *Controller) processNextWorkItem() bool {
 		// put back on the workqueue and attempted again after a back-off
 		// period.
 		defer c.workqueue.Done(obj)
-		var key string
+		var item WorkQueueItem
 		var ok bool
-		// We expect strings to come off the workqueue. These are of the
-		// form namespace/name. We do this as the delayed nature of the
-		// workqueue means the items in the informer cache may actually be
-		// more up to date that when the item was initially put onto the
-		// workqueue.
-		if key, ok = obj.(string); !ok {
+
+		// confirm we have a work queue item
+		if item, ok = obj.(WorkQueueItem); !ok {
 			// As the item in the workqueue is actually invalid, we call
 			// Forget here else we'd go into a loop of attempting to
 			// process a work item that is invalid.
@@ -190,15 +187,15 @@ func (c *Controller) processNextWorkItem() bool {
 		}
 		// Run the syncHandler, passing it the namespace/name string of the
 		// GrafanaDashboard resource to be synced.
-		if err := c.syncHandler(key); err != nil {
+		if err := c.syncHandler(item); err != nil {
 			// Put the item back on the workqueue to handle any transient errors.
-			c.workqueue.AddRateLimited(key)
-			return fmt.Errorf("error syncing '%s': %s, requeuing", key, err.Error())
+			c.workqueue.AddRateLimited(item.key)
+			return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
 		}
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queued again until another change happens.
 		c.workqueue.Forget(obj)
-		klog.Infof("Successfully synced '%s'", key)
+		klog.Infof("Successfully synced '%s'", item.key)
 		return nil
 	}(obj)
 
@@ -213,11 +210,11 @@ func (c *Controller) processNextWorkItem() bool {
 // syncHandler compares the actual state with the desired, and attempts to
 // converge the two. It then updates the Status block of the GrafanaDashboard resource
 // with the current status of the resource.
-func (c *Controller) syncHandler(key string) error {
+func (c *Controller) syncHandler(item WorkQueueItem) error {
 	// Convert the namespace/name string into a distinct namespace and name
-	namespace, name, err := cache.SplitMetaNamespaceKey(key)
+	namespace, name, err := cache.SplitMetaNamespaceKey(item.key)
 	if err != nil {
-		utilruntime.HandleError(fmt.Errorf("invalid resource key: %s", key))
+		utilruntime.HandleError(fmt.Errorf("invalid resource key: %s", item.key))
 		return nil
 	}
 
@@ -227,7 +224,7 @@ func (c *Controller) syncHandler(key string) error {
 		// The GrafanaDashboard resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("grafanaDashboard '%s' in work queue no longer exists", key))
+			utilruntime.HandleError(fmt.Errorf("grafanaDashboard '%s' in work queue no longer exists", item.key))
 			return nil
 		}
 
@@ -259,7 +256,7 @@ func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alph
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
 	grafanaDashboardCopy := grafanaDashboard.DeepCopy()
-	grafanaDashboardCopy.Status.Applied = true
+	grafanaDashboardCopy.Status.GrafanaUID = "TODO: add a UID"
 	// If the CustomResourceSubresources feature gate is not enabled,
 	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDashboard resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
@@ -274,9 +271,20 @@ func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alph
 func (c *Controller) enqueueGrafanaDashboard(obj interface{}) {
 	var key string
 	var err error
+	var dashboard samplev1alpha1.GrafanaDashboard
+	var ok bool
+
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
 		utilruntime.HandleError(err)
 		return
 	}
-	c.workqueue.AddRateLimited(key)
+
+	if dashboard, ok = obj.(samplev1alpha1.GrafanaDashboard); !ok {
+		utilruntime.HandleError(fmt.Errorf("expected GrafanaDashboard in workqueue but got %#v", obj))
+		return
+	}
+
+	item := NewWorkQueueItem(key, Dashboard, dashboard.Status.GrafanaUID) // todo: confirm this doesnt need null checking
+
+	c.workqueue.AddRateLimited(item)
 }

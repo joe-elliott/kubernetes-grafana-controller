@@ -39,7 +39,7 @@ type GrafanaDashboardSpec struct {
 
 // GrafanaDashboardStatus is the status for a GrafanaDashboard resource
 type GrafanaDashboardStatus struct {
-	Applied bool `json:"applied"`
+	GrafanaUID string `json:"grafanaUID"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
