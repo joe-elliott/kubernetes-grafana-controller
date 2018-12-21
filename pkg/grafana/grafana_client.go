@@ -1,6 +1,7 @@
 package grafana
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
@@ -25,9 +26,13 @@ func NewGrafanaClient(address string) *GrafanaClient {
 }
 
 func (client *GrafanaClient) PostDashboard(dashboardJSON string) error {
-	resp, err := http.Post(client.address+"/blerg", "application/json", strings.NewReader(dashboardJSON))
+	resp, err := http.Post(client.address+"/api/dashboards/db", "application/json", strings.NewReader(dashboardJSON))
 
 	klog.Infof("http response: %v", resp)
+
+	if resp != nil && resp.StatusCode >= 300 {
+		return errors.New(resp.Status)
+	}
 
 	return err
 }
