@@ -133,6 +133,14 @@
   version = "v0.3.6"
 
 [[projects]]
+  digest = "1:3fb51807ab996acf337a6372ac98e093e17f14d75edbf2c0d27f650e53d90fac"
+  name = "github.com/imroc/req"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b355b6f6842fbda1bee879f2846cb79424cad4de"
+  version = "v0.2.3"
+
+[[projects]]
   digest = "1:3e551bbb3a7c0ab2a2bf4660e7fcad16db089fdcfbb44b0199e62838038623ea"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -680,6 +688,7 @@
     "github.com/gogo/protobuf/proto",
     "github.com/gogo/protobuf/sortkeys",
     "github.com/gogo/protobuf/vanity/command",
+    "github.com/imroc/req",
     "github.com/spf13/pflag",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",

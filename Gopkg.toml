@@ -42,3 +42,7 @@
 [[constraint]]
   name = "github.com/grafana-tools/sdk"
   version = "0.8.0"
+
+[[constraint]]
+  name = "github.com/imroc/req"
+  version = "0.2.3"

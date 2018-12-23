@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
+	"kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
 	samplev1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	samplescheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
@@ -189,11 +190,11 @@ func (c *Controller) processNextWorkItem() bool {
 		// GrafanaDashboard resource to be synced.
 		if err := c.syncHandler(item); err != nil {
 			// Put the item back on the workqueue to handle any transient errors.
-			c.workqueue.AddRateLimited(item.key)
+			c.workqueue.AddRateLimited(item)
 			return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
 		}
 		// Finally, if no error occurs we Forget this item so it does not
-		// get queued again until another change happens.
+		// get queued again until anothePostDashboardr change happens.
 		c.workqueue.Forget(obj)
 		klog.Infof("Successfully synced '%s'", item.key)
 		return nil
@@ -231,7 +232,7 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	uid, err = c.grafanaClient.PostDashboard(grafanaDashboard.Spec.DashboardJSON)
+	uid, err := c.grafanaClient.PostDashboard(grafanaDashboard.Spec.DashboardJSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
@@ -271,7 +272,7 @@ func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alph
 func (c *Controller) enqueueGrafanaDashboard(obj interface{}) {
 	var key string
 	var err error
-	var dashboard samplev1alpha1.GrafanaDashboard
+	var dashboard *v1alpha1.GrafanaDashboard
 	var ok bool
 
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -279,7 +280,7 @@ func (c *Controller) enqueueGrafanaDashboard(obj interface{}) {
 		return
 	}
 
-	if dashboard, ok = obj.(samplev1alpha1.GrafanaDashboard); !ok {
+	if dashboard, ok = obj.(*v1alpha1.GrafanaDashboard); !ok {
 		utilruntime.HandleError(fmt.Errorf("expected GrafanaDashboard in workqueue but got %#v", obj))
 		return
 	}

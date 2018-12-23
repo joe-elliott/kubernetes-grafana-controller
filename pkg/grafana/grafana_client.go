@@ -3,14 +3,12 @@ package grafana
 import (
 	"errors"
 	"fmt"
-	"net/http"
-	"strings"
 
-	"k8s.io/klog"
+	"github.com/imroc/req"
 )
 
 type Interface interface {
-	PostDashboard(string) error
+	PostDashboard(string) (string, error)
 }
 
 type GrafanaClient struct {
@@ -27,7 +25,7 @@ func NewGrafanaClient(address string) *GrafanaClient {
 }
 
 func (client *GrafanaClient) PostDashboard(dashboardJSON string) (string, error) {
-	var uid string
+	var responseBody map[string]interface{}
 
 	postJSON := fmt.Sprintf(`{
 		"dashboard": %v,
@@ -35,15 +33,43 @@ func (client *GrafanaClient) PostDashboard(dashboardJSON string) (string, error)
 		"overwrite": true
 	}`, dashboardJSON)
 
-	resp, err := http.Post(client.address+"/api/dashboards/db", "application/json", strings.NewReader(postJSON))
-
-	klog.Infof("http response: %v", resp)
-
-	if resp != nil && (resp.StatusCode >= 300 || resp.StatusCode < 200) {
-		return "", errors.New(resp.Status)
+	header := req.Header{
+		"Content-Type": "application/json",
 	}
 
-	// do something to get uid out of resp
+	resp, err := req.Post(client.address+"/api/dashboards/db", header, postJSON)
 
-	return uid, err
+	if err != nil {
+		return "", err
+	}
+
+	if resp == nil {
+		return "", errors.New("Error and response are nil")
+	}
+
+	status := resp.Response().StatusCode
+
+	if status >= 300 || status < 200 {
+		return "", errors.New(resp.Response().Status)
+	}
+
+	err = resp.ToJSON(&responseBody)
+
+	if err != nil {
+		return "", err
+	}
+
+	uid, ok := responseBody["uid"]
+
+	if !ok {
+		return "", errors.New("Response Body did not have uid")
+	}
+
+	uidString, ok := uid.(string)
+
+	if !ok {
+		return "", fmt.Errorf("Unable to convert uid %#v to string", uid)
+	}
+
+	return uidString, err
 }
