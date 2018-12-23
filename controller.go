@@ -231,7 +231,7 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	err = c.grafanaClient.PostDashboard(grafanaDashboard.Spec.DashboardJSON)
+	uid, err = c.grafanaClient.PostDashboard(grafanaDashboard.Spec.DashboardJSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
@@ -242,7 +242,7 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 
 	// Finally, we update the status block of the GrafanaDashboard resource to reflect the
 	// current state of the world
-	err = c.updateGrafanaDashboardStatus(grafanaDashboard)
+	err = c.updateGrafanaDashboardStatus(grafanaDashboard, uid)
 	if err != nil {
 		return err
 	}
@@ -251,12 +251,12 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alpha1.GrafanaDashboard) error {
+func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alpha1.GrafanaDashboard, uid string) error {
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
 	grafanaDashboardCopy := grafanaDashboard.DeepCopy()
-	grafanaDashboardCopy.Status.GrafanaUID = "TODO: add a UID"
+	grafanaDashboardCopy.Status.GrafanaUID = uid
 	// If the CustomResourceSubresources feature gate is not enabled,
 	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDashboard resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,

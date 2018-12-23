@@ -26,7 +26,9 @@ func NewGrafanaClient(address string) *GrafanaClient {
 	return client
 }
 
-func (client *GrafanaClient) PostDashboard(dashboardJSON string) error {
+func (client *GrafanaClient) PostDashboard(dashboardJSON string) (string, error) {
+	var uid string
+
 	postJSON := fmt.Sprintf(`{
 		"dashboard": %v,
 		"folderId": 0,
@@ -38,8 +40,10 @@ func (client *GrafanaClient) PostDashboard(dashboardJSON string) error {
 	klog.Infof("http response: %v", resp)
 
 	if resp != nil && (resp.StatusCode >= 300 || resp.StatusCode < 200) {
-		return errors.New(resp.Status)
+		return "", errors.New(resp.Status)
 	}
 
-	return err
+	// do something to get uid out of resp
+
+	return uid, err
 }
