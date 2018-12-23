@@ -9,6 +9,7 @@ import (
 
 type Interface interface {
 	PostDashboard(string) (string, error)
+	DeleteDashboard(string) error
 }
 
 type GrafanaClient struct {
@@ -72,4 +73,20 @@ func (client *GrafanaClient) PostDashboard(dashboardJSON string) (string, error)
 	}
 
 	return uidString, err
+}
+
+func (client *GrafanaClient) DeleteDashboard(uid string) error {
+	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + uid)
+
+	if err != nil {
+		return err
+	}
+
+	status := resp.Response().StatusCode
+
+	if status >= 300 || status < 200 {
+		return errors.New(resp.Response().Status)
+	}
+
+	return nil
 }

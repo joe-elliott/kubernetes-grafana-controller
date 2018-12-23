@@ -226,7 +226,9 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 		// processing.
 		if errors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaDashboard '%s' in work queue no longer exists", item.key))
-			return nil
+
+			// dashboard was deleted, so delete from grafana
+			return c.grafanaClient.DeleteDashboard(item.uuid)
 		}
 
 		return err
