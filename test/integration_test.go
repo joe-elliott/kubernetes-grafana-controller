@@ -32,6 +32,11 @@ func TestMain(m *testing.M) {
 //
 func setupIntegration() {
 	fmt.Println("setupIntegration")
+
+	if os.Geteuid() != 0 {
+		fmt.Println("Failed:  Needs to be run as root to setup minikube")
+		os.Exit(1)
+	}
 }
 
 func teardownIntegration() {
