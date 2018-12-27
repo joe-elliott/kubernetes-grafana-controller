@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/imroc/req"
 )
@@ -184,4 +185,61 @@ func TestDashboardPost(t *testing.T) {
 	}
 
 	// dashboard exists!
+}
+
+func TestDashboardDelete(t *testing.T) {
+	fmt.Println("TestDashboardDelete")
+
+	var id string
+	var resp *req.Resp
+
+	grafanaUrl, err := getGrafanaUrl()
+	if err != nil {
+		t.Error("Failed to get Grafana URL", err)
+	}
+
+	// create dashboard
+	if err = run("kubectl", []string{"apply", "-f", "sample-dashboards.yaml"}); err != nil {
+		t.Error("Failed to create dashboards", err)
+		return
+	}
+
+	// get object status to get grafana id
+	if id, err = getGrafanaDashboardId("test-dash"); err != nil {
+		t.Error("Failed to get id", err)
+		return
+	}
+
+	// GET grafana dashboard with id
+	fmt.Println("Getting dashboard at " + grafanaUrl + "/api/dashboards/uid/" + id)
+	if resp, err = req.Get(grafanaUrl + "/api/dashboards/uid/" + id); err != nil {
+		t.Error("Failed to get dashboard", err)
+		return
+	}
+
+	status := resp.Response().StatusCode
+	if status >= 300 || status < 200 {
+		t.Error("Get Dashboard status is unsuccessful", resp.Response().Status)
+		return
+	}
+
+	// dashboard exists!  now delete
+	if err = run("kubectl", []string{"delete", "-f", "sample-dashboards.yaml"}); err != nil {
+		t.Error("Failed to delete dashboards", err)
+		return
+	}
+
+	time.Sleep(5 * time.Second)
+
+	fmt.Println("Getting dashboard at " + grafanaUrl + "/api/dashboards/uid/" + id)
+	if resp, err = req.Get(grafanaUrl + "/api/dashboards/uid/" + id); err != nil {
+		t.Error("Failed to get dashboard", err)
+		return
+	}
+
+	status = resp.Response().StatusCode
+	if status != 404 {
+		t.Error("Delete Dashboard status is not 404", resp.Response().Status)
+		return
+	}
 }
