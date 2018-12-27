@@ -22,10 +22,6 @@ var (
 	nosetup = flag.Bool("nosetup", false, "Skip minikube/grafana setup")
 )
 
-const (
-	MINIKUBE_NAME = "minikube-grafana-test"
-)
-
 func TestMain(m *testing.M) {
 	flag.Parse()
 
@@ -56,10 +52,10 @@ func setupIntegration() {
 	}
 
 	// ignore failure on these.  they will fail if a minikube cluster does not exist
-	run("minikube", []string{"stop", "-p", MINIKUBE_NAME})
-	run("minikube", []string{"delete", "-p", MINIKUBE_NAME})
+	run("minikube", []string{"stop"})
+	run("minikube", []string{"delete"})
 
-	if err := run("minikube", []string{"start", "-p", MINIKUBE_NAME}); err != nil {
+	if err := run("minikube", []string{"start"}); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -73,12 +69,18 @@ func setupIntegration() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+
+	// build dockerfile and deploy to minikube
+	if err := run("./integration_test.sh", []string{}); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 
 func teardownIntegration() {
 	fmt.Println("teardownIntegration")
 
-	run("minikube", []string{"stop", "-p", MINIKUBE_NAME})
+	run("minikube", []string{"stop", "-p"})
 }
 
 func run(cmdName string, cmdArgs []string) error {
@@ -111,7 +113,7 @@ func run(cmdName string, cmdArgs []string) error {
 
 func getGrafanaUrl() (string, error) {
 
-	out, err := exec.Command("minikube", []string{"service", "grafana", "--url", "-p", MINIKUBE_NAME}...).Output()
+	out, err := exec.Command("minikube", []string{"service", "grafana", "--url"}...).Output()
 	if err != nil {
 		return "", err
 	}
