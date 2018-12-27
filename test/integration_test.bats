@@ -39,8 +39,8 @@ teardown(){
     echo "Grafana Dashboard Id " $dashboardId
 
     # check if exists in grafana
-	run curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId}
-    [ "$status" -eq "200" ]
+	$httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+    [ "$httpStatus" -eq "200" ]
 }
 
 @test "Delete Dashboard" {
@@ -56,13 +56,13 @@ teardown(){
     echo "Grafana Dashboard Id " $dashboardId
 
     # check if exists in grafana
-	run curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId}
-    [ "$status" -eq "200" ]
+	$httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+    [ "$httpStatus" -eq "200" ]
 
     kubectl delete -f sample-dashboards.yaml
 
 	sleep 5s
 
-	run curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId}
-    [ "$status" -eq "404" ]
+	$httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+    [ "$httpStatus" -eq "404" ]
 }
