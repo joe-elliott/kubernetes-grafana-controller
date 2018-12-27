@@ -39,7 +39,8 @@ validateGrafanaUrl() {
     GRAFANA_URL=$(minikube service grafana --url)
 
     echo "grafana url: " $GRAFANA_URL
-    $httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL})
+    httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL})
+
     [ "$httpStatus" -eq "200" ]
 }
 
