@@ -53,15 +53,16 @@ spec:
 
 ### Integration
 
-To run integration tests run `sudo go test` in the `./test` directory.  This is currently a horrible  combination of go tests and Bash scripting.  I'm not really liking the go test framework for integration tests and will probably swap to Python or Bash.
+To run integration tests run `bats integration_test.bats` in the `./test` directory.  
+
+Previously I had attempted to use the native go testing framework for integration tests.  However, since the tests were 99% a long list of bash commands it made for some super gross code.  Moving to bats simplified and improved the integration tests.
 
 #### Dependencies
 
 - minikube
 - kubectl
 - docker
-
-Considering moving to bash/bats.  Currently disastified with the go mess I've created.
+- bats (https://github.com/bats-core/bats-core)
 
 ### Unit
 
@@ -72,7 +73,6 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
 - Testing
   - [ ] Controller tests
   - [ ] Integration Tests
-    - [ ] Move Integration tests to Bats? (https://github.com/sstephenson/bats)
     - Dashboards
       - [x] Add
       - [ ] Update
