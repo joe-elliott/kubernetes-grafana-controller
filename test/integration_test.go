@@ -25,6 +25,11 @@ var (
 func TestMain(m *testing.M) {
 	flag.Parse()
 
+	if os.Geteuid() != 0 {
+		fmt.Fprintln(os.Stderr, "Failed:  Needs to be run as root to setup minikube")
+		os.Exit(1)
+	}
+
 	if !(*nosetup) {
 		setupIntegration()
 	}
@@ -45,11 +50,6 @@ func TestMain(m *testing.M) {
 //
 func setupIntegration() {
 	fmt.Println("setupIntegration")
-
-	if os.Geteuid() != 0 {
-		fmt.Fprintln(os.Stderr, "Failed:  Needs to be run as root to setup minikube")
-		os.Exit(1)
-	}
 
 	// ignore failure on these.  they will fail if a minikube cluster does not exist
 	run("minikube", []string{"stop"})
