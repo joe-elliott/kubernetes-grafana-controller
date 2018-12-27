@@ -35,7 +35,7 @@ validateGrafanaUrl() {
 
     echo "grafana url: " $GRAFANA_URL
     run curl --silent --output /dev/null --write-out "%{http_code}" $GRAFANA_URL
-    [ "$status" -eq "200"]
+    [ "$status" -eq "200" ]
 }
 
 getGrafanaDashboardIdByName () {
