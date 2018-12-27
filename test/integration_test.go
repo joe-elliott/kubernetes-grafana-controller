@@ -13,8 +13,6 @@ import (
 	"strings"
 	"testing"
 
-	"kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
-
 	"github.com/imroc/req"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -208,7 +206,7 @@ func TestDashboardPost(t *testing.T) {
 
 	// get file json
 	var fileBytes []byte
-	var grafanaDashboard v1alpha1.GrafanaDashboard
+	var grafanaDashboard map[interface{}]interface{}
 
 	fileBytes, err = ioutil.ReadFile("sample-dashboards.yaml")
 	if err != nil {
@@ -223,7 +221,9 @@ func TestDashboardPost(t *testing.T) {
 	}
 
 	var equal bool
-	equal, err = areEqualJSON(grafanaDashboard.Spec.DashboardJSON, resp.String())
+	spec := grafanaDashboard["spec"]
+	dashboardJson := spec.(map[interface{}]interface{})["dashboardJson"]
+	equal, err = areEqualJSON(dashboardJson.(string), resp.String())
 
 	if err != nil {
 		t.Error("Error comparing json", err)
