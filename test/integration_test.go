@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"strings"
 	"testing"
 
 	"kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
@@ -118,7 +119,7 @@ func getGrafanaUrl() (string, error) {
 		return "", err
 	}
 
-	grafanaUrl := string(out)
+	grafanaUrl := strings.TrimSpace(string(out))
 
 	_, err = url.ParseRequestURI(grafanaUrl)
 
@@ -131,12 +132,15 @@ func getGrafanaUrl() (string, error) {
 
 func getGrafanaDashboardId(name string) (string, error) {
 
-	out, err := exec.Command("kubectl", []string{"get", "GrafanaDashboard", name, "-o=jsonpath='{.items[0].Status}'"}...).Output()
+	jsonPathArg := fmt.Sprintf("-o=jsonpath='{.items[?(@.metadata.name==\"%s\")].status.grafanaUID}'", name)
+
+	out, err := exec.Command("kubectl", []string{"get", "GrafanaDashboard", jsonPathArg}...).Output()
 	if err != nil {
 		return "", err
 	}
 
-	id := string(out)
+	id := strings.TrimSpace(string(out))
+	id = strings.Trim(id, "'")
 
 	if len(id) == 0 {
 		return "", fmt.Errorf("Grafana Id is empty for %s", name)
@@ -178,18 +182,19 @@ func TestDashboardPost(t *testing.T) {
 	}
 
 	// create dashboard
-	if err = run("kubectl", []string{"create", "-f", "sample-dashboards.yaml"}); err != nil {
+	if err = run("kubectl", []string{"apply", "-f", "sample-dashboards.yaml"}); err != nil {
 		t.Error("Failed to create dashboards", err)
 		return
 	}
 
 	// get object status to get grafana id
-	if id, err = getGrafanaDashboardId("test"); err != nil {
+	if id, err = getGrafanaDashboardId("test-dash"); err != nil {
 		t.Error("Failed to get id", err)
 		return
 	}
 
 	// GET grafana dashboard with id
+	fmt.Println("Getting dashboard at " + grafanaUrl + "/api/dashboards/uid/" + id)
 	if resp, err = req.Get(grafanaUrl + "/api/dashboards/uid/" + id); err != nil {
 		t.Error("Failed to get dashboard", err)
 		return
