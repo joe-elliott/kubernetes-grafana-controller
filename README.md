@@ -64,6 +64,7 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
 - Testing
   - [ ] Controller tests
   - [ ] Integration Tests
+    - [ ] Move Integration tests to Bats? (https://github.com/sstephenson/bats)
     - Dashboards
       - [x] Add
       - [ ] Update
