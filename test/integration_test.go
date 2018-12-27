@@ -165,6 +165,8 @@ func TestDashboardPost(t *testing.T) {
 		return
 	}
 
+	time.Sleep(5 * time.Second)
+
 	// get object status to get grafana id
 	if id, err = getGrafanaDashboardId("test-dash"); err != nil {
 		t.Error("Failed to get id", err)
@@ -203,6 +205,8 @@ func TestDashboardDelete(t *testing.T) {
 		t.Error("Failed to create dashboards", err)
 		return
 	}
+
+	time.Sleep(5 * time.Second)
 
 	// get object status to get grafana id
 	if id, err = getGrafanaDashboardId("test-dash"); err != nil {
