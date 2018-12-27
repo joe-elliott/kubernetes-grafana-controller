@@ -8,11 +8,7 @@ setup(){
         setupIntegrationTests
     fi
 
-    kubectl apply -f crd.yaml
-    [ "$?" -eq "0" ]
-
     kubectl apply -f grafana.yaml
-    [ "$?" -eq "0" ]
 
     validateGrafanaUrl
 
@@ -26,13 +22,23 @@ teardown(){
         teardownIntegrationTests
     fi
 
-    kubectl delete -f crd.yaml
-    [ "$?" -eq "0" ]
-
-    kubectl delete -f grafana.yaml
-    [ "$?" -eq "0" ]
+    kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
+    kubectl delete --ignore-not-found=true -f grafana.yaml
 }
 
 @test "Create Dashboard" {
 
+    # create in kubernetes
+    kubectl apply -f sample-dashboards.yaml
+
+	sleep 5s
+
+    getGrafanaDashboardIdByName test-dash
+    dashboardId=$?
+
+    echo "Grafana Dashboard Id " $dashboardId
+
+    # check if exists in grafana
+	run curl --silent --output /dev/null --write-out "%{http_code}" $GRAFANA_URL
+    [ "$status" -eq "200" ]
 }
