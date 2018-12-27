@@ -17,13 +17,13 @@ setup(){
 }
 
 teardown(){
+    run kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
+    run kubectl delete --ignore-not-found=true -f grafana.yaml
+
     # one time teardown
     if [ "$BATS_TEST_NUMBER" -eq ${#BATS_TEST_NAMES[@]} ]; then
         teardownIntegrationTests
     fi
-
-    kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
-    kubectl delete --ignore-not-found=true -f grafana.yaml
 }
 
 @test "Create Dashboard" {
@@ -39,6 +39,30 @@ teardown(){
     echo "Grafana Dashboard Id " $dashboardId
 
     # check if exists in grafana
-	run curl --silent --output /dev/null --write-out "%{http_code}" $GRAFANA_URL
+	run curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId}
     [ "$status" -eq "200" ]
+}
+
+@test "Delete Dashboard" {
+
+    # create in kubernetes
+    kubectl apply -f sample-dashboards.yaml
+
+	sleep 5s
+
+    getGrafanaDashboardIdByName test-dash
+    dashboardId=$?
+
+    echo "Grafana Dashboard Id " $dashboardId
+
+    # check if exists in grafana
+	run curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId}
+    [ "$status" -eq "200" ]
+
+    kubectl delete -f sample-dashboards.yaml
+
+	sleep 5s
+
+	run curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId}
+    [ "$status" -eq "404" ]
 }
