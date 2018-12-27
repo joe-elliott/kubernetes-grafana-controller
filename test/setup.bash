@@ -8,8 +8,8 @@ setupIntegrationTests() {
 
     # ignore failure on these.  they will fail if a minikube cluster does not exist
     echo '# terminating minikube' >&3
-	minikube stop
-	minikube delete
+	run minikube stop
+	run minikube delete
 
     echo '# starting minikube' >&3
     minikube start
