@@ -49,21 +49,52 @@ spec:
   dashboardJson: <dashboard json as string>
 ```
 
+## Tests
+
+### Integration
+
+To run integration tests run `sudo go test` in the `./test` directory.  This is currently a horrible  combination of go tests and Bash scripting.  I'm not really liking the go test framework for integration tests and will probably swap to Python or Bash.
+
+#### Dependencies
+
+- minikube
+- kubectl
+- docker
+
+Considering moving to bash/bats.  Currently disastified with the go mess I've created.
+
+### Unit
+
+Unit tests are currently broken.  They are a leftover from the kubernetes sample controller project and need to be updated to match the existing controller.
+
 ## TODO
 
 - Testing
   - [ ] Controller tests
   - [ ] Integration Tests
+    - [ ] Move Integration tests to Bats? (https://github.com/sstephenson/bats)
+    - Dashboards
+      - [x] Add
+      - [ ] Update
+      - [x] Delete
+    - Notification channels
+      - [ ] Add
+      - [ ] Update
+      - [ ] Delete
+    - Datasources
+      - [ ] Add
+      - [ ] Update
+      - [ ] Delete
 - Support
-  - dashboards
+  - Dashboards
     - [x] Add
     - [x] Update
     - [x] Delete
-  - notification channels
+  - Notification channels
     - [ ] Add
     - [ ] Update
     - [ ] Delete
-  - datasources
+  - Datasources
     - [ ] Add
     - [ ] Update
     - [ ] Delete
