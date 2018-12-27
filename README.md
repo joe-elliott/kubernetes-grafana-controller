@@ -55,6 +55,14 @@ spec:
 
 To run integration tests run `sudo go test` in the `./test` directory.  This is currently a horrible  combination of go tests and Bash scripting.  I'm not really liking the go test framework for integration tests and will probably swap to Python or Bash.
 
+#### Dependencies
+
+- minikube
+- kubectl
+- docker
+
+Considering moving to bash/bats.  Currently disastified with the go mess I've created.
+
 ### Unit
 
 Unit tests are currently broken.  They are a leftover from the kubernetes sample controller project and need to be updated to match the existing controller.
