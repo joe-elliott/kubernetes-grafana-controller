@@ -30,8 +30,8 @@ teardown(){
 
 	sleep 5s
 
-    getGrafanaDashboardIdByName test-dash
-    dashboardId=$?
+    dashboardName="test-dash"
+    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
 
     echo "Grafana Dashboard Id " $dashboardId
 
@@ -47,8 +47,8 @@ teardown(){
 
 	sleep 5s
 
-    getGrafanaDashboardIdByName test-dash
-    dashboardId=$?
+    dashboardName="test-dash"
+    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
 
     echo "Grafana Dashboard Id " $dashboardId
 

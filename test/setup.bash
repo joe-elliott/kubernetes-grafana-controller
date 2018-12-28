@@ -42,9 +42,3 @@ validateGrafanaUrl() {
 
     [ "$httpStatus" -eq "200" ]
 }
-
-getGrafanaDashboardIdByName () {
-    id=$(kubectl get GrafanaDashboard -o=jsonpath='{.items[?(@.metadata.name==\"${$1}\")].status.grafanaUID}')
-
-    return $id
-}
