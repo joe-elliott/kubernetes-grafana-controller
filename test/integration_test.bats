@@ -84,7 +84,8 @@ teardown(){
     equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
     if [ "$equal" != "true" ]; then
-        diff <(jq -S . a.json) <(jq -S . b.json)
+        run diff <(jq -S . a.json) <(jq -S . b.json)
+        echo $output
     fi
 
     [ "$equal" = "true" ]
