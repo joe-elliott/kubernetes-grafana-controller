@@ -198,15 +198,13 @@ func checkAction(expected, actual core.Action, t *testing.T) {
 
 // filterInformerActions filters list and watch actions for testing resources.
 // Since list and watch don't change resource state we can filter it to lower
-// nose level in our tests.
+// noise level in our tests.
 func filterInformerActions(actions []core.Action) []core.Action {
 	ret := []core.Action{}
 	for _, action := range actions {
 		if len(action.GetNamespace()) == 0 &&
-			(action.Matches("list", "foos") ||
-				action.Matches("watch", "foos") ||
-				action.Matches("list", "deployments") ||
-				action.Matches("watch", "deployments")) {
+			(action.Matches("list", "grafanadashboards") ||
+				action.Matches("watch", "grafanadashboards")) {
 			continue
 		}
 		ret = append(ret, action)
