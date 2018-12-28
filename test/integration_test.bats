@@ -11,30 +11,17 @@ setup(){
 
 teardown(){
     run kubectl delete --ignore-not-found=true -f grafana.yaml
-    run kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
+    run kubectl delete --ignore-not-found=true -f dashboards/test-dash.yaml
 }
 
 @test "creating a GrafanaDashboard CRD creates a Grafana Dashboard" {
-
-    # create in kubernetes
-    kubectl apply -f sample-dashboards.yaml
-
-	sleep 5s
-
-    dashboardName="test-dash"
-    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
-
-    echo "Grafana Dashboard Id " $dashboardId
-
-    # check if exists in grafana
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
-    [ "$httpStatus" -eq "200" ]
+    validatePostDashboard dashboards/test-dash.yaml
 }
 
 @test "deleting a GrafanaDashboard CRD deletes the Grafana Dashboard" {
 
     # create in kubernetes
-    kubectl apply -f sample-dashboards.yaml
+    kubectl apply -f dashboards/test-dash.yaml
 
 	sleep 5s
 
@@ -47,7 +34,7 @@ teardown(){
 	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
     [ "$httpStatus" -eq "200" ]
 
-    kubectl delete -f sample-dashboards.yaml
+    kubectl delete -f dashboards/test-dash.yaml
 
 	sleep 5s
 
@@ -58,7 +45,7 @@ teardown(){
 @test "creating a GrafanaDashboard CRD creates the same dashboard in Grafana" {
 
     # create in kubernetes
-    kubectl apply -f sample-dashboards.yaml
+    kubectl apply -f dashboards/test-dash.yaml
 
 	sleep 5s
 
@@ -75,7 +62,7 @@ teardown(){
 
     echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id)' > a.json
 
-    dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' sample-dashboards.yaml)
+    dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' dashboards/test-dash.yaml)
     dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
     dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
 
