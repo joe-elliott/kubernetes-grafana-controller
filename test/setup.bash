@@ -27,6 +27,8 @@ setupIntegrationTests() {
     kubectl create clusterrolebinding $IMAGE_NAME --clusterrole=cluster-admin --serviceaccount=default:default
     kubectl run $IMAGE_NAME --image=$IMAGE_NAME --image-pull-policy=Never
 
+    kubectl create -f crd.yaml
+
     SETUP_SUCCEEDED=1
 }
 
