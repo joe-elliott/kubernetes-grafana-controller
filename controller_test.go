@@ -33,9 +33,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 
-	samplecontroller "k8s.io/sample-controller/pkg/apis/samplecontroller/v1alpha1"
-	"k8s.io/sample-controller/pkg/client/clientset/versioned/fake"
-	informers "k8s.io/sample-controller/pkg/client/informers/externalversions"
+	samplecontroller "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
+	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
 )
 
 var (
