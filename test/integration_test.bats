@@ -23,7 +23,7 @@ teardown(){
     fi
 }
 
-@test "Create Dashboard" {
+@test "creating a GrafanaDashboard CRD creates a Grafana Dashboard" {
 
     # create in kubernetes
     kubectl apply -f sample-dashboards.yaml
@@ -40,7 +40,7 @@ teardown(){
     [ "$httpStatus" -eq "200" ]
 }
 
-@test "Delete Dashboard" {
+@test "deleting a GrafanaDashboard CRD deletes the Grafana Dashboard" {
 
     # create in kubernetes
     kubectl apply -f sample-dashboards.yaml
