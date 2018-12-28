@@ -1,7 +1,6 @@
 export MINIKUBE_WANTUPDATENOTIFICATION=false
 export MINIKUBE_WANTREPORTERRORPROMPT=false
 
-SETUP_SUCCEEDED=0
 GRAFANA_URL=""
 
 setupIntegrationTests() {
@@ -28,8 +27,6 @@ setupIntegrationTests() {
     kubectl run $IMAGE_NAME --image=$IMAGE_NAME --image-pull-policy=Never
 
     kubectl create -f crd.yaml
-
-    SETUP_SUCCEEDED=1
 }
 
 teardownIntegrationTests() {

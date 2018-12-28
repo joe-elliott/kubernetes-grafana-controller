@@ -11,9 +11,6 @@ setup(){
     kubectl apply -f grafana.yaml
 
     validateGrafanaUrl
-
-    # confirm one time setup worked before every step
-    [ "$SETUP_SUCCEEDED" -eq "1" ]
 }
 
 teardown(){
