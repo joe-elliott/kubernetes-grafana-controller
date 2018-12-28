@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -27,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/diff"
-	kubeinformers "k8s.io/client-go/informers"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	core "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
@@ -49,8 +47,7 @@ type fixture struct {
 	client     *fake.Clientset
 	kubeclient *k8sfake.Clientset
 	// Objects to put in the store.
-	fooLister        []*samplecontroller.Foo
-	deploymentLister []*apps.Deployment
+	grafanaDashboardLister []*samplecontroller.GrafanaDashboard
 	// Actions expected to happen on the client.
 	kubeactions []core.Action
 	actions     []core.Action
@@ -67,43 +64,36 @@ func newFixture(t *testing.T) *fixture {
 	return f
 }
 
-func newFoo(name string, replicas *int32) *samplecontroller.Foo {
-	return &samplecontroller.Foo{
+func newGrafanaDashboard(name string) *samplecontroller.GrafanaDashboard {
+	return &samplecontroller.GrafanaDashboard{
 		TypeMeta: metav1.TypeMeta{APIVersion: samplecontroller.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: samplecontroller.FooSpec{
-			DeploymentName: fmt.Sprintf("%s-deployment", name),
-			Replicas:       replicas,
+		Spec: samplecontroller.GrafanaDashboardSpec{
+			DashboardJSON: "{}",
 		},
 	}
 }
 
-func (f *fixture) newController() (*Controller, informers.SharedInformerFactory, kubeinformers.SharedInformerFactory) {
+func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
 	f.client = fake.NewSimpleClientset(f.objects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
 
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
-	k8sI := kubeinformers.NewSharedInformerFactory(f.kubeclient, noResyncPeriodFunc())
 
-	c := NewController(f.kubeclient, f.client,
-		k8sI.Apps().V1().Deployments(), i.Samplecontroller().V1alpha1().Foos())
+	c := NewController(f.client, f.kubeclient,
+		nil, i.Samplecontroller().V1alpha1().GrafanaDashboards())
 
-	c.foosSynced = alwaysReady
-	c.deploymentsSynced = alwaysReady
+	c.grafanaDashboardsSynced = alwaysReady
 	c.recorder = &record.FakeRecorder{}
 
-	for _, f := range f.fooLister {
-		i.Samplecontroller().V1alpha1().Foos().Informer().GetIndexer().Add(f)
+	for _, d := range f.grafanaDashboardLister {
+		i.Samplecontroller().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(f)
 	}
 
-	for _, d := range f.deploymentLister {
-		k8sI.Apps().V1().Deployments().Informer().GetIndexer().Add(d)
-	}
-
-	return c, i, k8sI
+	return c, i
 }
 
 func (f *fixture) run(fooName string) {
