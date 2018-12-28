@@ -42,6 +42,8 @@ validateGrafanaUrl() {
 
 #
 # validatePostDashboard <yaml file name>
+#   note that the dashboard file name must match the GrafanaDashboard object name ...
+#    ... b/c i'm lazy
 #
 validatePostDashboard() {
     specfile=$1

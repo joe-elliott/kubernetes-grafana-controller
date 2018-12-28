@@ -15,7 +15,9 @@ teardown(){
 }
 
 @test "creating a GrafanaDashboard CRD creates a Grafana Dashboard" {
-    validatePostDashboard dashboards/test-dash.yaml
+    for filename in dashboards/*.yaml; do
+        validatePostDashboard $filename
+    done
 }
 
 @test "deleting a GrafanaDashboard CRD deletes the Grafana Dashboard" {
