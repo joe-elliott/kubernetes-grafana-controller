@@ -43,39 +43,31 @@ teardown(){
 
 @test "creating a GrafanaDashboard CRD creates the same dashboard in Grafana" {
 
-    # create in kubernetes
-    kubectl apply -f dashboards/test-dash.yaml
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
 
-	sleep 5s
+        echo "Test Json Content of $filename ($dashboardId)"
 
-    dashboardName="test-dash"
-    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
+        dashboardJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
 
-    echo "Grafana Dashboard Id " $dashboardId
+        echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id)' > a.json
 
-    # check if exists in grafana
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
-    [ "$httpStatus" -eq "200" ]
+        dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' $filename)
+        dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
+        dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
 
-    dashboardJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+        echo $dashboardJsonFromYaml | jq 'del(.version) | del(.id)' > b.json
 
-    echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id)' > a.json
+        equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
-    dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' dashboards/test-dash.yaml)
-    dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
-    dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
+        if [ "$equal" != "true" ]; then
+            run diff <(jq -S . a.json) <(jq -S . b.json)
+            echo $output
+        fi
 
-    echo $dashboardJsonFromYaml | jq 'del(.version) | del(.id)' > b.json
+        [ "$equal" = "true" ]
 
-    equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
-
-    if [ "$equal" != "true" ]; then
-        run diff <(jq -S . a.json) <(jq -S . b.json)
-        echo $output
-    fi
-
-    [ "$equal" = "true" ]
-
-    rm a.json
-    rm b.json
+        rm a.json
+        rm b.json
+    done
 }
