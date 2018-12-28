@@ -21,7 +21,6 @@ import (
 	"testing"
 	"time"
 
-	apps "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -213,14 +212,6 @@ func filterInformerActions(actions []core.Action) []core.Action {
 	return ret
 }
 
-func (f *fixture) expectCreateDeploymentAction(d *apps.Deployment) {
-	f.kubeactions = append(f.kubeactions, core.NewCreateAction(schema.GroupVersionResource{Resource: "deployments"}, d.Namespace, d))
-}
-
-func (f *fixture) expectUpdateDeploymentAction(d *apps.Deployment) {
-	f.kubeactions = append(f.kubeactions, core.NewUpdateAction(schema.GroupVersionResource{Resource: "deployments"}, d.Namespace, d))
-}
-
 func (f *fixture) expectUpdateFooStatusAction(foo *samplecontroller.Foo) {
 	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "foos"}, foo.Namespace, foo)
 	// TODO: Until #38113 is merged, we can't use Subresource
@@ -228,10 +219,10 @@ func (f *fixture) expectUpdateFooStatusAction(foo *samplecontroller.Foo) {
 	f.actions = append(f.actions, action)
 }
 
-func getKey(foo *samplecontroller.Foo, t *testing.T) string {
-	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(foo)
+func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) string {
+	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(grafanaDashboard)
 	if err != nil {
-		t.Errorf("Unexpected error getting key for foo %v: %v", foo.Name, err)
+		t.Errorf("Unexpected error getting key for foo %v: %v", grafanaDashboard.Name, err)
 		return ""
 	}
 	return key
