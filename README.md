@@ -106,4 +106,8 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
     - [ ] Add
     - [ ] Update
     - [ ] Delete
-- rename "SampleController" crap everywhere
+- Refactoring
+  - rename "SampleController" crap everywhere
+  - fix grafana client struct/interface/package names
+  - move controllers to a pkg subfolder
+  - add comments where go wants me to
