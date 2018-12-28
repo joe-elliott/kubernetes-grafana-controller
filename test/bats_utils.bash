@@ -27,6 +27,7 @@ setupIntegrationTests() {
 
 teardownIntegrationTests() {
     minikube stop
+    minikube delete
 }
 
 validateGrafanaUrl() {

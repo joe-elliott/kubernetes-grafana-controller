@@ -53,7 +53,14 @@ spec:
 
 ### Integration
 
-To run integration tests run `bats integration_test.bats` in the `./test` directory.  
+To run integration tests navigate to the `./test` directory and run:
+
+- `bats one_time_setup.bats`
+  - this sets up minikube and other supporting configuration
+- `bats integration_test.bats` 
+  - run this as many time as you want while iterating on the tests and/or code
+- `bats one_time_teardown.bats` 
+  - stops and deletes the minikube cluster 
 
 Previously I had attempted to use the native go testing framework for integration tests.  However, since the tests were 99% a long list of bash commands it made for some super gross code.  Moving to bats simplified and improved the integration tests.
 
