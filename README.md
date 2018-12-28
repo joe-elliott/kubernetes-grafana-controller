@@ -70,6 +70,7 @@ Previously I had attempted to use the native go testing framework for integratio
 - kubectl
 - docker
 - bats (https://github.com/bats-core/bats-core)
+- jq
 
 ### Unit
 
