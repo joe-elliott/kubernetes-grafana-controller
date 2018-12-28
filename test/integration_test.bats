@@ -3,14 +3,15 @@
 load bats_utils
 
 setup(){
+    run kubectl delete po -l run=kubernetes-grafana-test
     kubectl apply -f grafana.yaml
 
     validateGrafanaUrl
 }
 
 teardown(){
-    run kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
     run kubectl delete --ignore-not-found=true -f grafana.yaml
+    run kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
 }
 
 @test "creating a GrafanaDashboard CRD creates a Grafana Dashboard" {
