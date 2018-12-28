@@ -6,20 +6,16 @@ GRAFANA_URL=""
 setupIntegrationTests() {
 
     # ignore failure on these.  they will fail if a minikube cluster does not exist
-    echo '# terminating minikube' >&3
 	run minikube stop
 	run minikube delete
 
-    echo '# starting minikube' >&3
     minikube start
 
-    echo '# building docker container' >&3
 	IMAGE_NAME=kubernetes-grafana-test
 
     eval $(minikube docker-env)
     docker build .. -t $IMAGE_NAME
 
-    echo '# configuring k8s' >&3
     kubectl delete clusterrolebinding --ignore-not-found=true $IMAGE_NAME
     kubectl delete deployment --ignore-not-found=true $IMAGE_NAME
 
