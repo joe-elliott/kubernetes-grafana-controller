@@ -50,13 +50,13 @@ teardown(){
 
         dashboardJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
 
-        echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id)' > a.json
+        echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id) | del (.uid)' > a.json
 
         dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' $filename)
         dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
         dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
 
-        echo $dashboardJsonFromYaml | jq 'del(.version) | del(.id)' > b.json
+        echo $dashboardJsonFromYaml | jq 'del(.version) | del(.id) | del (.uid)' > b.json
 
         equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
