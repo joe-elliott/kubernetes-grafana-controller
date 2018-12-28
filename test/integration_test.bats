@@ -53,7 +53,3 @@ teardown(){
 	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
     [ "$httpStatus" -eq "404" ]
 }
-
-@test "one time teardown" {
-    
-}
