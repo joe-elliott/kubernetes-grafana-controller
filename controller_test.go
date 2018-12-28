@@ -33,6 +33,7 @@ import (
 	samplecontroller "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	"kubernetes-grafana-controller/pkg/grafana"
 )
 
 var (
@@ -43,8 +44,9 @@ var (
 type fixture struct {
 	t *testing.T
 
-	client     *fake.Clientset
-	kubeclient *k8sfake.Clientset
+	client        *fake.Clientset
+	kubeclient    *k8sfake.Clientset
+	grafanaClient *grafana.GrafanaClientFake
 	// Objects to put in the store.
 	grafanaDashboardLister []*samplecontroller.GrafanaDashboard
 	// Actions expected to happen on the client.
@@ -79,11 +81,12 @@ func newGrafanaDashboard(name string) *samplecontroller.GrafanaDashboard {
 func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
 	f.client = fake.NewSimpleClientset(f.objects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
+	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com")
 
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
 
 	c := NewController(f.client, f.kubeclient,
-		nil, i.Samplecontroller().V1alpha1().GrafanaDashboards())
+		f.grafanaClient, i.Samplecontroller().V1alpha1().GrafanaDashboards())
 
 	c.grafanaDashboardsSynced = alwaysReady
 	c.recorder = &record.FakeRecorder{}
