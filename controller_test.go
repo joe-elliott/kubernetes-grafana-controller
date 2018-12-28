@@ -41,6 +41,10 @@ var (
 	noResyncPeriodFunc = func() time.Duration { return 0 }
 )
 
+const (
+	FAKE_UID = "fakeUID"
+)
+
 type fixture struct {
 	t *testing.T
 
@@ -81,7 +85,7 @@ func newGrafanaDashboard(name string) *samplecontroller.GrafanaDashboard {
 func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
 	f.client = fake.NewSimpleClientset(f.objects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
-	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com")
+	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com", FAKE_UID)
 
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
 
@@ -214,7 +218,7 @@ func filterInformerActions(actions []core.Action) []core.Action {
 }
 
 func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *samplecontroller.GrafanaDashboard) {
-	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "grafanaDashboards"}, grafanaDashboard.Namespace, grafanaDashboard)
+	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "grafanadashboards"}, grafanaDashboard.Namespace, grafanaDashboard)
 	// TODO: Until #38113 is merged, we can't use Subresource
 	//action.Subresource = "status"
 	f.actions = append(f.actions, action)
@@ -229,15 +233,15 @@ func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) s
 	return key
 }
 
-func TestCreatesDeployment(t *testing.T) {
+func TestCreatesGrafanaDashboard(t *testing.T) {
+	// jpe - todo - add test for grafana client getting PostDashboard with the right json called
 	f := newFixture(t)
 	dashboard := newGrafanaDashboard("test")
 
 	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
 	f.objects = append(f.objects, dashboard)
 
-	// expDeployment := newDeployment(foo)
-	// f.expectCreateDeploymentAction(expDeployment)
+	dashboard.Status.GrafanaUID = FAKE_UID
 	f.expectUpdateGrafanaUid(dashboard)
 
 	f.run(getKey(dashboard, t))
