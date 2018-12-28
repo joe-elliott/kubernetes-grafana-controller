@@ -230,64 +230,47 @@ func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) s
 
 func TestCreatesDeployment(t *testing.T) {
 	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
+	dashboard := newGrafanaDashboard("test")
 
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
+	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
+	f.objects = append(f.objects, dashboard)
 
-	expDeployment := newDeployment(foo)
-	f.expectCreateDeploymentAction(expDeployment)
-	f.expectUpdateFooStatusAction(foo)
+	// expDeployment := newDeployment(foo)
+	// f.expectCreateDeploymentAction(expDeployment)
+	f.expectUpdateGrafanaUid(dashboard)
 
-	f.run(getKey(foo, t))
+	f.run(getKey(dashboard, t))
 }
 
 func TestDoNothing(t *testing.T) {
 	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
-	d := newDeployment(foo)
+	dashboard := newGrafanaDashboard("test")
+	//d := newDeployment(foo)
 
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
-	f.deploymentLister = append(f.deploymentLister, d)
-	f.kubeobjects = append(f.kubeobjects, d)
+	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
+	f.objects = append(f.objects, dashboard)
+	//f.deploymentLister = append(f.deploymentLister, d)
+	//f.kubeobjects = append(f.kubeobjects, d)
 
-	f.expectUpdateFooStatusAction(foo)
-	f.run(getKey(foo, t))
+	f.expectUpdateGrafanaUid(dashboard)
+	f.run(getKey(dashboard, t))
 }
 
-func TestUpdateDeployment(t *testing.T) {
+func TestUpdateDashboard(t *testing.T) {
 	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
-	d := newDeployment(foo)
+	dashboard := newGrafanaDashboard("test")
+	// d := newDeployment(foo)
 
-	// Update replicas
-	foo.Spec.Replicas = int32Ptr(2)
-	expDeployment := newDeployment(foo)
+	// Update dashboard
+	dashboard.Spec.DashboardJSON = "{'test': 'test'}"
+	//expDeployment := newDeployment(foo)
 
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
-	f.deploymentLister = append(f.deploymentLister, d)
-	f.kubeobjects = append(f.kubeobjects, d)
+	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
+	f.objects = append(f.objects, dashboard)
+	//f.deploymentLister = append(f.deploymentLister, d)
+	//f.kubeobjects = append(f.kubeobjects, d)
 
-	f.expectUpdateFooStatusAction(foo)
-	f.expectUpdateDeploymentAction(expDeployment)
-	f.run(getKey(foo, t))
+	f.expectUpdateGrafanaUid(dashboard)
+	//f.expectUpdateDeploymentAction(expDeployment)
+	f.run(getKey(dashboard, t))
 }
-
-func TestNotControlledByUs(t *testing.T) {
-	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
-	d := newDeployment(foo)
-
-	d.ObjectMeta.OwnerReferences = []metav1.OwnerReference{}
-
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
-	f.deploymentLister = append(f.deploymentLister, d)
-	f.kubeobjects = append(f.kubeobjects, d)
-
-	f.runExpectError(getKey(foo, t))
-}
-
-func int32Ptr(i int32) *int32 { return &i }
