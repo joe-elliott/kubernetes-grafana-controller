@@ -96,24 +96,23 @@ func (f *fixture) newController() (*Controller, informers.SharedInformerFactory)
 	return c, i
 }
 
-func (f *fixture) run(fooName string) {
-	f.runController(fooName, true, false)
+func (f *fixture) run(grafanaDashboardName string) {
+	f.runController(grafanaDashboardName, true, false)
 }
 
-func (f *fixture) runExpectError(fooName string) {
-	f.runController(fooName, true, true)
+func (f *fixture) runExpectError(grafanaDashboardName string) {
+	f.runController(grafanaDashboardName, true, true)
 }
 
-func (f *fixture) runController(fooName string, startInformers bool, expectError bool) {
-	c, i, k8sI := f.newController()
+func (f *fixture) runController(grafanaDashboardName string, startInformers bool, expectError bool) {
+	c, i := f.newController()
 	if startInformers {
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 		i.Start(stopCh)
-		k8sI.Start(stopCh)
 	}
 
-	err := c.syncHandler(fooName)
+	err := c.syncHandler(NewWorkQueueItem(grafanaDashboardName, Dashboard, ""))
 	if !expectError && err != nil {
 		f.t.Errorf("error syncing foo: %v", err)
 	} else if expectError && err == nil {
