@@ -89,7 +89,7 @@ func (f *fixture) newController() (*Controller, informers.SharedInformerFactory)
 	c.recorder = &record.FakeRecorder{}
 
 	for _, d := range f.grafanaDashboardLister {
-		i.Samplecontroller().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(f)
+		i.Samplecontroller().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(d)
 	}
 
 	return c, i
