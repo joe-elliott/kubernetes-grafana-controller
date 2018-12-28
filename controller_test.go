@@ -33,7 +33,7 @@ import (
 	samplecontroller "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
-	"kubernetes-grafana-controller/pkg/grafana"
+	grafana "kubernetes-grafana-controller/pkg/grafana/fake"
 )
 
 var (
