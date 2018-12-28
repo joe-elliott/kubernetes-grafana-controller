@@ -51,18 +51,16 @@ validatePostDashboard() {
     dashboardName="${specfile##*/}"
     dashboardName="${dashboardName%.*}"
 
-    echo "Posting dashboard " $dashboardName
-
     # create in kubernetes
-    kubectl apply -f $specfile
+    kubectl apply -f $specfile >&2
 
 	sleep 5s
 
     dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
 
-    echo "Grafana Dashboard Id " $dashboardId
-
     # check if exists in grafana
 	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
     [ "$httpStatus" -eq "200" ]
+
+    echo $dashboardId
 }
