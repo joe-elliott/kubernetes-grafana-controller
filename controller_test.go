@@ -212,8 +212,8 @@ func filterInformerActions(actions []core.Action) []core.Action {
 	return ret
 }
 
-func (f *fixture) expectUpdateFooStatusAction(foo *samplecontroller.Foo) {
-	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "foos"}, foo.Namespace, foo)
+func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *samplecontroller.GrafanaDashboard) {
+	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "grafanaDashboards"}, grafanaDashboard.Namespace, grafanaDashboard)
 	// TODO: Until #38113 is merged, we can't use Subresource
 	//action.Subresource = "status"
 	f.actions = append(f.actions, action)
