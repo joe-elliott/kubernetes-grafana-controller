@@ -50,7 +50,7 @@ type fixture struct {
 
 	client        *fake.Clientset
 	kubeclient    *k8sfake.Clientset
-	grafanaClient *grafana.GrafanaClientFake
+	grafanaClient *grafana.ClientFake
 
 	// Objects to put in the store.
 	grafanaDashboardLister []*grafanacontroller.GrafanaDashboard

@@ -50,7 +50,7 @@ func main() {
 		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
-	grafanaClient := grafana.NewGrafanaClient(grafanaURL)
+	grafanaClient := grafana.NewClient(grafanaURL)
 
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 

@@ -1,15 +1,15 @@
 package grafana
 
-type GrafanaClientFake struct {
+type ClientFake struct {
 	address string
 	fakeUID string
 
 	PostedJson *string
 }
 
-func NewGrafanaClientFake(address string, fakeUID string) *GrafanaClientFake {
+func NewGrafanaClientFake(address string, fakeUID string) *ClientFake {
 
-	client := &GrafanaClientFake{
+	client := &ClientFake{
 		address:    address,
 		fakeUID:    fakeUID,
 		PostedJson: nil,
@@ -18,12 +18,12 @@ func NewGrafanaClientFake(address string, fakeUID string) *GrafanaClientFake {
 	return client
 }
 
-func (client *GrafanaClientFake) PostDashboard(dashboardJSON string) (string, error) {
+func (client *ClientFake) PostDashboard(dashboardJSON string) (string, error) {
 	client.PostedJson = &dashboardJSON
 
 	return client.fakeUID, nil
 }
 
-func (client *GrafanaClientFake) DeleteDashboard(uid string) error {
+func (client *ClientFake) DeleteDashboard(uid string) error {
 	return nil
 }
