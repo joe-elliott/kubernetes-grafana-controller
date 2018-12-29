@@ -41,7 +41,7 @@ klog
 ### Dashboards
 
 ```
-apiVersion: samplecontroller.k8s.io/v1alpha1
+apiVersion: grafana.k8s.io/v1alpha1
 kind: GrafanaDashboard
 metadata:
   name: test-dash
@@ -108,6 +108,5 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [ ] Update
     - [ ] Delete
 - Refactoring
-  - rename "SampleController" crap everywhere
   - fix grafana client struct/interface/package names
   - add comments where go wants me to
