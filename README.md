@@ -80,6 +80,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
 
 - Testing
   - [ ] Controller tests
+    - Define and build tests
   - [ ] Integration Tests
     - Reduce dependencies by running bats in container
     - Dashboards
@@ -107,7 +108,6 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [ ] Add
     - [ ] Update
     - [ ] Delete
-- Refactoring
-  - fix grafana client struct/interface/package names
-  - add comments where go wants me to
+- Refactoring/Cleanup
+  - Add comments where go wants me to
   - The dashboard object is currently `grafanadashboard.grafana.k8s.io`.  This feels wrong.  Revisit object naming.  Should it be `dashboard.grafana.com`?  I should probably talk to the Grafana people before I do that.
