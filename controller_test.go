@@ -17,25 +17,23 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
-	apps "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/diff"
-	kubeinformers "k8s.io/client-go/informers"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	core "k8s.io/client-go/testing"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 
-	samplecontroller "k8s.io/sample-controller/pkg/apis/samplecontroller/v1alpha1"
-	"k8s.io/sample-controller/pkg/client/clientset/versioned/fake"
-	informers "k8s.io/sample-controller/pkg/client/informers/externalversions"
+	samplecontroller "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
+	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	grafana "kubernetes-grafana-controller/pkg/grafana/fake"
 )
 
 var (
@@ -43,17 +41,25 @@ var (
 	noResyncPeriodFunc = func() time.Duration { return 0 }
 )
 
+const (
+	FAKE_UID = "fakeUID"
+)
+
 type fixture struct {
 	t *testing.T
 
-	client     *fake.Clientset
-	kubeclient *k8sfake.Clientset
+	client        *fake.Clientset
+	kubeclient    *k8sfake.Clientset
+	grafanaClient *grafana.GrafanaClientFake
+
 	// Objects to put in the store.
-	fooLister        []*samplecontroller.Foo
-	deploymentLister []*apps.Deployment
+	grafanaDashboardLister []*samplecontroller.GrafanaDashboard
+
 	// Actions expected to happen on the client.
-	kubeactions []core.Action
-	actions     []core.Action
+	kubeactions       []core.Action
+	actions           []core.Action
+	grafanaPostedJson *string
+
 	// Objects from here preloaded into NewSimpleFake.
 	kubeobjects []runtime.Object
 	objects     []runtime.Object
@@ -64,66 +70,61 @@ func newFixture(t *testing.T) *fixture {
 	f.t = t
 	f.objects = []runtime.Object{}
 	f.kubeobjects = []runtime.Object{}
+	f.grafanaPostedJson = nil
+
 	return f
 }
 
-func newFoo(name string, replicas *int32) *samplecontroller.Foo {
-	return &samplecontroller.Foo{
+func newGrafanaDashboard(name string, dashboardJson string) *samplecontroller.GrafanaDashboard {
+	return &samplecontroller.GrafanaDashboard{
 		TypeMeta: metav1.TypeMeta{APIVersion: samplecontroller.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: samplecontroller.FooSpec{
-			DeploymentName: fmt.Sprintf("%s-deployment", name),
-			Replicas:       replicas,
+		Spec: samplecontroller.GrafanaDashboardSpec{
+			DashboardJSON: dashboardJson,
 		},
 	}
 }
 
-func (f *fixture) newController() (*Controller, informers.SharedInformerFactory, kubeinformers.SharedInformerFactory) {
+func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
 	f.client = fake.NewSimpleClientset(f.objects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
+	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com", FAKE_UID)
 
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
-	k8sI := kubeinformers.NewSharedInformerFactory(f.kubeclient, noResyncPeriodFunc())
 
-	c := NewController(f.kubeclient, f.client,
-		k8sI.Apps().V1().Deployments(), i.Samplecontroller().V1alpha1().Foos())
+	c := NewController(f.client, f.kubeclient,
+		f.grafanaClient, i.Samplecontroller().V1alpha1().GrafanaDashboards())
 
-	c.foosSynced = alwaysReady
-	c.deploymentsSynced = alwaysReady
+	c.grafanaDashboardsSynced = alwaysReady
 	c.recorder = &record.FakeRecorder{}
 
-	for _, f := range f.fooLister {
-		i.Samplecontroller().V1alpha1().Foos().Informer().GetIndexer().Add(f)
+	for _, d := range f.grafanaDashboardLister {
+		i.Samplecontroller().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(d)
 	}
 
-	for _, d := range f.deploymentLister {
-		k8sI.Apps().V1().Deployments().Informer().GetIndexer().Add(d)
-	}
-
-	return c, i, k8sI
+	return c, i
 }
 
-func (f *fixture) run(fooName string) {
-	f.runController(fooName, true, false)
+func (f *fixture) run(grafanaDashboardName string) {
+	f.runController(grafanaDashboardName, true, false)
 }
 
-func (f *fixture) runExpectError(fooName string) {
-	f.runController(fooName, true, true)
+func (f *fixture) runExpectError(grafanaDashboardName string) {
+	f.runController(grafanaDashboardName, true, true)
 }
 
-func (f *fixture) runController(fooName string, startInformers bool, expectError bool) {
-	c, i, k8sI := f.newController()
+func (f *fixture) runController(grafanaDashboardName string, startInformers bool, expectError bool) {
+	c, i := f.newController()
 	if startInformers {
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 		i.Start(stopCh)
-		k8sI.Start(stopCh)
 	}
 
-	err := c.syncHandler(fooName)
+	err := c.syncHandler(NewWorkQueueItem(grafanaDashboardName, Dashboard, ""))
 	if !expectError && err != nil {
 		f.t.Errorf("error syncing foo: %v", err)
 	} else if expectError && err == nil {
@@ -158,6 +159,13 @@ func (f *fixture) runController(fooName string, startInformers bool, expectError
 
 	if len(f.kubeactions) > len(k8sActions) {
 		f.t.Errorf("%d additional expected actions:%+v", len(f.kubeactions)-len(k8sActions), f.kubeactions[len(k8sActions):])
+	}
+
+	// test grafana client "actions"
+	if f.grafanaPostedJson != nil &&
+		*f.grafanaPostedJson != *f.grafanaClient.PostedJson {
+
+		f.t.Errorf("Expected posted dashboard json %s but found %s", *f.grafanaPostedJson, *f.grafanaClient.PostedJson)
 	}
 }
 
@@ -207,15 +215,13 @@ func checkAction(expected, actual core.Action, t *testing.T) {
 
 // filterInformerActions filters list and watch actions for testing resources.
 // Since list and watch don't change resource state we can filter it to lower
-// nose level in our tests.
+// noise level in our tests.
 func filterInformerActions(actions []core.Action) []core.Action {
 	ret := []core.Action{}
 	for _, action := range actions {
 		if len(action.GetNamespace()) == 0 &&
-			(action.Matches("list", "foos") ||
-				action.Matches("watch", "foos") ||
-				action.Matches("list", "deployments") ||
-				action.Matches("watch", "deployments")) {
+			(action.Matches("list", "grafanadashboards") ||
+				action.Matches("watch", "grafanadashboards")) {
 			continue
 		}
 		ret = append(ret, action)
@@ -224,90 +230,39 @@ func filterInformerActions(actions []core.Action) []core.Action {
 	return ret
 }
 
-func (f *fixture) expectCreateDeploymentAction(d *apps.Deployment) {
-	f.kubeactions = append(f.kubeactions, core.NewCreateAction(schema.GroupVersionResource{Resource: "deployments"}, d.Namespace, d))
-}
-
-func (f *fixture) expectUpdateDeploymentAction(d *apps.Deployment) {
-	f.kubeactions = append(f.kubeactions, core.NewUpdateAction(schema.GroupVersionResource{Resource: "deployments"}, d.Namespace, d))
-}
-
-func (f *fixture) expectUpdateFooStatusAction(foo *samplecontroller.Foo) {
-	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "foos"}, foo.Namespace, foo)
+func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *samplecontroller.GrafanaDashboard) {
+	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "grafanadashboards"}, grafanaDashboard.Namespace, grafanaDashboard)
 	// TODO: Until #38113 is merged, we can't use Subresource
 	//action.Subresource = "status"
 	f.actions = append(f.actions, action)
 }
 
-func getKey(foo *samplecontroller.Foo, t *testing.T) string {
-	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(foo)
+func (f *fixture) expectGrafanaDashboardPost(dashboardJson string) {
+	f.grafanaPostedJson = &dashboardJson
+}
+
+func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) string {
+	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(grafanaDashboard)
 	if err != nil {
-		t.Errorf("Unexpected error getting key for foo %v: %v", foo.Name, err)
+		t.Errorf("Unexpected error getting key for foo %v: %v", grafanaDashboard.Name, err)
 		return ""
 	}
 	return key
 }
 
-func TestCreatesDeployment(t *testing.T) {
+func TestCreatesGrafanaDashboard(t *testing.T) {
+
 	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
+	dashboardJson := "{ 'test': 'test' }"
 
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
+	dashboard := newGrafanaDashboard("test", dashboardJson)
 
-	expDeployment := newDeployment(foo)
-	f.expectCreateDeploymentAction(expDeployment)
-	f.expectUpdateFooStatusAction(foo)
+	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
+	f.objects = append(f.objects, dashboard)
 
-	f.run(getKey(foo, t))
+	dashboard.Status.GrafanaUID = FAKE_UID
+	f.expectUpdateGrafanaUid(dashboard)
+	f.expectGrafanaDashboardPost(dashboardJson)
+
+	f.run(getKey(dashboard, t))
 }
-
-func TestDoNothing(t *testing.T) {
-	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
-	d := newDeployment(foo)
-
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
-	f.deploymentLister = append(f.deploymentLister, d)
-	f.kubeobjects = append(f.kubeobjects, d)
-
-	f.expectUpdateFooStatusAction(foo)
-	f.run(getKey(foo, t))
-}
-
-func TestUpdateDeployment(t *testing.T) {
-	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
-	d := newDeployment(foo)
-
-	// Update replicas
-	foo.Spec.Replicas = int32Ptr(2)
-	expDeployment := newDeployment(foo)
-
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
-	f.deploymentLister = append(f.deploymentLister, d)
-	f.kubeobjects = append(f.kubeobjects, d)
-
-	f.expectUpdateFooStatusAction(foo)
-	f.expectUpdateDeploymentAction(expDeployment)
-	f.run(getKey(foo, t))
-}
-
-func TestNotControlledByUs(t *testing.T) {
-	f := newFixture(t)
-	foo := newFoo("test", int32Ptr(1))
-	d := newDeployment(foo)
-
-	d.ObjectMeta.OwnerReferences = []metav1.OwnerReference{}
-
-	f.fooLister = append(f.fooLister, foo)
-	f.objects = append(f.objects, foo)
-	f.deploymentLister = append(f.deploymentLister, d)
-	f.kubeobjects = append(f.kubeobjects, d)
-
-	f.runExpectError(getKey(foo, t))
-}
-
-func int32Ptr(i int32) *int32 { return &i }

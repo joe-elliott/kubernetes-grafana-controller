@@ -74,7 +74,7 @@ Previously I had attempted to use the native go testing framework for integratio
 
 ### Unit
 
-Unit tests are currently broken.  They are a leftover from the kubernetes sample controller project and need to be updated to match the existing controller.
+Unit tests for the controller technically pass, but they only test creating a new dashboard.  We need to flesh out grafana client testing structure and increase coverage.
 
 ## TODO
 
