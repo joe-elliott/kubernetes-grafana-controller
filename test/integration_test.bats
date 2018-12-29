@@ -44,30 +44,18 @@ teardown(){
 @test "creating a GrafanaDashboard CRD creates the same dashboard in Grafana" {
 
     for filename in dashboards/*.yaml; do
-        dashboardId=$(validatePostDashboard $filename)
+        validateDashboardContents $filename
+    done
+}
 
-        echo "Test Json Content of $filename ($dashboardId)"
+@test "updating a GrafanaDashboard CRD updates the same dashboard in Grafana" {
 
-        dashboardJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+    for filename in dashboards/*.yaml; do
+        validateDashboardContents $filename
+    done
 
-        echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id) | del (.uid)' > a.json
-
-        dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' $filename)
-        dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
-        dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
-
-        echo $dashboardJsonFromYaml | jq 'del(.version) | del(.id) | del (.uid)' > b.json
-
-        equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
-
-        if [ "$equal" != "true" ]; then
-            run diff <(jq -S . a.json) <(jq -S . b.json)
-            echo $output
-        fi
-
-        [ "$equal" = "true" ]
-
-        rm a.json
-        rm b.json
+    # the .update files have dashboards with the same ids and different contents
+    for filename in dashboards/*.update; do
+        validateDashboardContents $filename
     done
 }
