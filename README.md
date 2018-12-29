@@ -83,7 +83,7 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
   - [ ] Integration Tests
     - Dashboards
       - [x] Add
-      - [ ] Update
+      - [x] Update
       - [x] Delete
     - Notification channels
       - [ ] Add
