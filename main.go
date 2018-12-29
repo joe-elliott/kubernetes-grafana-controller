@@ -6,6 +6,7 @@ import (
 
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	"kubernetes-grafana-controller/pkg/controllers"
 	"kubernetes-grafana-controller/pkg/grafana"
 	"kubernetes-grafana-controller/pkg/signals"
 
@@ -53,7 +54,7 @@ func main() {
 
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
-	controller := NewController(client, kubeClient, grafanaClient,
+	controller := controllers.NewController(client, kubeClient, grafanaClient,
 		informerFactory.Samplecontroller().V1alpha1().GrafanaDashboards())
 
 	stopCh := signals.SetupSignalHandler()
