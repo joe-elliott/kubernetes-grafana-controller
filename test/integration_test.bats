@@ -17,7 +17,7 @@ teardown(){
     done
 }
 
-@test "creating a GrafanaDashboard CRD creates a Grafana Dashboard" {
+@test "creating a GrafanaDashboard object creates a Grafana Dashboard" {
     count=0
 
     for filename in dashboards/*.yaml; do
@@ -30,7 +30,7 @@ teardown(){
     done
 }
 
-@test "deleting a GrafanaDashboard CRD deletes the Grafana Dashboard" {
+@test "deleting a GrafanaDashboard object deletes the Grafana Dashboard" {
 
     for filename in dashboards/*.yaml; do
         dashboardId=$(validatePostDashboard $filename)
@@ -48,7 +48,7 @@ teardown(){
     done
 }
 
-@test "creating a GrafanaDashboard CRD creates the same dashboard in Grafana" {
+@test "creating a GrafanaDashboard object creates the same dashboard in Grafana" {
     count=0
 
     for filename in dashboards/*.yaml; do
@@ -59,7 +59,7 @@ teardown(){
     done
 }
 
-@test "updating a GrafanaDashboard CRD updates the same dashboard in Grafana" {
+@test "updating a GrafanaDashboard object updates the dashboard in Grafana" {
     count=0
     
     for filename in dashboards/*.yaml; do

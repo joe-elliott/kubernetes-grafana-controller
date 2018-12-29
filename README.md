@@ -81,6 +81,7 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
 - Testing
   - [ ] Controller tests
   - [ ] Integration Tests
+    - Reduce dependencies by running bats in container
     - Dashboards
       - [x] Add
       - [x] Update
