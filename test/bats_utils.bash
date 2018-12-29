@@ -39,3 +39,74 @@ validateGrafanaUrl() {
 
     [ "$httpStatus" -eq "200" ]
 }
+
+#
+# validateDashboardCount <count>
+#   use grafana search api to confirm that the count is what is expected 
+#
+validateDashboardCount() {
+    searchJson=$(curl --silent ${GRAFANA_URL}/api/search)
+
+    count=$(echo $searchJson | jq length)
+
+    [ "$count" -eq "$1" ]
+}
+
+#
+# validatePostDashboard <yaml file name>
+#   note that the dashboard file name must match the GrafanaDashboard object name ...
+#    ... b/c i'm lazy
+#
+validatePostDashboard() {
+    specfile=$1
+
+    dashboardName="${specfile##*/}"
+    dashboardName="${dashboardName%.*}"
+
+    # create in kubernetes
+    kubectl apply -f $specfile >&2
+
+	sleep 5s
+
+    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
+
+    # check if exists in grafana
+	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+    [ "$httpStatus" -eq "200" ]
+
+    echo $dashboardId
+}
+
+#
+# validateDashboardContents <yaml file name>
+#   creates a dashboard and both verifies it exists and that its content matches
+#
+validateDashboardContents() {
+    filename=$1
+
+    dashboardId=$(validatePostDashboard $filename)
+
+    echo "Test Json Content of $filename ($dashboardId)"
+
+    dashboardJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+    echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id) | del (.uid)' > a.json
+
+    dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' $filename)
+    dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
+    dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
+
+    echo $dashboardJsonFromYaml | jq 'del(.version) | del(.id) | del (.uid)' > b.json
+
+    equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
+
+    if [ "$equal" != "true" ]; then
+        run diff <(jq -S . a.json) <(jq -S . b.json)
+        echo $output
+    fi
+
+    [ "$equal" = "true" ]
+
+    rm a.json
+    rm b.json
+}
