@@ -41,6 +41,18 @@ validateGrafanaUrl() {
 }
 
 #
+# validateDashboardCount <count>
+#   use grafana search api to confirm that the count is what is expected 
+#
+validateDashboardCount() {
+    searchJson=$(curl --silent ${GRAFANA_URL}/api/search)
+
+    count=$(echo $searchJson | jq length)
+
+    [ "$count" -eq "$1" ]
+}
+
+#
 # validatePostDashboard <yaml file name>
 #   note that the dashboard file name must match the GrafanaDashboard object name ...
 #    ... b/c i'm lazy
