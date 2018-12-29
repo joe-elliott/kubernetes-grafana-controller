@@ -11,46 +11,69 @@ setup(){
 
 teardown(){
     run kubectl delete --ignore-not-found=true -f grafana.yaml
-    run kubectl delete --ignore-not-found=true -f sample-dashboards.yaml
+
+    for filename in dashboards/*; do
+        run kubectl delete --ignore-not-found=true -f $filename
+    done
 }
 
-@test "creating a GrafanaDashboard CRD creates a Grafana Dashboard" {
+@test "creating a GrafanaDashboard object creates a Grafana Dashboard" {
+    count=0
 
-    # create in kubernetes
-    kubectl apply -f sample-dashboards.yaml
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
 
-	sleep 5s
+        echo "Test Creating $filename ($dashboardId)"
 
-    dashboardName="test-dash"
-    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
-
-    echo "Grafana Dashboard Id " $dashboardId
-
-    # check if exists in grafana
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
-    [ "$httpStatus" -eq "200" ]
+        (( count++ ))
+        validateDashboardCount $count
+    done
 }
 
-@test "deleting a GrafanaDashboard CRD deletes the Grafana Dashboard" {
+@test "deleting a GrafanaDashboard object deletes the Grafana Dashboard" {
 
-    # create in kubernetes
-    kubectl apply -f sample-dashboards.yaml
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
 
-	sleep 5s
+        echo "Test Deleting $filename ($dashboardId)"
 
-    dashboardName="test-dash"
-    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
+        kubectl delete -f $filename
 
-    echo "Grafana Dashboard Id " $dashboardId
+        sleep 5s
 
-    # check if exists in grafana
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
-    [ "$httpStatus" -eq "200" ]
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+        [ "$httpStatus" -eq "404" ]
 
-    kubectl delete -f sample-dashboards.yaml
+        validateDashboardCount 0
+    done
+}
 
-	sleep 5s
+@test "creating a GrafanaDashboard object creates the same dashboard in Grafana" {
+    count=0
 
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
-    [ "$httpStatus" -eq "404" ]
+    for filename in dashboards/*.yaml; do
+        validateDashboardContents $filename
+
+        (( count++ ))
+        validateDashboardCount $count
+    done
+}
+
+@test "updating a GrafanaDashboard object updates the dashboard in Grafana" {
+    count=0
+    
+    for filename in dashboards/*.yaml; do
+        validateDashboardContents $filename
+
+        (( count++ ))
+        validateDashboardCount $count
+    done
+
+    # the .update files have dashboards with the same ids and different contents. 
+    #  not the best.  not the worst.  could be improved.
+    for filename in dashboards/*.update; do
+        validateDashboardContents $filename
+
+        validateDashboardCount $count
+    done
 }

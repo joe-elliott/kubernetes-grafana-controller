@@ -62,7 +62,7 @@ To run integration tests navigate to the `./test` directory and run:
 - `bats one_time_teardown.bats` 
   - stops and deletes the minikube cluster 
 
-Previously I had attempted to use the native go testing framework for integration tests.  However, since the tests were 99% a long list of bash commands it made for some super gross code.  Moving to bats simplified and improved the integration tests.
+Previously I had attempted to use the native go testing framework for integration tests.  However, since the tests were basically a long list of bash commands it made for some super gross code.  Moving to bats simplified and improved the integration tests.
 
 #### Dependencies
 
@@ -70,6 +70,7 @@ Previously I had attempted to use the native go testing framework for integratio
 - kubectl
 - docker
 - bats (https://github.com/bats-core/bats-core)
+- jq
 
 ### Unit
 
@@ -80,9 +81,10 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
 - Testing
   - [ ] Controller tests
   - [ ] Integration Tests
+    - Reduce dependencies by running bats in container
     - Dashboards
       - [x] Add
-      - [ ] Update
+      - [x] Update
       - [x] Delete
     - Notification channels
       - [ ] Add
@@ -105,4 +107,8 @@ Unit tests are currently broken.  They are a leftover from the kubernetes sample
     - [ ] Add
     - [ ] Update
     - [ ] Delete
-- rename "SampleController" crap everywhere
+- Refactoring
+  - rename "SampleController" crap everywhere
+  - fix grafana client struct/interface/package names
+  - move controllers to a pkg subfolder
+  - add comments where go wants me to
