@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Samplecontroller() grafana.Interface
+	Grafana() grafana.Interface
 }
 
-func (f *sharedInformerFactory) Samplecontroller() grafana.Interface {
+func (f *sharedInformerFactory) Grafana() grafana.Interface {
 	return grafana.New(f, f.namespace, f.tweakListOptions)
 }

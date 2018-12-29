@@ -61,13 +61,13 @@ func NewFilteredGrafanaDashboardInformer(client versioned.Interface, namespace s
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SamplecontrollerV1alpha1().GrafanaDashboards(namespace).List(options)
+				return client.GrafanaV1alpha1().GrafanaDashboards(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.SamplecontrollerV1alpha1().GrafanaDashboards(namespace).Watch(options)
+				return client.GrafanaV1alpha1().GrafanaDashboards(namespace).Watch(options)
 			},
 		},
 		&grafanav1alpha1.GrafanaDashboard{},

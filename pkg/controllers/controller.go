@@ -265,7 +265,7 @@ func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alp
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := c.grafanaclientset.SamplecontrollerV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
+	_, err := c.grafanaclientset.GrafanaV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
 	return err
 }
 
