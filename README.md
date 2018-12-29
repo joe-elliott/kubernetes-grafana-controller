@@ -110,5 +110,4 @@ Unit tests for the controller technically pass, but they only test creating a ne
 - Refactoring
   - rename "SampleController" crap everywhere
   - fix grafana client struct/interface/package names
-  - move controllers to a pkg subfolder
   - add comments where go wants me to
