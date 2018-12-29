@@ -51,11 +51,15 @@ type fixture struct {
 	client        *fake.Clientset
 	kubeclient    *k8sfake.Clientset
 	grafanaClient *grafana.GrafanaClientFake
+
 	// Objects to put in the store.
 	grafanaDashboardLister []*samplecontroller.GrafanaDashboard
+
 	// Actions expected to happen on the client.
-	kubeactions []core.Action
-	actions     []core.Action
+	kubeactions       []core.Action
+	actions           []core.Action
+	grafanaPostedJson *string
+
 	// Objects from here preloaded into NewSimpleFake.
 	kubeobjects []runtime.Object
 	objects     []runtime.Object
@@ -66,10 +70,12 @@ func newFixture(t *testing.T) *fixture {
 	f.t = t
 	f.objects = []runtime.Object{}
 	f.kubeobjects = []runtime.Object{}
+	f.grafanaPostedJson = nil
+
 	return f
 }
 
-func newGrafanaDashboard(name string) *samplecontroller.GrafanaDashboard {
+func newGrafanaDashboard(name string, dashboardJson string) *samplecontroller.GrafanaDashboard {
 	return &samplecontroller.GrafanaDashboard{
 		TypeMeta: metav1.TypeMeta{APIVersion: samplecontroller.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
@@ -77,7 +83,7 @@ func newGrafanaDashboard(name string) *samplecontroller.GrafanaDashboard {
 			Namespace: metav1.NamespaceDefault,
 		},
 		Spec: samplecontroller.GrafanaDashboardSpec{
-			DashboardJSON: "{}",
+			DashboardJSON: dashboardJson,
 		},
 	}
 }
@@ -154,6 +160,13 @@ func (f *fixture) runController(grafanaDashboardName string, startInformers bool
 	if len(f.kubeactions) > len(k8sActions) {
 		f.t.Errorf("%d additional expected actions:%+v", len(f.kubeactions)-len(k8sActions), f.kubeactions[len(k8sActions):])
 	}
+
+	// test grafana client "actions"
+	if f.grafanaPostedJson != nil &&
+		*f.grafanaPostedJson != *f.grafanaClient.PostedJson {
+
+		f.t.Errorf("Expected posted dashboard json %s but found %s", *f.grafanaPostedJson, *f.grafanaClient.PostedJson)
+	}
 }
 
 // checkAction verifies that expected and actual actions are equal and both have
@@ -224,6 +237,10 @@ func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *samplecontroller.Graf
 	f.actions = append(f.actions, action)
 }
 
+func (f *fixture) expectGrafanaDashboardPost(dashboardJson string) {
+	f.grafanaPostedJson = &dashboardJson
+}
+
 func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) string {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(grafanaDashboard)
 	if err != nil {
@@ -234,48 +251,18 @@ func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) s
 }
 
 func TestCreatesGrafanaDashboard(t *testing.T) {
-	// jpe - todo - add test for grafana client getting PostDashboard with the right json called
+
 	f := newFixture(t)
-	dashboard := newGrafanaDashboard("test")
+	dashboardJson := "{ 'test': 'test' }"
+
+	dashboard := newGrafanaDashboard("test", dashboardJson)
 
 	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
 	f.objects = append(f.objects, dashboard)
 
 	dashboard.Status.GrafanaUID = FAKE_UID
 	f.expectUpdateGrafanaUid(dashboard)
+	f.expectGrafanaDashboardPost(dashboardJson)
 
-	f.run(getKey(dashboard, t))
-}
-
-func TestDoNothing(t *testing.T) {
-	f := newFixture(t)
-	dashboard := newGrafanaDashboard("test")
-	//d := newDeployment(foo)
-
-	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
-	f.objects = append(f.objects, dashboard)
-	//f.deploymentLister = append(f.deploymentLister, d)
-	//f.kubeobjects = append(f.kubeobjects, d)
-
-	f.expectUpdateGrafanaUid(dashboard)
-	f.run(getKey(dashboard, t))
-}
-
-func TestUpdateDashboard(t *testing.T) {
-	f := newFixture(t)
-	dashboard := newGrafanaDashboard("test")
-	// d := newDeployment(foo)
-
-	// Update dashboard
-	dashboard.Spec.DashboardJSON = "{'test': 'test'}"
-	//expDeployment := newDeployment(foo)
-
-	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
-	f.objects = append(f.objects, dashboard)
-	//f.deploymentLister = append(f.deploymentLister, d)
-	//f.kubeobjects = append(f.kubeobjects, d)
-
-	f.expectUpdateGrafanaUid(dashboard)
-	//f.expectUpdateDeploymentAction(expDeployment)
 	f.run(getKey(dashboard, t))
 }
