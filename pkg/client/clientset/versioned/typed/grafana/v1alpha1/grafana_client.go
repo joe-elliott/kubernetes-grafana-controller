@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	v1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"

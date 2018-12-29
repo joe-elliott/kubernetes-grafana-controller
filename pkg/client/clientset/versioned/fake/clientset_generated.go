@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1"
-	fakesamplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1/fake"
+	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
+	fakesamplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1/fake"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"

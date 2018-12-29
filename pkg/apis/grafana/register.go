@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package samplecontroller
+package grafana
 
 const (
-	GroupName = "samplecontroller.k8s.io"
+	GroupName = "grafana.k8s.io"
 )

@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	grafanav1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	versioned "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "kubernetes-grafana-controller/pkg/client/listers/samplecontroller/v1alpha1"
+	v1alpha1 "kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -70,7 +70,7 @@ func NewFilteredGrafanaDashboardInformer(client versioned.Interface, namespace s
 				return client.SamplecontrollerV1alpha1().GrafanaDashboards(namespace).Watch(options)
 			},
 		},
-		&samplecontrollerv1alpha1.GrafanaDashboard{},
+		&grafanav1alpha1.GrafanaDashboard{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *grafanaDashboardInformer) defaultInformer(client versioned.Interface, r
 }
 
 func (f *grafanaDashboardInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&samplecontrollerv1alpha1.GrafanaDashboard{}, f.defaultInformer)
+	return f.factory.InformerFor(&grafanav1alpha1.GrafanaDashboard{}, f.defaultInformer)
 }
 
 func (f *grafanaDashboardInformer) Lister() v1alpha1.GrafanaDashboardLister {

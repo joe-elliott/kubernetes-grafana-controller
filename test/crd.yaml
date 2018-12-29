@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: grafanadashboards.samplecontroller.k8s.io
 spec:
-  group: samplecontroller.k8s.io
+  group: grafana
   version: v1alpha1
   names:
     kind: GrafanaDashboard
