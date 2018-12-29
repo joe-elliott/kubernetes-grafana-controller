@@ -6,6 +6,7 @@ import (
 
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	"kubernetes-grafana-controller/pkg/controllers"
 	"kubernetes-grafana-controller/pkg/grafana"
 	"kubernetes-grafana-controller/pkg/signals"
 
@@ -49,12 +50,12 @@ func main() {
 		klog.Fatalf("Error building kubernetes clientset: %s", err.Error())
 	}
 
-	grafanaClient := grafana.NewGrafanaClient(grafanaURL)
+	grafanaClient := grafana.NewClient(grafanaURL)
 
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
-	controller := NewController(client, kubeClient, grafanaClient,
-		informerFactory.Samplecontroller().V1alpha1().GrafanaDashboards())
+	controller := controllers.NewController(client, kubeClient, grafanaClient,
+		informerFactory.Grafana().V1alpha1().GrafanaDashboards())
 
 	stopCh := signals.SetupSignalHandler()
 

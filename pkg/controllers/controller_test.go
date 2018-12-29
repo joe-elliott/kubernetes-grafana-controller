@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package controllers
 
 import (
 	"reflect"
@@ -30,7 +30,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
 
-	samplecontroller "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	grafanacontroller "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
 	grafana "kubernetes-grafana-controller/pkg/grafana/fake"
@@ -50,10 +50,10 @@ type fixture struct {
 
 	client        *fake.Clientset
 	kubeclient    *k8sfake.Clientset
-	grafanaClient *grafana.GrafanaClientFake
+	grafanaClient *grafana.ClientFake
 
 	// Objects to put in the store.
-	grafanaDashboardLister []*samplecontroller.GrafanaDashboard
+	grafanaDashboardLister []*grafanacontroller.GrafanaDashboard
 
 	// Actions expected to happen on the client.
 	kubeactions       []core.Action
@@ -75,14 +75,14 @@ func newFixture(t *testing.T) *fixture {
 	return f
 }
 
-func newGrafanaDashboard(name string, dashboardJson string) *samplecontroller.GrafanaDashboard {
-	return &samplecontroller.GrafanaDashboard{
-		TypeMeta: metav1.TypeMeta{APIVersion: samplecontroller.SchemeGroupVersion.String()},
+func newGrafanaDashboard(name string, dashboardJson string) *grafanacontroller.GrafanaDashboard {
+	return &grafanacontroller.GrafanaDashboard{
+		TypeMeta: metav1.TypeMeta{APIVersion: grafanacontroller.SchemeGroupVersion.String()},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: samplecontroller.GrafanaDashboardSpec{
+		Spec: grafanacontroller.GrafanaDashboardSpec{
 			DashboardJSON: dashboardJson,
 		},
 	}
@@ -96,13 +96,13 @@ func (f *fixture) newController() (*Controller, informers.SharedInformerFactory)
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
 
 	c := NewController(f.client, f.kubeclient,
-		f.grafanaClient, i.Samplecontroller().V1alpha1().GrafanaDashboards())
+		f.grafanaClient, i.Grafana().V1alpha1().GrafanaDashboards())
 
 	c.grafanaDashboardsSynced = alwaysReady
 	c.recorder = &record.FakeRecorder{}
 
 	for _, d := range f.grafanaDashboardLister {
-		i.Samplecontroller().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(d)
+		i.Grafana().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(d)
 	}
 
 	return c, i
@@ -126,9 +126,9 @@ func (f *fixture) runController(grafanaDashboardName string, startInformers bool
 
 	err := c.syncHandler(NewWorkQueueItem(grafanaDashboardName, Dashboard, ""))
 	if !expectError && err != nil {
-		f.t.Errorf("error syncing foo: %v", err)
+		f.t.Errorf("error syncing dashboard: %v", err)
 	} else if expectError && err == nil {
-		f.t.Error("expected error syncing foo, got nil")
+		f.t.Error("expected error syncing dashboard, got nil")
 	}
 
 	actions := filterInformerActions(f.client.Actions())
@@ -230,7 +230,7 @@ func filterInformerActions(actions []core.Action) []core.Action {
 	return ret
 }
 
-func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *samplecontroller.GrafanaDashboard) {
+func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *grafanacontroller.GrafanaDashboard) {
 	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "grafanadashboards"}, grafanaDashboard.Namespace, grafanaDashboard)
 	// TODO: Until #38113 is merged, we can't use Subresource
 	//action.Subresource = "status"
@@ -241,10 +241,10 @@ func (f *fixture) expectGrafanaDashboardPost(dashboardJson string) {
 	f.grafanaPostedJson = &dashboardJson
 }
 
-func getKey(grafanaDashboard *samplecontroller.GrafanaDashboard, t *testing.T) string {
+func getKey(grafanaDashboard *grafanacontroller.GrafanaDashboard, t *testing.T) string {
 	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(grafanaDashboard)
 	if err != nil {
-		t.Errorf("Unexpected error getting key for foo %v: %v", grafanaDashboard.Name, err)
+		t.Errorf("Unexpected error getting key for dashboard %v: %v", grafanaDashboard.Name, err)
 		return ""
 	}
 	return key

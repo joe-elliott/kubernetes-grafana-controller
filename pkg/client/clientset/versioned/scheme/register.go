@@ -19,7 +19,7 @@ limitations under the License.
 package scheme
 
 import (
-	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	grafanav1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
@@ -32,7 +32,7 @@ var Scheme = runtime.NewScheme()
 var Codecs = serializer.NewCodecFactory(Scheme)
 var ParameterCodec = runtime.NewParameterCodec(Scheme)
 var localSchemeBuilder = runtime.SchemeBuilder{
-	samplecontrollerv1alpha1.AddToScheme,
+	grafanav1alpha1.AddToScheme,
 }
 
 // AddToScheme adds all types of this clientset into the given scheme. This allows composition

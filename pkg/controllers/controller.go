@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package controllers
 
 import (
 	"fmt"
@@ -32,16 +32,16 @@ import (
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 
-	"kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
-	samplev1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	"kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
+	grafanav1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	samplescheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
-	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller/v1alpha1"
-	listers "kubernetes-grafana-controller/pkg/client/listers/samplecontroller/v1alpha1"
+	grafanascheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana/v1alpha1"
+	listers "kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
 	"kubernetes-grafana-controller/pkg/grafana"
 )
 
-const controllerAgentName = "sample-controller"
+const controllerAgentName = "grafana-controller"
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
@@ -60,8 +60,7 @@ const (
 
 // Controller is the controller implementation for GrafanaDashboard resources
 type Controller struct {
-	// sampleclientset is a clientset for our own API group
-	sampleclientset clientset.Interface
+	grafanaclientset clientset.Interface
 
 	grafanaDashboardsLister listers.GrafanaDashboardLister
 	grafanaDashboardsSynced cache.InformerSynced
@@ -79,17 +78,17 @@ type Controller struct {
 	recorder record.EventRecorder
 }
 
-// NewController returns a new sample controller
+// NewController returns a new grafana dashboard controller
 func NewController(
-	sampleclientset clientset.Interface,
+	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
 	grafanaDashboardInformer informers.GrafanaDashboardInformer) *Controller {
 
 	// Create event broadcaster
-	// Add sample-controller types to the default Kubernetes Scheme so Events can be
-	// logged for sample-controller types.
-	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
+	// Add grafana-controller types to the default Kubernetes Scheme so Events can be
+	// logged for grafana-controller types.
+	utilruntime.Must(grafanascheme.AddToScheme(scheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartLogging(klog.Infof)
@@ -97,7 +96,7 @@ func NewController(
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &Controller{
-		sampleclientset:         sampleclientset,
+		grafanaclientset:        grafanaclientset,
 		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
 		grafanaDashboardsSynced: grafanaDashboardInformer.Informer().HasSynced,
 		grafanaClient:           grafanaClient,
@@ -254,7 +253,8 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alpha1.GrafanaDashboard, uid string) error {
+func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alpha1.GrafanaDashboard, uid string) error {
+
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
@@ -264,7 +264,8 @@ func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *samplev1alph
 	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDashboard resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
-	_, err := c.sampleclientset.SamplecontrollerV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
+
+	_, err := c.grafanaclientset.GrafanaV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
 	return err
 }
 

@@ -20,8 +20,8 @@ package fake
 
 import (
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	samplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1"
-	fakesamplecontrollerv1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1/fake"
+	grafanav1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
+	fakegrafanav1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1/fake"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
@@ -72,12 +72,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// SamplecontrollerV1alpha1 retrieves the SamplecontrollerV1alpha1Client
-func (c *Clientset) SamplecontrollerV1alpha1() samplecontrollerv1alpha1.SamplecontrollerV1alpha1Interface {
-	return &fakesamplecontrollerv1alpha1.FakeSamplecontrollerV1alpha1{Fake: &c.Fake}
+// GrafanaV1alpha1 retrieves the GrafanaV1alpha1Client
+func (c *Clientset) GrafanaV1alpha1() grafanav1alpha1.GrafanaV1alpha1Interface {
+	return &fakegrafanav1alpha1.FakeGrafanaV1alpha1{Fake: &c.Fake}
 }
 
-// Samplecontroller retrieves the SamplecontrollerV1alpha1Client
-func (c *Clientset) Samplecontroller() samplecontrollerv1alpha1.SamplecontrollerV1alpha1Interface {
-	return &fakesamplecontrollerv1alpha1.FakeSamplecontrollerV1alpha1{Fake: &c.Fake}
+// Grafana retrieves the GrafanaV1alpha1Client
+func (c *Clientset) Grafana() grafanav1alpha1.GrafanaV1alpha1Interface {
+	return &fakegrafanav1alpha1.FakeGrafanaV1alpha1{Fake: &c.Fake}
 }

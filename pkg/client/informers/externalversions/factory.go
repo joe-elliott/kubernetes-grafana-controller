@@ -20,8 +20,8 @@ package externalversions
 
 import (
 	versioned "kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	grafana "kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana"
 	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
-	samplecontroller "kubernetes-grafana-controller/pkg/client/informers/externalversions/samplecontroller"
 	reflect "reflect"
 	sync "sync"
 	time "time"
@@ -172,9 +172,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Samplecontroller() samplecontroller.Interface
+	Grafana() grafana.Interface
 }
 
-func (f *sharedInformerFactory) Samplecontroller() samplecontroller.Interface {
-	return samplecontroller.New(f, f.namespace, f.tweakListOptions)
+func (f *sharedInformerFactory) Grafana() grafana.Interface {
+	return grafana.New(f, f.namespace, f.tweakListOptions)
 }

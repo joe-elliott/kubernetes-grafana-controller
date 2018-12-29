@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	v1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -31,13 +31,13 @@ import (
 
 // FakeGrafanaDashboards implements GrafanaDashboardInterface
 type FakeGrafanaDashboards struct {
-	Fake *FakeSamplecontrollerV1alpha1
+	Fake *FakeGrafanaV1alpha1
 	ns   string
 }
 
-var grafanadashboardsResource = schema.GroupVersionResource{Group: "samplecontroller.k8s.io", Version: "v1alpha1", Resource: "grafanadashboards"}
+var grafanadashboardsResource = schema.GroupVersionResource{Group: "grafana.k8s.io", Version: "v1alpha1", Resource: "grafanadashboards"}
 
-var grafanadashboardsKind = schema.GroupVersionKind{Group: "samplecontroller.k8s.io", Version: "v1alpha1", Kind: "GrafanaDashboard"}
+var grafanadashboardsKind = schema.GroupVersionKind{Group: "grafana.k8s.io", Version: "v1alpha1", Kind: "GrafanaDashboard"}
 
 // Get takes name of the grafanaDashboard, and returns the corresponding grafanaDashboard object, and an error if there is any.
 func (c *FakeGrafanaDashboards) Get(name string, options v1.GetOptions) (result *v1alpha1.GrafanaDashboard, err error) {

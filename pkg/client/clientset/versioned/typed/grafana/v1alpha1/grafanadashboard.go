@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "kubernetes-grafana-controller/pkg/apis/samplecontroller/v1alpha1"
+	v1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	scheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	"time"
 
@@ -56,7 +56,7 @@ type grafanaDashboards struct {
 }
 
 // newGrafanaDashboards returns a GrafanaDashboards
-func newGrafanaDashboards(c *SamplecontrollerV1alpha1Client, namespace string) *grafanaDashboards {
+func newGrafanaDashboards(c *GrafanaV1alpha1Client, namespace string) *grafanaDashboards {
 	return &grafanaDashboards{
 		client: c.RESTClient(),
 		ns:     namespace,

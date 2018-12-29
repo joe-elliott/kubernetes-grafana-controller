@@ -21,7 +21,13 @@ set -o pipefail
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 CODEGEN_PKG=${SCRIPT_ROOT}/vendor/k8s.io/code-generator
 
+if [ "$GOPATH" == "" ]; then
+  echo "make sure GOPATH is set (case sensitive)"
+  exit 1
+fi
+
 # dep ensure nukes the code-generator package.  just copy what we have here over to the vendor folder
+mkdir -p $CODEGEN_PKG
 cp -Rf code-generator/* $CODEGEN_PKG
 
 # generate the code with:
@@ -30,7 +36,7 @@ cp -Rf code-generator/* $CODEGEN_PKG
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   kubernetes-grafana-controller/pkg/client kubernetes-grafana-controller/pkg/apis \
-  samplecontroller:v1alpha1 \
+  grafana:v1alpha1 \
   --output-base "$(dirname ${BASH_SOURCE})/../../../src" \
   --go-header-file ${SCRIPT_ROOT}/codegen/boilerplate.go.txt
 

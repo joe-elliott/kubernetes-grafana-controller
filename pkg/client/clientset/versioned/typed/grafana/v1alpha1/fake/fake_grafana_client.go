@@ -19,23 +19,23 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/samplecontroller/v1alpha1"
+	v1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
 
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )
 
-type FakeSamplecontrollerV1alpha1 struct {
+type FakeGrafanaV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeSamplecontrollerV1alpha1) GrafanaDashboards(namespace string) v1alpha1.GrafanaDashboardInterface {
+func (c *FakeGrafanaV1alpha1) GrafanaDashboards(namespace string) v1alpha1.GrafanaDashboardInterface {
 	return &FakeGrafanaDashboards{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *FakeSamplecontrollerV1alpha1) RESTClient() rest.Interface {
+func (c *FakeGrafanaV1alpha1) RESTClient() rest.Interface {
 	var ret *rest.RESTClient
 	return ret
 }

@@ -12,20 +12,20 @@ type Interface interface {
 	DeleteDashboard(string) error
 }
 
-type GrafanaClient struct {
+type Client struct {
 	address string
 }
 
-func NewGrafanaClient(address string) *GrafanaClient {
+func NewClient(address string) *Client {
 
-	client := &GrafanaClient{
+	client := &Client{
 		address: address,
 	}
 
 	return client
 }
 
-func (client *GrafanaClient) PostDashboard(dashboardJSON string) (string, error) {
+func (client *Client) PostDashboard(dashboardJSON string) (string, error) {
 	var responseBody map[string]interface{}
 
 	postJSON := fmt.Sprintf(`{
@@ -75,7 +75,7 @@ func (client *GrafanaClient) PostDashboard(dashboardJSON string) (string, error)
 	return uidString, err
 }
 
-func (client *GrafanaClient) DeleteDashboard(uid string) error {
+func (client *Client) DeleteDashboard(uid string) error {
 	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + uid)
 
 	if err != nil {
