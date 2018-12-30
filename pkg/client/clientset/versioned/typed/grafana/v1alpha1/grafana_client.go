@@ -29,6 +29,7 @@ import (
 type GrafanaV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	GrafanaDashboardsGetter
+	GrafanaNotificationChannelsGetter
 }
 
 // GrafanaV1alpha1Client is used to interact with features provided by the grafana.k8s.io group.
@@ -38,6 +39,10 @@ type GrafanaV1alpha1Client struct {
 
 func (c *GrafanaV1alpha1Client) GrafanaDashboards(namespace string) GrafanaDashboardInterface {
 	return newGrafanaDashboards(c, namespace)
+}
+
+func (c *GrafanaV1alpha1Client) GrafanaNotificationChannels(namespace string) GrafanaNotificationChannelInterface {
+	return newGrafanaNotificationChannels(c, namespace)
 }
 
 // NewForConfig creates a new GrafanaV1alpha1Client for the given config.

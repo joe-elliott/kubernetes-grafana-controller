@@ -55,6 +55,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=grafana.k8s.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("grafanadashboards"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().GrafanaDashboards().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("grafananotificationchannels"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().GrafanaNotificationChannels().Informer()}, nil
 
 	}
 
