@@ -54,14 +54,14 @@ func main() {
 
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
-	controller := controllers.NewController(client, kubeClient, grafanaClient,
+	dashboardController := controllers.NewDashboardController(client, kubeClient, grafanaClient,
 		informerFactory.Grafana().V1alpha1().GrafanaDashboards())
 
 	stopCh := signals.SetupSignalHandler()
 
 	informerFactory.Start(stopCh)
 
-	if err = controller.Run(2, stopCh); err != nil {
-		klog.Fatalf("Error running controller: %s", err.Error())
+	if err = dashboardController.Run(2, stopCh); err != nil {
+		klog.Fatalf("Error running dashboardController: %s", err.Error())
 	}
 }

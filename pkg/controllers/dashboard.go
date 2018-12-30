@@ -41,7 +41,7 @@ import (
 	"kubernetes-grafana-controller/pkg/grafana"
 )
 
-const controllerAgentName = "grafana-controller"
+const controllerAgentName = "grafana-dashboard-controller"
 
 const (
 	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
@@ -58,8 +58,8 @@ const (
 	MessageResourceSynced = "GrafanaDashboard synced successfully"
 )
 
-// Controller is the controller implementation for GrafanaDashboard resources
-type Controller struct {
+// DashboardController is the controller implementation for GrafanaDashboard resources
+type DashboardController struct {
 	grafanaclientset clientset.Interface
 
 	grafanaDashboardsLister listers.GrafanaDashboardLister
@@ -78,12 +78,12 @@ type Controller struct {
 	recorder record.EventRecorder
 }
 
-// NewController returns a new grafana dashboard controller
-func NewController(
+// NewDashboardController returns a new grafana dashboard controller
+func NewDashboardController(
 	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
-	grafanaDashboardInformer informers.GrafanaDashboardInformer) *Controller {
+	grafanaDashboardInformer informers.GrafanaDashboardInformer) *DashboardController {
 
 	// Create event broadcaster
 	// Add grafana-controller types to the default Kubernetes Scheme so Events can be
@@ -95,7 +95,7 @@ func NewController(
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
-	controller := &Controller{
+	controller := &DashboardController{
 		grafanaclientset:        grafanaclientset,
 		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
 		grafanaDashboardsSynced: grafanaDashboardInformer.Informer().HasSynced,
@@ -121,7 +121,7 @@ func NewController(
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
 // workers to finish processing their current work items.
-func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
+func (c *DashboardController) Run(threadiness int, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
 
@@ -150,14 +150,14 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 // runWorker is a long-running function that will continually call the
 // processNextWorkItem function in order to read and process a message on the
 // workqueue.
-func (c *Controller) runWorker() {
+func (c *DashboardController) runWorker() {
 	for c.processNextWorkItem() {
 	}
 }
 
 // processNextWorkItem will read a single work item off the workqueue and
 // attempt to process it, by calling the syncHandler.
-func (c *Controller) processNextWorkItem() bool {
+func (c *DashboardController) processNextWorkItem() bool {
 	obj, shutdown := c.workqueue.Get()
 
 	if shutdown {
@@ -210,7 +210,7 @@ func (c *Controller) processNextWorkItem() bool {
 // syncHandler compares the actual state with the desired, and attempts to
 // converge the two. It then updates the Status block of the GrafanaDashboard resource
 // with the current status of the resource.
-func (c *Controller) syncHandler(item WorkQueueItem) error {
+func (c *DashboardController) syncHandler(item WorkQueueItem) error {
 	// Convert the namespace/name string into a distinct namespace and name
 	namespace, name, err := cache.SplitMetaNamespaceKey(item.key)
 	if err != nil {
@@ -253,7 +253,7 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alpha1.GrafanaDashboard, uid string) error {
+func (c *DashboardController) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alpha1.GrafanaDashboard, uid string) error {
 
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
@@ -272,7 +272,7 @@ func (c *Controller) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alp
 // enqueueGrafanaDashboard takes a GrafanaDashboard resource and converts it into a namespace/name
 // string which is then put onto the work queue. This method should *not* be
 // passed resources of any type other than GrafanaDashboard.
-func (c *Controller) enqueueGrafanaDashboard(obj interface{}) {
+func (c *DashboardController) enqueueGrafanaDashboard(obj interface{}) {
 	var key string
 	var err error
 	var dashboard *v1alpha1.GrafanaDashboard

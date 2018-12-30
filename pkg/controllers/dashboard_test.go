@@ -88,7 +88,7 @@ func newGrafanaDashboard(name string, dashboardJson string) *grafanacontroller.G
 	}
 }
 
-func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
+func (f *fixture) newController() (*DashboardController, informers.SharedInformerFactory) {
 	f.client = fake.NewSimpleClientset(f.objects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
 	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com", FAKE_UID)
