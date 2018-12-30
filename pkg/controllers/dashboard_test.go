@@ -95,7 +95,7 @@ func (f *fixture) newController() (*DashboardController, informers.SharedInforme
 
 	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
 
-	c := NewController(f.client, f.kubeclient,
+	c := NewDashboardController(f.client, f.kubeclient,
 		f.grafanaClient, i.Grafana().V1alpha1().GrafanaDashboards())
 
 	c.grafanaDashboardsSynced = alwaysReady
