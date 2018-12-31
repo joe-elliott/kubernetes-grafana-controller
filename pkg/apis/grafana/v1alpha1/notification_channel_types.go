@@ -34,12 +34,12 @@ type GrafanaNotificationChannel struct {
 
 // GrafanaNotificationChannelSpec is the spec for a GrafanaNotificationChannel resource
 type GrafanaNotificationChannelSpec struct {
-	DashboardJSON string `json:"dashboardJson"`
+	NotificationChannelJSON string `json:"notificationChannelJson"`
 }
 
 // GrafanaNotificationChannelStatus is the status for a GrafanaNotificationChannel resource
 type GrafanaNotificationChannelStatus struct {
-	GrafanaUID string `json:"grafanaID"`
+	GrafanaID string `json:"grafanaID"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

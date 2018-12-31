@@ -115,7 +115,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	uid, err := s.grafanaClient.PostNotificationChannel(grafanaNotificationChannel.Spec.NotificationChannelJSON)
+	id, err := s.grafanaClient.PostNotificationChannel(grafanaNotificationChannel.Spec.NotificationChannelJSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
@@ -126,7 +126,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 
 	// Finally, we update the status block of the GrafanaDashboard resource to reflect the
 	// current state of the world
-	err = s.updateGrafanaNotificationChannelStatus(grafanaNotificationChannel, uid)
+	err = s.updateGrafanaNotificationChannelStatus(grafanaNotificationChannel, id)
 	if err != nil {
 		return err
 	}
@@ -135,13 +135,13 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.GrafanaNotificationChannel, uid string) error {
+func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.GrafanaNotificationChannel, id string) error {
 
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
 	grafanaNotificationChannelCopy := grafanaNotificationChannel.DeepCopy()
-	grafanaNotificationChannelCopy.Status.GrafanaUID = uid
+	grafanaNotificationChannelCopy.Status.GrafanaID = id
 	// If the CustomResourceSubresources feature gate is not enabled,
 	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDashboard resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
