@@ -88,7 +88,7 @@ func newGrafanaDashboard(name string, dashboardJson string) *grafanacontroller.G
 	}
 }
 
-func (f *fixture) newController() (*DashboardController, informers.SharedInformerFactory) {
+func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
 	f.client = fake.NewSimpleClientset(f.objects...)
 	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
 	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com", FAKE_UID)
@@ -98,8 +98,8 @@ func (f *fixture) newController() (*DashboardController, informers.SharedInforme
 	c := NewDashboardController(f.client, f.kubeclient,
 		f.grafanaClient, i.Grafana().V1alpha1().GrafanaDashboards())
 
-	c.grafanaDashboardsSynced = alwaysReady
-	c.recorder = &record.FakeRecorder{}
+	c.informerSynced = alwaysReady
+	c.syncer.(*DashboardSyncer).recorder = &record.FakeRecorder{}
 
 	for _, d := range f.grafanaDashboardLister {
 		i.Grafana().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(d)
@@ -124,7 +124,7 @@ func (f *fixture) runController(grafanaDashboardName string, startInformers bool
 		i.Start(stopCh)
 	}
 
-	err := c.syncHandler(NewWorkQueueItem(grafanaDashboardName, Dashboard, ""))
+	err := c.syncer.(*DashboardSyncer).syncHandler(NewWorkQueueItem(grafanaDashboardName, Dashboard, ""))
 	if !expectError && err != nil {
 		f.t.Errorf("error syncing dashboard: %v", err)
 	} else if expectError && err == nil {
