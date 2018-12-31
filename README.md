@@ -109,6 +109,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [ ] Add
     - [ ] Update
     - [ ] Delete
+  - Full refresh functionality in case the controller goes offline or someone mucks with state in Grafana
 - Refactoring/Cleanup
   - Add comments where go wants me to
   - The dashboard object is currently `grafanadashboard.grafana.k8s.io`.  This feels wrong.  Revisit object naming.  Should it be `dashboard.grafana.com`?  I should probably talk to the Grafana people before I do that.
