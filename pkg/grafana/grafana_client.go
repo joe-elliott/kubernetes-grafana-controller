@@ -3,6 +3,7 @@ package grafana
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/imroc/req"
 )
@@ -124,13 +125,15 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 		return "", errors.New("Response Body did not have id")
 	}
 
-	idString, ok := id.(string)
+	// this is really dumb, there has to be a better way to just get a string
+	idFloat, ok := id.(float64)
+	idInt := int(idFloat)
 
 	if !ok {
-		return "", fmt.Errorf("Unable to convert id %#v to string", id)
+		return "", fmt.Errorf("Unable to convert id %T %#v to int", id, id)
 	}
 
-	return idString, err
+	return strconv.Itoa(idInt), err
 }
 
 func (client *Client) DeleteNotificationChannel(id string) error {
