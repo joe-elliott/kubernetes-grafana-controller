@@ -82,6 +82,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - [ ] Controller tests
     - Define and build tests
   - [ ] Integration Tests
+    - Inspect events and pods logs as part of testing
     - Reduce dependencies by running bats in container
     - Dashboards
       - [x] Add
