@@ -39,16 +39,6 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const controllerAgentName = "grafana-notificationchannel-controller"
-
-const (
-	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
-	SuccessSynced = "Synced"
-	// MessageResourceSynced is the message used for an Event fired when a GrafanaDashboard
-	// is synced successfully
-	MessageResourceSynced = "GrafanaDashboard synced successfully"
-)
-
 // NotificationChannelSyncer is the controller implementation for GrafanaNotificationChannel resources
 type NotificationChannelSyncer struct {
 	grafanaNotificationChannelLister listers.GrafanaNotificationChannelLister
@@ -64,6 +54,8 @@ func NewNotificationChannelController(
 	grafanaClient grafana.Interface,
 	grafanaNotificationChannelInformer informers.GrafanaNotificationChannelInformer) *Controller {
 
+	controllerAgentName := "grafana-notificationchannel-controller"
+
 	// Create event broadcaster
 	// Add grafana-controller types to the default Kubernetes Scheme so Events can be
 	// logged for grafana-controller types.
@@ -74,7 +66,7 @@ func NewNotificationChannelController(
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
-	syncer := &DashboardSyncer{
+	syncer := &NotificationChannelSyncer{
 		grafanaNotificationChannelLister: grafanaNotificationChannelInformer.Lister(),
 		grafanaClient:                    grafanaClient,
 		grafanaclientset:                 grafanaclientset,
@@ -167,7 +159,7 @@ func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQu
 		return nil
 	}
 
-	item := NewWorkQueueItem(key, NotificationChannel, grafanaNotificationChannel.Status.GrafanaUID) // todo: confirm this doesnt need null checking
+	item := NewWorkQueueItem(key, NotificationChannel, grafanaNotificationChannel.Status.GrafanaID) // todo: confirm this doesnt need null checking
 
 	return &item
 }

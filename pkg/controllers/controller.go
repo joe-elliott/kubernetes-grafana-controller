@@ -12,6 +12,14 @@ import (
 	"k8s.io/klog"
 )
 
+const (
+	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
+	SuccessSynced = "Synced"
+	// MessageResourceSynced is the message used for an Event fired when a GrafanaDashboard
+	// is synced successfully
+	MessageResourceSynced = "Grafana Object synced successfully"
+)
+
 type Controller struct {
 	syncer         Syncer
 	informerSynced cache.InformerSynced

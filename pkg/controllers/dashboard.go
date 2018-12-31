@@ -39,16 +39,6 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-const controllerAgentName = "grafana-dashboard-controller"
-
-const (
-	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
-	SuccessSynced = "Synced"
-	// MessageResourceSynced is the message used for an Event fired when a GrafanaDashboard
-	// is synced successfully
-	MessageResourceSynced = "GrafanaDashboard synced successfully"
-)
-
 // DashboardSyncer is the controller implementation for GrafanaDashboard resources
 type DashboardSyncer struct {
 	grafanaDashboardsLister listers.GrafanaDashboardLister
@@ -63,6 +53,8 @@ func NewDashboardController(
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
 	grafanaDashboardInformer informers.GrafanaDashboardInformer) *Controller {
+
+	controllerAgentName := "grafana-dashboard-controller"
 
 	// Create event broadcaster
 	// Add grafana-controller types to the default Kubernetes Scheme so Events can be
