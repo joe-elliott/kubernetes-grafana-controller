@@ -3,7 +3,8 @@ package controllers
 type GrafanaObject int
 
 const (
-	Dashboard = 0
+	Dashboard           = 0
+	NotificationChannel = 1
 )
 
 type WorkQueueItem struct {
