@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"sync"
 	"time"
 
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
@@ -56,12 +57,29 @@ func main() {
 
 	dashboardController := controllers.NewDashboardController(client, kubeClient, grafanaClient,
 		informerFactory.Grafana().V1alpha1().GrafanaDashboards())
+	notificationChannelController := controllers.NewNotificationChannelController(client, kubeClient, grafanaClient,
+		informerFactory.Grafana().V1alpha1().GrafanaNotificationChannels())
 
 	stopCh := signals.SetupSignalHandler()
 
 	informerFactory.Start(stopCh)
 
-	if err = dashboardController.Run(2, stopCh); err != nil {
-		klog.Fatalf("Error running dashboardController: %s", err.Error())
-	}
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		if err = dashboardController.Run(2, stopCh); err != nil {
+			klog.Fatalf("Error running dashboardController: %s", err.Error())
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err = notificationChannelController.Run(2, stopCh); err != nil {
+			klog.Fatalf("Error running notificationChannelController: %s", err.Error())
+		}
+	}()
+
+	wg.Wait()
 }

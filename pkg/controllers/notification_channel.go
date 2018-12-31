@@ -47,7 +47,7 @@ type NotificationChannelSyncer struct {
 	recorder                         record.EventRecorder
 }
 
-// NewNotificationChannelController returns a new grafana dashboard controller
+// NewNotificationChannelController returns a new grafana channel controller
 func NewNotificationChannelController(
 	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
@@ -82,7 +82,7 @@ func NewNotificationChannelController(
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the GrafanaDashboard resource
+// converge the two. It then updates the Status block of the GrafanaNotificationChannel resource
 // with the current status of the resource.
 func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 	// Convert the namespace/name string into a distinct namespace and name
@@ -92,15 +92,15 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
-	// Get the GrafanaDashboard resource with this namespace/name
+	// Get the GrafanaNotificationChannel resource with this namespace/name
 	grafanaNotificationChannel, err := s.grafanaNotificationChannelLister.GrafanaNotificationChannels(namespace).Get(name)
 	if err != nil {
-		// The GrafanaDashboard resource may no longer exist, in which case we stop
+		// The GrafanaNotificationChannel resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaNotificationChannel '%s' in work queue no longer exists", item.key))
 
-			// dashboard was deleted, so delete from grafana
+			// channel was deleted, so delete from grafana
 			return s.grafanaClient.DeleteNotificationChannel(item.uuid)
 		}
 
@@ -116,7 +116,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	// Finally, we update the status block of the GrafanaDashboard resource to reflect the
+	// Finally, we update the status block of the GrafanaNotificationChannel resource to reflect the
 	// current state of the world
 	err = s.updateGrafanaNotificationChannelStatus(grafanaNotificationChannel, id)
 	if err != nil {
@@ -134,8 +134,8 @@ func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafa
 	// Or create a copy manually for better performance
 	grafanaNotificationChannelCopy := grafanaNotificationChannel.DeepCopy()
 	grafanaNotificationChannelCopy.Status.GrafanaID = id
-	// If the CustomResourceSubresources feature gate is not enabled,
-	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDashboard resource.
+	// If the CustomResou	rceSubresources feature gate is not enabled,
+	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaNotificationChannel resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 

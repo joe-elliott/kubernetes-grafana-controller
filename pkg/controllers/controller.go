@@ -75,6 +75,7 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	}
 
 	klog.Info("Started workers")
+
 	<-stopCh
 	klog.Info("Shutting down workers")
 
