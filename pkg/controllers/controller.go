@@ -139,6 +139,6 @@ func (c *Controller) enqueueWorkQueueItem(obj interface{}) {
 	item := c.syncer.createWorkQueueItem(obj)
 
 	if item != nil {
-		c.workqueue.AddRateLimited(item)
+		c.workqueue.AddRateLimited(*item)
 	}
 }
