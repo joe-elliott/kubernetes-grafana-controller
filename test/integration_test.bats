@@ -83,3 +83,18 @@ teardown(){
     done
 }
 
+#
+# notification channels
+#
+@test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
+    count=0
+
+    for filename in dashboards/*.yaml; do
+        channelId=$(validatePostNotificationChannel $filename)
+
+        echo "Test Creating $filename ($channelId)"
+
+        (( count++ ))
+        validateChannelCount $count
+    done
+}

@@ -110,3 +110,45 @@ validateDashboardContents() {
     rm a.json
     rm b.json
 }
+
+#
+# notification channel
+#
+#
+
+# validatePostNotificationChannel <yaml file name>
+#   note that the channel file name must match the GrafanaNotificationChannel object name ...
+#    ... b/c i'm lazy
+#
+validatePostNotificationChannel() {
+    specfile=$1
+
+    channelName="${specfile##*/}"
+    channelName="${channelName%.*}"
+
+    # create in kubernetes
+    kubectl apply -f $specfile >&2
+
+	sleep 5s
+
+    channelId=$(kubectl get GrafanaNotificationChannel -o=jsonpath="{.items[?(@.metadata.name==\"${channelName}\")].status.grafanaID}")
+
+    # check if exists in grafana
+	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+    [ "$httpStatus" -eq "200" ]
+
+    echo $channelId
+}
+
+
+#
+# validateDashboardCount <count>
+#   use grafana search api to confirm that the count is what is expected 
+#
+validateNotificationChannelCount() {
+    channelJson=$(curl --silent ${GRAFANA_URL}/api/alert-notifications)
+
+    count=$(echo $channelJson | jq length)
+
+    [ "$count" -eq "$1" ]
+}
