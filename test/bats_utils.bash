@@ -186,3 +186,14 @@ validateNotificationChannelContents() {
     rm a.json
     rm b.json
 }
+
+#
+# utils
+#
+dumpState() {
+    kubectl logs $(kubectl get po -l=run=kubernetes-grafana-test --no-headers=true | cut -d ' ' -f 1)
+    kubectl logs $(kubectl get po -l=app=grafana --no-headers=true| cut -d ' ' -f 1)
+
+    kubectl describe GrafanaDashboard
+    kubectl describe GrafanaNotificationChannel
+}

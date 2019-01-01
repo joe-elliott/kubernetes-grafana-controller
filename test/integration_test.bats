@@ -46,6 +46,7 @@ teardown(){
         sleep 5s
 
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
         [ "$httpStatus" -eq "404" ]
 
         validateDashboardCount 0
@@ -110,6 +111,11 @@ teardown(){
         sleep 5s
 
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+
+        if [ "$httpStatus" -ne "404" ]; then
+            dumpState
+        fi
+
         [ "$httpStatus" -eq "404" ]
 
         validateNotificationChannelCount 0
@@ -130,14 +136,14 @@ teardown(){
 @test "updating a GrafanaNotificationChannel object updates the channel in Grafana" {
     count=0
     
-    for filename in dashboards/*.yaml; do
+    for filename in notification_channels/*.yaml; do
         validateNotificationChannelContents $filename
 
         (( count++ ))
         validateNotificationChannelCount $count
     done
 
-    for filename in dashboards/*.update; do
+    for filename in notification_channels/*.update; do
         validateNotificationChannelContents $filename
 
         validateNotificationChannelCount $count
