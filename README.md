@@ -101,13 +101,19 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [x] Update
     - [x] Delete
   - Notification channels
-    - [ ] Add
-    - [ ] Update
-    - [ ] Delete
+    - [x] Add
+    - [x] Update
+    - [x] Delete
+      - Currently using name as the primary key/id for the notification channel.  Determine/document appropriate behavior when multiple channels have the same names.
   - Datasources
     - [ ] Add
     - [ ] Update
     - [ ] Delete
-- Refactoring/Cleanup
+- Refactoring/Cleanup/Additional
   - Add comments where go wants me to
-  - The dashboard object is currently `grafanadashboard.grafana.k8s.io`.  This feels wrong.  Revisit object naming.  Should it be `dashboard.grafana.com`?  I should probably talk to the Grafana people before I do that.
+  - The dashboard object is currently `grafanadashboard.grafana.k8s.io`.  This feels wrong.  Revisit object naming.  Should it be `dashboard.grafana.com`, `dashboard.kubernetes-grafana-controller`?
+  - Drop "Grafana" on all objects
+  - Change "Notification Channels" to "Alert Notifications"
+  - Add prometheus metrics
+  - Determine/document the behavior of a dashboard with a uid vs one without.  Confirm sanity.
+  - Pass ID from status into Grafana client when making calls?
