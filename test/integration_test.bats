@@ -101,7 +101,7 @@ teardown(){
 @test "deleting a GrafanaNotificationChannel object deletes the Grafana Notification Channel" {
 
     for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostDashboard $filename)
+        channelId=$(validatePostNotificationChannel $filename)
 
         echo "Test Deleting $filename ($channelId)"
 
