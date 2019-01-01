@@ -14,9 +14,8 @@ teardown(){
 
     run kubectl delete --ignore-not-found=true -f grafana.yaml
 
-    for filename in dashboards/*; do
-        run kubectl delete --ignore-not-found=true -f $filename
-    done
+    kubectl delete GrafanaDashboard --ignore-not-found=true --all
+    kubectl delete GrafanaNotificationChannel --ignore-not-found=true --all
 }
 
 #
