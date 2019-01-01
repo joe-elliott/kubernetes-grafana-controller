@@ -142,7 +142,7 @@ validatePostNotificationChannel() {
 
 
 #
-# validateDashboardCount <count>
+# validateNotificationChannelCount <count>
 #   use grafana search api to confirm that the count is what is expected 
 #
 validateNotificationChannelCount() {
@@ -151,4 +151,38 @@ validateNotificationChannelCount() {
     count=$(echo $channelJson | jq length)
 
     [ "$count" -eq "$1" ]
+}
+
+#
+# validateNotificationChannelContents <yaml file name>
+#   creates a Notification Channel and both verifies it exists and that its content matches
+#
+validateNotificationChannelContents() {
+    filename=$1
+
+    channelId=$(validatePostNotificationChannel $filename)
+
+    echo "Test Json Content of $filename ($channelId)"
+
+    channelJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${channelId})
+
+    echo $channelJsonFromGrafana | jq 'del(.id)' > a.json
+
+    channelJsonFromYaml=$(grep -A9999 'notificationChannelJson' $filename)
+    channelJsonFromYaml=${channelJsonFromYaml%?}   # strip final quote
+    channelJsonFromYaml=${channelJsonFromYaml#*\'} # strip up to and including the first quote
+
+    echo $channelJsonFromYaml | jq 'del(.id)' > b.json
+
+    equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
+
+    if [ "$equal" != "true" ]; then
+        run diff <(jq -S . a.json) <(jq -S . b.json)
+        echo $output
+    fi
+
+    [ "$equal" = "true" ]
+
+    rm a.json
+    rm b.json
 }

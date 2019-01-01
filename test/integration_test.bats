@@ -88,12 +88,58 @@ teardown(){
 @test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
     count=0
 
-    for filename in dashboards/*.yaml; do
+    for filename in notification_channels/*.yaml; do
         channelId=$(validatePostNotificationChannel $filename)
 
         echo "Test Creating $filename ($channelId)"
 
         (( count++ ))
-        validateChannelCount $count
+        validateNotificationChannelCount $count
+    done
+}
+
+@test "deleting a GrafanaNotificationChannel object deletes the Grafana Notification Channel" {
+
+    for filename in notification_channels/*.yaml; do
+        channelId=$(validatePostDashboard $filename)
+
+        echo "Test Deleting $filename ($channelId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+        [ "$httpStatus" -eq "404" ]
+
+        validateNotificationChannelCount 0
+    done
+}
+
+@test "creating a GrafanaNotificationChannel object creates the same channel in Grafana" {
+    count=0
+
+    for filename in notification_channels/*.yaml; do
+        validateNotificationChannelContents $filename
+
+        (( count++ ))
+        validateNotificationChannelCount $count
+    done
+}
+
+@test "updating a GrafanaNotificationChannel object updates the channel in Grafana" {
+    count=0
+    
+    for filename in dashboards/*.yaml; do
+        validateNotificationChannelContents $filename
+
+        (( count++ ))
+        validateNotificationChannelCount $count
+    done
+
+    for filename in dashboards/*.update; do
+        validateNotificationChannelContents $filename
+
+        validateNotificationChannelCount $count
     done
 }
