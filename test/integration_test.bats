@@ -3,13 +3,15 @@
 load bats_utils
 
 setup(){
-    run kubectl delete po -l run=kubernetes-grafana-test
+    run kubectl scale --replicas=1 deployment/kubernetes-grafana-test
     kubectl apply -f grafana.yaml
 
     validateGrafanaUrl
 }
 
 teardown(){
+    run kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
     run kubectl delete --ignore-not-found=true -f grafana.yaml
 
     for filename in dashboards/*; do
@@ -17,6 +19,9 @@ teardown(){
     done
 }
 
+#
+# dashboards
+#
 @test "creating a GrafanaDashboard object creates a Grafana Dashboard" {
     count=0
 
@@ -77,3 +82,4 @@ teardown(){
         validateDashboardCount $count
     done
 }
+
