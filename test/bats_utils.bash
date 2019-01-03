@@ -170,13 +170,15 @@ validateNotificationChannelContents() {
 
     channelJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${channelId})
 
-    echo $channelJsonFromGrafana | jq 'del(.id)' > a.json
+    # grafana adds a lot of fields.  blindly stripping them off here.
+    #   todo:  find a way to dynamically compare only the fields in json from the yaml spec file
+    echo $channelJsonFromGrafana | jq 'del(.id) | del(.disableResolveMessage) | del(.created) | del(.frequency) | del(.updated)' > a.json
 
     channelJsonFromYaml=$(grep -A9999 'notificationChannelJson' $filename)
     channelJsonFromYaml=${channelJsonFromYaml%?}   # strip final quote
     channelJsonFromYaml=${channelJsonFromYaml#*\'} # strip up to and including the first quote
 
-    echo $channelJsonFromYaml | jq 'del(.id)' > b.json
+    echo $channelJsonFromYaml > b.json
 
     equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
