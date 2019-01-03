@@ -7,7 +7,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceRoot}",
-            "args": ["-kubeconfig","/Users/jelliott/.kube/config","-grafana","http://192.168.99.104:30613"]
+            "args": ["-kubeconfig","/Users/jelliott/.kube/config","-grafana","http://192.168.99.106:31294"]
         }
     ]
 }

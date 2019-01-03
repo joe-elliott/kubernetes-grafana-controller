@@ -97,18 +97,6 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 
 		// grafana requires an ID on put
 		postChannel.ID = matchingChannel.ID
-
-		// merge any unspecified field from grafana into the input json
-		if postChannel.Frequency == nil {
-			postChannel.Frequency = matchingChannel.Frequency
-		}
-		if postChannel.IsDefault == nil {
-			postChannel.IsDefault = matchingChannel.IsDefault
-		}
-		if postChannel.SendReminder == nil {
-			postChannel.SendReminder = matchingChannel.SendReminder
-		}
-
 		postJSON, err := json.Marshal(postChannel)
 
 		if err != nil {

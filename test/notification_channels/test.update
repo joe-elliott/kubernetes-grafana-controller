@@ -8,6 +8,7 @@ spec:
   "type":  "email",
   "isDefault": false,
   "sendReminder": true,
+  "frequency": "1m",
   "settings": {
     "addresses": "blerg@grafana.com"
   }
