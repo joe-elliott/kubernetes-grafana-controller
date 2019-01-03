@@ -23,6 +23,8 @@ setupIntegrationTests() {
     kubectl run $IMAGE_NAME --image=$IMAGE_NAME --image-pull-policy=Never
 
     kubectl create -f crd.yaml
+
+    kubectl apply -f grafana.yaml
 }
 
 teardownIntegrationTests() {
@@ -32,7 +34,7 @@ teardownIntegrationTests() {
 
 validateGrafanaUrl() {
     # get grafana url
-    GRAFANA_URL=$(minikube service grafana --url)
+    GRAFANA_URL=$(minikube service grafana --url --interval=1)
 
     echo "grafana url: " $GRAFANA_URL
     httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL})

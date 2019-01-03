@@ -4,15 +4,14 @@ load bats_utils
 
 setup(){
     run kubectl scale --replicas=1 deployment/kubernetes-grafana-test
-    kubectl apply -f grafana.yaml
+    run kubectl scale --replicas=1 deployment/grafana
 
     validateGrafanaUrl
 }
 
 teardown(){
     run kubectl scale --replicas=0 deployment/kubernetes-grafana-test
-
-    run kubectl delete --ignore-not-found=true -f grafana.yaml
+    run kubectl scale --replicas=0 deployment/grafana
 
     kubectl delete GrafanaDashboard --ignore-not-found=true --all
     kubectl delete GrafanaNotificationChannel --ignore-not-found=true --all
@@ -39,7 +38,6 @@ teardown(){
 }
 
 @test "deleting a GrafanaDashboard object deletes the Grafana Dashboard" {
-
     for filename in dashboards/*.yaml; do
         dashboardId=$(validatePostDashboard $filename)
 
@@ -90,6 +88,17 @@ teardown(){
 #
 # notification channels
 #
+@test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
+    for filename in notification_channels/*.yaml; do
+        channelId=$(validatePostNotificationChannel $filename)
+
+        echo "Test Creating $filename ($channelId)"
+
+        (( count++ ))
+        validateNotificationChannelCount $count
+    done
+}
+
 @test "deleting a GrafanaNotificationChannel object deletes the Grafana Notification Channel" {
 
     for filename in notification_channels/*.yaml; do
@@ -103,23 +112,11 @@ teardown(){
 
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
 
+        echo $httpStatus
         # for some reason grafana 500s when you GET a non-existent alert-notifications?
         [ "$httpStatus" -eq "500" ]
 
         validateNotificationChannelCount 0
-    done
-}
-
-@test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
-    count=0
-
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
-
-        echo "Test Creating $filename ($channelId)"
-
-        (( count++ ))
-        validateNotificationChannelCount $count
     done
 }
 
