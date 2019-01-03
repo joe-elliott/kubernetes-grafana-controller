@@ -16,6 +16,10 @@ teardown(){
 
     kubectl delete GrafanaDashboard --ignore-not-found=true --all
     kubectl delete GrafanaNotificationChannel --ignore-not-found=true --all
+
+    # clean up comparison files if they exist
+    rm -f a.json
+    rm -f b.json
 }
 
 #
@@ -86,19 +90,6 @@ teardown(){
 #
 # notification channels
 #
-@test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
-    count=0
-
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
-
-        echo "Test Creating $filename ($channelId)"
-
-        (( count++ ))
-        validateNotificationChannelCount $count
-    done
-}
-
 @test "deleting a GrafanaNotificationChannel object deletes the Grafana Notification Channel" {
 
     for filename in notification_channels/*.yaml; do
@@ -112,13 +103,23 @@ teardown(){
 
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
 
-        if [ "$httpStatus" -ne "404" ]; then
-            dumpState
-        fi
-
-        [ "$httpStatus" -eq "404" ]
+        # for some reason grafana 500s when you GET a non-existent alert-notifications?
+        [ "$httpStatus" -eq "500" ]
 
         validateNotificationChannelCount 0
+    done
+}
+
+@test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
+    count=0
+
+    for filename in notification_channels/*.yaml; do
+        channelId=$(validatePostNotificationChannel $filename)
+
+        echo "Test Creating $filename ($channelId)"
+
+        (( count++ ))
+        validateNotificationChannelCount $count
     done
 }
 

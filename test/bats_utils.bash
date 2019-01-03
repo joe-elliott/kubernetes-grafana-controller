@@ -133,6 +133,8 @@ validatePostNotificationChannel() {
 
     channelId=$(kubectl get GrafanaNotificationChannel -o=jsonpath="{.items[?(@.metadata.name==\"${channelName}\")].status.grafanaID}")
 
+    [ "$channelId" != "" ]
+
     # check if exists in grafana
 	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
     [ "$httpStatus" -eq "200" ]
