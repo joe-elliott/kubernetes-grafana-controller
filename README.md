@@ -117,3 +117,4 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - Add prometheus metrics
   - Determine/document the behavior of a dashboard with a uid vs one without.  Confirm sanity.
   - Pass ID from status into Grafana client when making calls?
+  - Fix API objects naming to be less verbose and redundant
