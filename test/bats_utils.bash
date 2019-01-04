@@ -139,20 +139,22 @@ validateNotificationChannelContents() {
 
     echo "Test Json Content of $filename ($channelId)"
 
-    channelJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${channelId})
-
-    # grafana adds a lot of fields.  blindly stripping them off here.
-    #   todo:  find a way to dynamically compare only the fields in json from the yaml spec file
-    echo $channelJsonFromGrafana | jq 'del(.id) | del(.disableResolveMessage) | del(.created) | del(.frequency) | del(.updated)' > a.json
-
     channelJsonFromYaml=$(grep -A9999 'notificationChannelJson' $filename)
     channelJsonFromYaml=${channelJsonFromYaml%?}   # strip final quote
     channelJsonFromYaml=${channelJsonFromYaml#*\'} # strip up to and including the first quote
 
     echo $channelJsonFromYaml > b.json
+    fieldsToKeep=$(cat b.json | jq keys)
+
+    channelJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${channelId})
+
+    # grafana can add fields to flesh out the object.  remove anything from grafana not present in the original
+    #  spec file
+    echo $channelJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
 
     equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
+    # dunk some debug output to stdout if this is about to fail
     if [ "$equal" != "true" ]; then
         run diff <(jq -S . a.json) <(jq -S . b.json)
         echo $output
