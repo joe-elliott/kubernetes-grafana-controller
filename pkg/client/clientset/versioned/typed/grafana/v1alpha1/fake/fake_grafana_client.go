@@ -33,6 +33,10 @@ func (c *FakeGrafanaV1alpha1) GrafanaDashboards(namespace string) v1alpha1.Grafa
 	return &FakeGrafanaDashboards{c, namespace}
 }
 
+func (c *FakeGrafanaV1alpha1) GrafanaNotificationChannels(namespace string) v1alpha1.GrafanaNotificationChannelInterface {
+	return &FakeGrafanaNotificationChannels{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeGrafanaV1alpha1) RESTClient() rest.Interface {

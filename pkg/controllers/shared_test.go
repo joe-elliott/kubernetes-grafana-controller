@@ -1,39 +1,21 @@
-/*
-Copyright 2017 The Kubernetes Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package controllers
 
 import (
-	"reflect"
-	"testing"
-	"time"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/diff"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
-	core "k8s.io/client-go/testing"
-	"k8s.io/client-go/tools/cache"
-	"k8s.io/client-go/tools/record"
-
 	grafanacontroller "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
 	grafana "kubernetes-grafana-controller/pkg/grafana/fake"
+	"reflect"
+	"testing"
+	"time"
+
+	k8sfake "k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/tools/cache"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/diff"
+	core "k8s.io/client-go/testing"
 )
 
 var (
@@ -45,6 +27,8 @@ const (
 	FAKE_UID = "fakeUID"
 )
 
+type controllerFactory func(*fixture) (*Controller, informers.SharedInformerFactory)
+
 type fixture struct {
 	t *testing.T
 
@@ -54,6 +38,7 @@ type fixture struct {
 
 	// Objects to put in the store.
 	grafanaDashboardLister []*grafanacontroller.GrafanaDashboard
+	grafanaChannelLister   []*grafanacontroller.GrafanaNotificationChannel
 
 	// Actions expected to happen on the client.
 	kubeactions       []core.Action
@@ -75,56 +60,15 @@ func newFixture(t *testing.T) *fixture {
 	return f
 }
 
-func newGrafanaDashboard(name string, dashboardJson string) *grafanacontroller.GrafanaDashboard {
-	return &grafanacontroller.GrafanaDashboard{
-		TypeMeta: metav1.TypeMeta{APIVersion: grafanacontroller.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: metav1.NamespaceDefault,
-		},
-		Spec: grafanacontroller.GrafanaDashboardSpec{
-			DashboardJSON: dashboardJson,
-		},
-	}
-}
-
-func (f *fixture) newController() (*Controller, informers.SharedInformerFactory) {
-	f.client = fake.NewSimpleClientset(f.objects...)
-	f.kubeclient = k8sfake.NewSimpleClientset(f.kubeobjects...)
-	f.grafanaClient = grafana.NewGrafanaClientFake("https://example.com", FAKE_UID)
-
-	i := informers.NewSharedInformerFactory(f.client, noResyncPeriodFunc())
-
-	c := NewController(f.client, f.kubeclient,
-		f.grafanaClient, i.Grafana().V1alpha1().GrafanaDashboards())
-
-	c.grafanaDashboardsSynced = alwaysReady
-	c.recorder = &record.FakeRecorder{}
-
-	for _, d := range f.grafanaDashboardLister {
-		i.Grafana().V1alpha1().GrafanaDashboards().Informer().GetIndexer().Add(d)
-	}
-
-	return c, i
-}
-
-func (f *fixture) run(grafanaDashboardName string) {
-	f.runController(grafanaDashboardName, true, false)
-}
-
-func (f *fixture) runExpectError(grafanaDashboardName string) {
-	f.runController(grafanaDashboardName, true, true)
-}
-
-func (f *fixture) runController(grafanaDashboardName string, startInformers bool, expectError bool) {
-	c, i := f.newController()
+func (f *fixture) runController(newController controllerFactory, item WorkQueueItem, startInformers bool, expectError bool) {
+	c, i := newController(f)
 	if startInformers {
 		stopCh := make(chan struct{})
 		defer close(stopCh)
 		i.Start(stopCh)
 	}
 
-	err := c.syncHandler(NewWorkQueueItem(grafanaDashboardName, Dashboard, ""))
+	err := c.syncer.syncHandler(item)
 	if !expectError && err != nil {
 		f.t.Errorf("error syncing dashboard: %v", err)
 	} else if expectError && err == nil {
@@ -165,7 +109,7 @@ func (f *fixture) runController(grafanaDashboardName string, startInformers bool
 	if f.grafanaPostedJson != nil &&
 		*f.grafanaPostedJson != *f.grafanaClient.PostedJson {
 
-		f.t.Errorf("Expected posted dashboard json %s but found %s", *f.grafanaPostedJson, *f.grafanaClient.PostedJson)
+		f.t.Errorf("Expected grafana posted json %s but found %s", *f.grafanaPostedJson, *f.grafanaClient.PostedJson)
 	}
 }
 
@@ -217,52 +161,39 @@ func checkAction(expected, actual core.Action, t *testing.T) {
 // Since list and watch don't change resource state we can filter it to lower
 // noise level in our tests.
 func filterInformerActions(actions []core.Action) []core.Action {
+
 	ret := []core.Action{}
 	for _, action := range actions {
+
 		if len(action.GetNamespace()) == 0 &&
 			(action.Matches("list", "grafanadashboards") ||
-				action.Matches("watch", "grafanadashboards")) {
+				action.Matches("watch", "grafanadashboards") ||
+				action.Matches("list", "grafananotificationchannels") ||
+				action.Matches("watch", "grafananotificationchannels")) {
 			continue
 		}
 		ret = append(ret, action)
 	}
 
-	return ret
+	return actions
 }
 
-func (f *fixture) expectUpdateGrafanaUid(grafanaDashboard *grafanacontroller.GrafanaDashboard) {
-	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: "grafanadashboards"}, grafanaDashboard.Namespace, grafanaDashboard)
+func (f *fixture) expectUpdateGrafanaObject(obj runtime.Object, namespace string, resource string) {
+	action := core.NewUpdateAction(schema.GroupVersionResource{Resource: resource}, namespace, obj)
 	// TODO: Until #38113 is merged, we can't use Subresource
 	//action.Subresource = "status"
 	f.actions = append(f.actions, action)
 }
 
-func (f *fixture) expectGrafanaDashboardPost(dashboardJson string) {
-	f.grafanaPostedJson = &dashboardJson
+func (f *fixture) expectGrafanaPost(json string) {
+	f.grafanaPostedJson = &json
 }
 
-func getKey(grafanaDashboard *grafanacontroller.GrafanaDashboard, t *testing.T) string {
-	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(grafanaDashboard)
+func getKey(obj interface{}, t *testing.T) string {
+	key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 	if err != nil {
-		t.Errorf("Unexpected error getting key for dashboard %v: %v", grafanaDashboard.Name, err)
+		t.Errorf("Unexpected error getting key for object %v: %v", obj, err)
 		return ""
 	}
 	return key
-}
-
-func TestCreatesGrafanaDashboard(t *testing.T) {
-
-	f := newFixture(t)
-	dashboardJson := "{ 'test': 'test' }"
-
-	dashboard := newGrafanaDashboard("test", dashboardJson)
-
-	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
-	f.objects = append(f.objects, dashboard)
-
-	dashboard.Status.GrafanaUID = FAKE_UID
-	f.expectUpdateGrafanaUid(dashboard)
-	f.expectGrafanaDashboardPost(dashboardJson)
-
-	f.run(getKey(dashboard, t))
 }

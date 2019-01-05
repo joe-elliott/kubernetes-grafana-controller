@@ -1,0 +1,15 @@
+apiVersion: grafana.k8s.io/v1alpha1
+kind: GrafanaNotificationChannel
+metadata:
+  name: test
+spec:
+  notificationChannelJson: '{
+  "name": "new alert notification",
+  "type":  "email",
+  "isDefault": false,
+  "sendReminder": true,
+  "frequency": "1m",
+  "settings": {
+    "addresses": "blerg@grafana.com"
+  }
+}'
