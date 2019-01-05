@@ -68,7 +68,7 @@ func (f *fixture) runController(newController controllerFactory, item WorkQueueI
 		i.Start(stopCh)
 	}
 
-	err := c.syncer.(*DashboardSyncer).syncHandler(item)
+	err := c.syncer.syncHandler(item)
 	if !expectError && err != nil {
 		f.t.Errorf("error syncing dashboard: %v", err)
 	} else if expectError && err == nil {
@@ -161,17 +161,21 @@ func checkAction(expected, actual core.Action, t *testing.T) {
 // Since list and watch don't change resource state we can filter it to lower
 // noise level in our tests.
 func filterInformerActions(actions []core.Action) []core.Action {
+
 	ret := []core.Action{}
 	for _, action := range actions {
+
 		if len(action.GetNamespace()) == 0 &&
 			(action.Matches("list", "grafanadashboards") ||
-				action.Matches("watch", "grafanadashboards")) {
+				action.Matches("watch", "grafanadashboards") ||
+				action.Matches("list", "grafananotificationchannels") ||
+				action.Matches("watch", "grafananotificationchannels")) {
 			continue
 		}
 		ret = append(ret, action)
 	}
 
-	return ret
+	return actions
 }
 
 func (f *fixture) expectUpdateGrafanaObject(obj runtime.Object, namespace string, resource string) {
