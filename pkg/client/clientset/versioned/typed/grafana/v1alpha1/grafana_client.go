@@ -29,6 +29,7 @@ import (
 type GrafanaV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	GrafanaDashboardsGetter
+	GrafanaDataSourcesGetter
 	GrafanaNotificationChannelsGetter
 }
 
@@ -39,6 +40,10 @@ type GrafanaV1alpha1Client struct {
 
 func (c *GrafanaV1alpha1Client) GrafanaDashboards(namespace string) GrafanaDashboardInterface {
 	return newGrafanaDashboards(c, namespace)
+}
+
+func (c *GrafanaV1alpha1Client) GrafanaDataSources(namespace string) GrafanaDataSourceInterface {
+	return newGrafanaDataSources(c, namespace)
 }
 
 func (c *GrafanaV1alpha1Client) GrafanaNotificationChannels(namespace string) GrafanaNotificationChannelInterface {

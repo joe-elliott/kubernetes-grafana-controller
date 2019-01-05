@@ -33,6 +33,10 @@ func (c *FakeGrafanaV1alpha1) GrafanaDashboards(namespace string) v1alpha1.Grafa
 	return &FakeGrafanaDashboards{c, namespace}
 }
 
+func (c *FakeGrafanaV1alpha1) GrafanaDataSources(namespace string) v1alpha1.GrafanaDataSourceInterface {
+	return &FakeGrafanaDataSources{c, namespace}
+}
+
 func (c *FakeGrafanaV1alpha1) GrafanaNotificationChannels(namespace string) v1alpha1.GrafanaNotificationChannelInterface {
 	return &FakeGrafanaNotificationChannels{c, namespace}
 }
