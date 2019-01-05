@@ -82,6 +82,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - [ ] Controller tests
     - Define and build tests
   - [ ] Integration Tests
+    - Inspect events and pods logs as part of testing
     - Reduce dependencies by running bats in container
     - Dashboards
       - [x] Add
@@ -110,6 +111,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [ ] Update
     - [ ] Delete
 - Refactoring/Cleanup/Additional
+  - Full refresh functionality in case the controller goes offline or someone mucks with state in Grafana
   - Add comments where go wants me to
   - The dashboard object is currently `grafanadashboard.grafana.k8s.io`.  This feels wrong.  Revisit object naming.  Should it be `dashboard.grafana.com`, `dashboard.kubernetes-grafana-controller`?
   - Drop "Grafana" on all objects
