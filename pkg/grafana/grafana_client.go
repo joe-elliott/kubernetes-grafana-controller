@@ -125,10 +125,10 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 
 func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
 
-	// Grafana throws a 500 if you post 2 data sources with the same name
-	//  search for a matching data source and put these changes to it
+	// Grafana throws a 500 if you post 2 datasources with the same name
+	//  search for a matching datasources and put these changes to it
 
-	var postDataSource DataSource
+	var postDataSource map[string]interface{}
 	err := json.Unmarshal([]byte(dataSourceJson), &postDataSource)
 
 	if err != nil {
@@ -138,39 +138,38 @@ func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
 	// Request existing notification channels
 	resp, err := req.Get(client.address + "/api/datasources")
 
-	var responseBody []DataSource
-
+	var responseBody []map[string]interface{}
 	err = resp.ToJSON(&responseBody)
 
 	if err != nil {
 		return "", err
 	}
 
-	var matchingSource *DataSource = nil
+	var matchingDataSource *map[string]interface{}
 
-	for _, source := range responseBody {
-		if source.Name == postDataSource.Name {
+	for _, channel := range responseBody {
+		if channel["name"] == postDataSource["name"] {
 			//found the thing
-			matchingSource = &source
+			matchingDataSource = &channel
 			break
 		}
 	}
 
-	if matchingSource != nil {
+	if matchingDataSource != nil {
 
-		if matchingSource.ID == nil {
-			return "", errors.New("Found a matching source but id is nil")
+		if (*matchingDataSource)["id"] == nil {
+			return "", errors.New("Found a matching datasource but id is nil")
 		}
 
 		// grafana requires an ID on put
-		postDataSource.ID = matchingSource.ID
-		postJSON, err := json.Marshal(postDataSource)
+		postDataSource["id"] = (*matchingDataSource)["id"]
+		postJSON, err := json.Marshal(matchingDataSource)
 
 		if err != nil {
 			return "", err
 		}
 
-		return client.putGrafanaObject(string(postJSON), "/api/datasources/"+strconv.Itoa(*matchingSource.ID), "id")
+		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/datasources/%v", (*matchingDataSource)["id"]), "id")
 
 	} else {
 		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
