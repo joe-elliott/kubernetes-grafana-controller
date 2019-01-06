@@ -34,7 +34,7 @@ type GrafanaDataSource struct {
 
 // GrafanaDataSourceSpec is the spec for a GrafanaDataSource resource
 type GrafanaDataSourceSpec struct {
-	DashboardJSON string `json:"dashboardJson"`
+	DataSourceJSON string `json:"dataSourceJson"`
 }
 
 // GrafanaDataSourceStatus is the status for a GrafanaDataSource resource
