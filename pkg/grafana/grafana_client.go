@@ -15,6 +15,9 @@ type Interface interface {
 
 	PostNotificationChannel(string) (string, error)
 	DeleteNotificationChannel(string) error
+
+	PostDataSource(string) (string, error)
+	DeleteDataSource(string) error
 }
 
 type Client struct {
@@ -58,8 +61,6 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 
 	// Grafana throws a 500 if you post 2 notification channels with the same name
 	//  search for a matching notification channel and put these changes to it
-	//  todo:  decide and document how to handle having the unique name key alongside the id
-	//         pass id into this function instead of querying grafana?
 
 	var postChannel NotificationChannel
 	err := json.Unmarshal([]byte(notificationChannelJson), &postChannel)
@@ -123,6 +124,78 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 
 	return nil
 }
+
+func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
+
+	// Grafana throws a 500 if you post 2 data sources with the same name
+	//  search for a matching data source and put these changes to it
+
+	var postDataSource DataSource
+	err := json.Unmarshal([]byte(dataSourceJson), &postDataSource)
+
+	if err != nil {
+		return "", err
+	}
+
+	// Request existing notification channels
+	resp, err := req.Get(client.address + "/api/datasources")
+
+	var responseBody []DataSource
+
+	err = resp.ToJSON(&responseBody)
+
+	if err != nil {
+		return "", err
+	}
+
+	var matchingSource *DataSource = nil
+
+	for _, source := range responseBody {
+		if source.Name == postDataSource.Name {
+			//found the thing
+			matchingSource = &source
+			break
+		}
+	}
+
+	if matchingSource != nil {
+
+		if matchingSource.ID == nil {
+			return "", errors.New("Found a matching source but id is nil")
+		}
+
+		// grafana requires an ID on put
+		postDataSource.ID = matchingSource.ID
+		postJSON, err := json.Marshal(postDataSource)
+
+		if err != nil {
+			return "", err
+		}
+
+		return client.putGrafanaObject(string(postJSON), "/api/datasources/"+strconv.Itoa(*matchingSource.ID), "id")
+
+	} else {
+		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
+	}
+}
+
+func (client *Client) DeleteDataSource(id string) error {
+	resp, err := req.Delete(client.address + "/api/datasources" + id)
+
+	if err != nil {
+		return err
+	}
+
+	if !responseIsSuccess(resp) {
+		return errors.New(resp.Response().Status)
+	}
+
+	return nil
+}
+
+//
+// shared
+//
 
 func (client *Client) postGrafanaObject(postJSON string, path string, idField string) (string, error) {
 	var responseBody map[string]interface{}

@@ -37,3 +37,13 @@ func (client *ClientFake) PostNotificationChannel(notificationChannelJson string
 func (client *ClientFake) DeleteNotificationChannel(id string) error {
 	return nil
 }
+
+func (client *ClientFake) PostDataSource(notificationChannelJson string) (string, error) {
+	client.PostedJson = &notificationChannelJson
+
+	return client.fakeUID, nil
+}
+
+func (client *ClientFake) DeleteDataSource(id string) error {
+	return nil
+}
