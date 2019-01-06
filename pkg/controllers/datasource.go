@@ -146,7 +146,7 @@ func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *graf
 func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 	var key string
 	var err error
-	var DataSource *v1alpha1.GrafanaDataSource
+	var dataSource *v1alpha1.GrafanaDataSource
 	var ok bool
 
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -154,12 +154,12 @@ func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 		return nil
 	}
 
-	if DataSource, ok = obj.(*v1alpha1.GrafanaDataSource); !ok {
+	if dataSource, ok = obj.(*v1alpha1.GrafanaDataSource); !ok {
 		utilruntime.HandleError(fmt.Errorf("expected GrafanaDataSource in workqueue but got %#v", obj))
 		return nil
 	}
 
-	item := NewWorkQueueItem(key, DataSource, DataSource.Status.GrafanaID) // todo: confirm this doesnt need null checking
+	item := NewWorkQueueItem(key, DataSource, dataSource.Status.GrafanaID) // todo: confirm this doesnt need null checking
 
 	return &item
 }

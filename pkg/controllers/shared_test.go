@@ -37,8 +37,9 @@ type fixture struct {
 	grafanaClient *grafana.ClientFake
 
 	// Objects to put in the store.
-	grafanaDashboardLister []*grafanacontroller.GrafanaDashboard
-	grafanaChannelLister   []*grafanacontroller.GrafanaNotificationChannel
+	grafanaDashboardLister  []*grafanacontroller.GrafanaDashboard
+	grafanaChannelLister    []*grafanacontroller.GrafanaNotificationChannel
+	grafanaDataSourceLister []*grafanacontroller.GrafanaDataSource
 
 	// Actions expected to happen on the client.
 	kubeactions       []core.Action

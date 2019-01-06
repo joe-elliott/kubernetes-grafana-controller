@@ -49,6 +49,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&GrafanaDashboardList{},
 		&GrafanaNotificationChannel{},
 		&GrafanaNotificationChannelList{},
+		&GrafanaDataSource{},
+		&GrafanaDataSourceList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
