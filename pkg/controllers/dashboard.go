@@ -129,6 +129,10 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 
 func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alpha1.GrafanaDashboard, uid string) error {
 
+	if grafanaDashboard.Status.GrafanaUID == uid {
+		return nil
+	}
+
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance

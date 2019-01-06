@@ -129,6 +129,10 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 
 func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *grafanav1alpha1.GrafanaDataSource, id string) error {
 
+	if grafanaDataSource.Status.GrafanaID == id {
+		return nil
+	}
+
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance

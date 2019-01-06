@@ -129,6 +129,10 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 
 func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.GrafanaNotificationChannel, id string) error {
 
+	if grafanaNotificationChannel.Status.GrafanaID == id {
+		return nil
+	}
+
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
