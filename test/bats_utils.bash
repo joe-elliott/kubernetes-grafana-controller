@@ -183,8 +183,6 @@ validatePostDataSource() {
 
     sourceId=$(kubectl get GrafanaDataSource -o=jsonpath="{.items[?(@.metadata.name==\"${sourceName}\")].status.grafanaID}")
 
-    echo "sourceId $sourceId"
-
     [ "$sourceId" != "" ]
 
     # check if exists in grafana

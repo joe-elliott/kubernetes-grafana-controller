@@ -155,11 +155,33 @@ teardown(){
     count=0
 
     for filename in datasources/*.yaml; do
-        channelId=$(validatePostDataSource $filename)
+        sourceId=$(validatePostDataSource $filename)
 
-        echo "Test Creating $filename ($channelId)"
+        echo "Test Creating $filename ($sourceId)"
 
         (( count++ ))
         validateDataSourceCount $count
+    done
+}
+
+@test "deleting a GrafanaDataSource object deletes the Grafana DataSource" {
+
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        echo "Test Deleting $filename ($sourceId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+
+        echo "status $httpStatus"
+        curl ${GRAFANA_URL}/api/datasources
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateDataSourceCount 0
     done
 }
