@@ -166,6 +166,46 @@ validateNotificationChannelContents() {
     rm b.json
 }
 
+# validatePostDataSource <yaml file name>
+#   note that the channel file name must match the GrafanaDataSource object name ...
+#    ... b/c i'm lazy
+#
+validatePostDataSource() {
+    specfile=$1
+
+    sourceName="${specfile##*/}"
+    sourceName="${sourceName%.*}"
+
+    # create in kubernetes
+    kubectl apply -f $specfile >&2
+
+	sleep 5s
+
+    sourceId=$(kubectl get GrafanaDataSource -o=jsonpath="{.items[?(@.metadata.name==\"${sourceName}\")].status.grafanaID}")
+
+    echo "sourceId $sourceId"
+
+    [ "$sourceId" != "" ]
+
+    # check if exists in grafana
+	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+    [ "$httpStatus" -eq "200" ]
+
+    echo $sourceId
+}
+
+#
+# validateDataSourceCount <count>
+#   use grafana search api to confirm that the count is what is expected 
+#
+validateDataSourceCount() {
+    sourceJson=$(curl --silent ${GRAFANA_URL}/api/datasources)
+
+    count=$(echo $sourceJson | jq length)
+
+    [ "$count" -eq "$1" ]
+}
+
 #
 # utils
 #
@@ -175,4 +215,5 @@ dumpState() {
 
     kubectl describe GrafanaDashboard
     kubectl describe GrafanaNotificationChannel
+    kubectl describe GrafanaDataSource
 }

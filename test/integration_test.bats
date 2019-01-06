@@ -15,6 +15,7 @@ teardown(){
 
     kubectl delete GrafanaDashboard --ignore-not-found=true --all
     kubectl delete GrafanaNotificationChannel --ignore-not-found=true --all
+    kubectl delete GrafanaDataSource --ignore-not-found=true --all
 
     # clean up comparison files if they exist
     rm -f a.json
@@ -144,5 +145,21 @@ teardown(){
         validateNotificationChannelContents $filename
 
         validateNotificationChannelCount $count
+    done
+}
+
+#
+# data sources
+#
+@test "creating a GrafanaDataSource object creates a Grafana DataSource" {
+    count=0
+
+    for filename in datasources/*.yaml; do
+        channelId=$(validatePostDataSource $filename)
+
+        echo "Test Creating $filename ($channelId)"
+
+        (( count++ ))
+        validateDataSourceCount $count
     done
 }
