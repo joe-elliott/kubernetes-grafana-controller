@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/imroc/req"
 )
@@ -61,7 +60,7 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 	//  todo:  decide and document how to handle having the unique name key alongside the id
 	//         pass id into this function instead of querying grafana?
 
-	var postChannel NotificationChannel
+	var postChannel map[string]interface{}
 	err := json.Unmarshal([]byte(notificationChannelJson), &postChannel)
 
 	if err != nil {
@@ -71,18 +70,17 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 	// Request existing notification channels
 	resp, err := req.Get(client.address + "/api/alert-notifications")
 
-	var responseBody []NotificationChannel
-
+	var responseBody []map[string]interface{}
 	err = resp.ToJSON(&responseBody)
 
 	if err != nil {
 		return "", err
 	}
 
-	var matchingChannel *NotificationChannel = nil
+	var matchingChannel *map[string]interface{}
 
 	for _, channel := range responseBody {
-		if channel.Name == postChannel.Name {
+		if channel["name"] == postChannel["name"] {
 			//found the thing
 			matchingChannel = &channel
 			break
@@ -91,19 +89,19 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 
 	if matchingChannel != nil {
 
-		if matchingChannel.ID == nil {
+		if (*matchingChannel)["id"] == nil {
 			return "", errors.New("Found a matching channel but id is nil")
 		}
 
 		// grafana requires an ID on put
-		postChannel.ID = matchingChannel.ID
+		postChannel["id"] = (*matchingChannel)["id"]
 		postJSON, err := json.Marshal(postChannel)
 
 		if err != nil {
 			return "", err
 		}
 
-		return client.putGrafanaObject(string(postJSON), "/api/alert-notifications/"+strconv.Itoa(*matchingChannel.ID), "id")
+		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", (*matchingChannel)["id"]), "id")
 
 	} else {
 		return client.postGrafanaObject(notificationChannelJson, "/api/alert-notifications", "id")
