@@ -187,3 +187,14 @@ teardown(){
         validateDataSourceCount 0
     done
 }
+
+@test "creating a GrafanaDataSource object creates the same datasource in Grafana" {
+    count=0
+
+    for filename in datasources/*.yaml; do
+        validateDataSourceContents $filename
+
+        (( count++ ))
+        validateDataSourceCount $count
+    done
+}

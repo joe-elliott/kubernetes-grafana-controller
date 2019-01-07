@@ -205,6 +205,45 @@ validateDataSourceCount() {
 }
 
 #
+# validateDataSourceContents <yaml file name>
+#   creates a DataSource and both verifies it exists and that its content matches
+#
+validateDataSourceContents() {
+    filename=$1
+
+    sourceId=$(validatePostDataSource $filename)
+
+    echo "Test Json Content of $filename ($sourceId)"
+
+    sourceJsonFromYaml=$(grep -A9999 'dataSourceJson' $filename)
+    sourceJsonFromYaml=${sourceJsonFromYaml%?}   # strip final quote
+    sourceJsonFromYaml=${sourceJsonFromYaml#*\'} # strip up to and including the first quote
+
+    # remove the version field from comparison b/c grafana will update it
+    echo $sourceJsonFromYaml | jq '. | del(.version)'  > b.json
+    fieldsToKeep=$(cat b.json | jq keys)
+
+    sourceJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/datasources/${sourceId})
+
+    # grafana can add fields to flesh out the object.  remove anything from grafana not present in the original
+    #  spec file
+    echo $sourceJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
+
+    equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
+
+    # dunk some debug output to stdout if this is about to fail
+    if [ "$equal" != "true" ]; then
+        run diff <(jq -S . a.json) <(jq -S . b.json)
+        echo $output
+    fi
+
+    [ "$equal" = "true" ]
+
+    rm a.json
+    rm b.json
+}
+
+#
 # utils
 #
 dumpState() {
