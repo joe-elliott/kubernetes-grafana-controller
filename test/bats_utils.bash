@@ -208,10 +208,15 @@ validateDataSourceCount() {
 # utils
 #
 dumpState() {
+    echo "-----------controller logs--------------"
     kubectl logs $(kubectl get po -l=run=kubernetes-grafana-test --no-headers=true | cut -d ' ' -f 1)
+    echo "-----------grafana logs--------------"
     kubectl logs $(kubectl get po -l=app=grafana --no-headers=true| cut -d ' ' -f 1)
 
+    echo "-----------GrafanaDashboards--------------"
     kubectl describe GrafanaDashboard
+    echo "-----------GrafanaNotificationChannels--------------"
     kubectl describe GrafanaNotificationChannel
+    echo "-----------GrafanaDataSources --------------"
     kubectl describe GrafanaDataSource
 }

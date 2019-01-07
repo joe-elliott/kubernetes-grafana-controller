@@ -10,6 +10,8 @@ setup(){
 }
 
 teardown(){
+    dumpState
+
     run kubectl scale --replicas=0 deployment/kubernetes-grafana-test
     run kubectl scale --replicas=0 deployment/grafana
 
