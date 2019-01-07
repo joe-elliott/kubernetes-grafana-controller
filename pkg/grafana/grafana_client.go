@@ -177,7 +177,7 @@ func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
 }
 
 func (client *Client) DeleteDataSource(id string) error {
-	resp, err := req.Delete(client.address + "/api/datasources" + id)
+	resp, err := req.Delete(client.address + "/api/datasources/" + id)
 
 	if err != nil {
 		return err
