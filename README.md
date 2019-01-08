@@ -107,9 +107,9 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [x] Delete
       - Currently using name as the primary key/id for the notification channel.  Determine/document appropriate behavior when multiple channels have the same names.
   - Datasources
-    - [ ] Add
-    - [ ] Update
-    - [ ] Delete
+    - [x] Add
+    - [x] Update
+    - [x] Delete
 - Refactoring/Cleanup/Additional
   - Full refresh functionality in case the controller goes offline or someone mucks with state in Grafana
   - Add comments where go wants me to
