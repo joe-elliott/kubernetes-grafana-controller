@@ -107,9 +107,9 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [x] Delete
       - Currently using name as the primary key/id for the notification channel.  Determine/document appropriate behavior when multiple channels have the same names.
   - Datasources
-    - [ ] Add
-    - [ ] Update
-    - [ ] Delete
+    - [x] Add
+    - [x] Update
+    - [x] Delete
 - Refactoring/Cleanup/Additional
   - Full refresh functionality in case the controller goes offline or someone mucks with state in Grafana
   - Add comments where go wants me to
@@ -118,6 +118,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - Change "Notification Channels" to "Alert Notifications"
   - Add prometheus metrics
   - Determine/document the behavior of a dashboard with a uid vs one without.  Confirm sanity.
-  - Pass ID from status into Grafana client when making calls?
   - Fix API objects naming to be less verbose and redundant
   - Support interpolation of k8s secrets into datasources
+  - Since Grafana wants to use the name as a unique key should we stop storing IDs in status and just query the id using the name when we want to delete/update?
+  - Grafana client is a mess.  clean it up

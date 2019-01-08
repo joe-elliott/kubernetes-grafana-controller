@@ -26,6 +26,8 @@ import (
 type Interface interface {
 	// GrafanaDashboards returns a GrafanaDashboardInformer.
 	GrafanaDashboards() GrafanaDashboardInformer
+	// GrafanaDataSources returns a GrafanaDataSourceInformer.
+	GrafanaDataSources() GrafanaDataSourceInformer
 	// GrafanaNotificationChannels returns a GrafanaNotificationChannelInformer.
 	GrafanaNotificationChannels() GrafanaNotificationChannelInformer
 }
@@ -44,6 +46,11 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // GrafanaDashboards returns a GrafanaDashboardInformer.
 func (v *version) GrafanaDashboards() GrafanaDashboardInformer {
 	return &grafanaDashboardInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// GrafanaDataSources returns a GrafanaDataSourceInformer.
+func (v *version) GrafanaDataSources() GrafanaDataSourceInformer {
+	return &grafanaDataSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // GrafanaNotificationChannels returns a GrafanaNotificationChannelInformer.

@@ -26,6 +26,14 @@ type GrafanaDashboardListerExpansion interface{}
 // GrafanaDashboardNamespaceLister.
 type GrafanaDashboardNamespaceListerExpansion interface{}
 
+// GrafanaDataSourceListerExpansion allows custom methods to be added to
+// GrafanaDataSourceLister.
+type GrafanaDataSourceListerExpansion interface{}
+
+// GrafanaDataSourceNamespaceListerExpansion allows custom methods to be added to
+// GrafanaDataSourceNamespaceLister.
+type GrafanaDataSourceNamespaceListerExpansion interface{}
+
 // GrafanaNotificationChannelListerExpansion allows custom methods to be added to
 // GrafanaNotificationChannelLister.
 type GrafanaNotificationChannelListerExpansion interface{}

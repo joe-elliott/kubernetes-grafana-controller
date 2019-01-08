@@ -20,4 +20,6 @@ package v1alpha1
 
 type GrafanaDashboardExpansion interface{}
 
+type GrafanaDataSourceExpansion interface{}
+
 type GrafanaNotificationChannelExpansion interface{}

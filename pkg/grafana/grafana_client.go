@@ -14,6 +14,9 @@ type Interface interface {
 
 	PostNotificationChannel(string) (string, error)
 	DeleteNotificationChannel(string) error
+
+	PostDataSource(string) (string, error)
+	DeleteDataSource(string) error
 }
 
 type Client struct {
@@ -57,8 +60,6 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 
 	// Grafana throws a 500 if you post 2 notification channels with the same name
 	//  search for a matching notification channel and put these changes to it
-	//  todo:  decide and document how to handle having the unique name key alongside the id
-	//         pass id into this function instead of querying grafana?
 
 	var postChannel map[string]interface{}
 	err := json.Unmarshal([]byte(notificationChannelJson), &postChannel)
@@ -101,7 +102,7 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 			return "", err
 		}
 
-		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", (*matchingChannel)["id"]), "id")
+		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", postChannel["id"]), "id")
 
 	} else {
 		return client.postGrafanaObject(notificationChannelJson, "/api/alert-notifications", "id")
@@ -121,6 +122,77 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 
 	return nil
 }
+
+func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
+
+	// Grafana throws a 500 if you post 2 datasources with the same name
+	//  search for a matching datasources and put these changes to it
+
+	var postDataSource map[string]interface{}
+	err := json.Unmarshal([]byte(dataSourceJson), &postDataSource)
+
+	if err != nil {
+		return "", err
+	}
+
+	// Request existing notification channels
+	resp, err := req.Get(client.address + "/api/datasources")
+
+	var responseBody []map[string]interface{}
+	err = resp.ToJSON(&responseBody)
+
+	if err != nil {
+		return "", err
+	}
+
+	var matchingDataSource *map[string]interface{}
+
+	for _, channel := range responseBody {
+		if channel["name"] == postDataSource["name"] {
+			//found the thing
+			matchingDataSource = &channel
+			break
+		}
+	}
+
+	if matchingDataSource != nil {
+
+		if (*matchingDataSource)["id"] == nil {
+			return "", errors.New("Found a matching datasource but id is nil")
+		}
+
+		// grafana requires an ID on put
+		postDataSource["id"] = (*matchingDataSource)["id"]
+		postJSON, err := json.Marshal(postDataSource)
+
+		if err != nil {
+			return "", err
+		}
+
+		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/datasources/%v", postDataSource["id"]), "id")
+
+	} else {
+		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
+	}
+}
+
+func (client *Client) DeleteDataSource(id string) error {
+	resp, err := req.Delete(client.address + "/api/datasources/" + id)
+
+	if err != nil {
+		return err
+	}
+
+	if !responseIsSuccess(resp) {
+		return errors.New(resp.Response().Status)
+	}
+
+	return nil
+}
+
+//
+// shared
+//
 
 func (client *Client) postGrafanaObject(postJSON string, path string, idField string) (string, error) {
 	var responseBody map[string]interface{}

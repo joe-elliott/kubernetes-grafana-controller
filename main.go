@@ -59,6 +59,8 @@ func main() {
 		informerFactory.Grafana().V1alpha1().GrafanaDashboards())
 	notificationChannelController := controllers.NewNotificationChannelController(client, kubeClient, grafanaClient,
 		informerFactory.Grafana().V1alpha1().GrafanaNotificationChannels())
+	dataSourceController := controllers.NewDataSourceController(client, kubeClient, grafanaClient,
+		informerFactory.Grafana().V1alpha1().GrafanaDataSources())
 
 	stopCh := signals.SetupSignalHandler()
 
@@ -66,7 +68,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	wg.Add(2)
+	wg.Add(3)
 	go func() {
 		defer wg.Done()
 		if err = dashboardController.Run(2, stopCh); err != nil {
@@ -78,6 +80,13 @@ func main() {
 		defer wg.Done()
 		if err = notificationChannelController.Run(2, stopCh); err != nil {
 			klog.Fatalf("Error running notificationChannelController: %s", err.Error())
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if err = dataSourceController.Run(2, stopCh); err != nil {
+			klog.Fatalf("Error running dataSourceController: %s", err.Error())
 		}
 	}()
 

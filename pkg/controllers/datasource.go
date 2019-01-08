@@ -39,22 +39,22 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-// NotificationChannelSyncer is the controller implementation for GrafanaNotificationChannel resources
-type NotificationChannelSyncer struct {
-	grafanaNotificationChannelLister listers.GrafanaNotificationChannelLister
-	grafanaClient                    grafana.Interface
-	grafanaclientset                 clientset.Interface
-	recorder                         record.EventRecorder
+// DataSourceSyncer is the controller implementation for GrafanaDataSource resources
+type DataSourceSyncer struct {
+	grafanaDataSourcesLister listers.GrafanaDataSourceLister
+	grafanaClient            grafana.Interface
+	grafanaclientset         clientset.Interface
+	recorder                 record.EventRecorder
 }
 
-// NewNotificationChannelController returns a new grafana channel controller
-func NewNotificationChannelController(
+// NewDataSourceController returns a new grafana DataSource controller
+func NewDataSourceController(
 	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
-	grafanaNotificationChannelInformer informers.GrafanaNotificationChannelInformer) *Controller {
+	grafanaDataSourceInformer informers.GrafanaDataSourceInformer) *Controller {
 
-	controllerAgentName := "grafana-notificationchannel-controller"
+	controllerAgentName := "grafana-DataSource-controller"
 
 	// Create event broadcaster
 	// Add grafana-controller types to the default Kubernetes Scheme so Events can be
@@ -66,15 +66,15 @@ func NewNotificationChannelController(
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
-	syncer := &NotificationChannelSyncer{
-		grafanaNotificationChannelLister: grafanaNotificationChannelInformer.Lister(),
-		grafanaClient:                    grafanaClient,
-		grafanaclientset:                 grafanaclientset,
-		recorder:                         recorder,
+	syncer := &DataSourceSyncer{
+		grafanaDataSourcesLister: grafanaDataSourceInformer.Lister(),
+		grafanaClient:            grafanaClient,
+		grafanaclientset:         grafanaclientset,
+		recorder:                 recorder,
 	}
 
 	controller := NewController(controllerAgentName,
-		grafanaNotificationChannelInformer.Informer(),
+		grafanaDataSourceInformer.Informer(),
 		kubeclientset,
 		syncer)
 
@@ -82,9 +82,9 @@ func NewNotificationChannelController(
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the GrafanaNotificationChannel resource
+// converge the two. It then updates the Status block of the GrafanaDataSource resource
 // with the current status of the resource.
-func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
+func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 	// Convert the namespace/name string into a distinct namespace and name
 	namespace, name, err := cache.SplitMetaNamespaceKey(item.key)
 	if err != nil {
@@ -92,22 +92,22 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
-	// Get the GrafanaNotificationChannel resource with this namespace/name
-	grafanaNotificationChannel, err := s.grafanaNotificationChannelLister.GrafanaNotificationChannels(namespace).Get(name)
+	// Get the GrafanaDataSource resource with this namespace/name
+	grafanaDataSource, err := s.grafanaDataSourcesLister.GrafanaDataSources(namespace).Get(name)
 	if err != nil {
-		// The GrafanaNotificationChannel resource may no longer exist, in which case we stop
+		// The GrafanaDataSource resource may no longer exist, in which case we stop
 		// processing.
 		if errors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("grafanaNotificationChannel '%s' in work queue no longer exists", item.key))
+			utilruntime.HandleError(fmt.Errorf("grafanaDataSource '%s' in work queue no longer exists", item.key))
 
-			// channel was deleted, so delete from grafana
-			return s.grafanaClient.DeleteNotificationChannel(item.uuid)
+			// DataSource was deleted, so delete from grafana
+			return s.grafanaClient.DeleteDataSource(item.uuid)
 		}
 
 		return err
 	}
 
-	id, err := s.grafanaClient.PostNotificationChannel(grafanaNotificationChannel.Spec.NotificationChannelJSON)
+	id, err := s.grafanaClient.PostDataSource(grafanaDataSource.Spec.DataSourceJSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
@@ -116,41 +116,41 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	// Finally, we update the status block of the GrafanaNotificationChannel resource to reflect the
+	// Finally, we update the status block of the GrafanaDataSource resource to reflect the
 	// current state of the world
-	err = s.updateGrafanaNotificationChannelStatus(grafanaNotificationChannel, id)
+	err = s.updateGrafanaDataSourceStatus(grafanaDataSource, id)
 	if err != nil {
 		return err
 	}
 
-	s.recorder.Event(grafanaNotificationChannel, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	s.recorder.Event(grafanaDataSource, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil
 }
 
-func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.GrafanaNotificationChannel, id string) error {
+func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *grafanav1alpha1.GrafanaDataSource, id string) error {
 
-	if grafanaNotificationChannel.Status.GrafanaID == id {
+	if grafanaDataSource.Status.GrafanaID == id {
 		return nil
 	}
 
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
-	grafanaNotificationChannelCopy := grafanaNotificationChannel.DeepCopy()
-	grafanaNotificationChannelCopy.Status.GrafanaID = id
-	// If the CustomResou	rceSubresources feature gate is not enabled,
-	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaNotificationChannel resource.
+	grafanaDataSourceCopy := grafanaDataSource.DeepCopy()
+	grafanaDataSourceCopy.Status.GrafanaID = id
+	// If the CustomResourceSubresources feature gate is not enabled,
+	// we must use Update instead of UpdateStatus to update the Status block of the GrafanaDataSource resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaNotificationChannels(grafanaNotificationChannel.Namespace).Update(grafanaNotificationChannelCopy)
+	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaDataSources(grafanaDataSource.Namespace).Update(grafanaDataSourceCopy)
 	return err
 }
 
-func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
+func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 	var key string
 	var err error
-	var grafanaNotificationChannel *v1alpha1.GrafanaNotificationChannel
+	var dataSource *v1alpha1.GrafanaDataSource
 	var ok bool
 
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -158,12 +158,12 @@ func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQu
 		return nil
 	}
 
-	if grafanaNotificationChannel, ok = obj.(*v1alpha1.GrafanaNotificationChannel); !ok {
-		utilruntime.HandleError(fmt.Errorf("expected GrafanaNotificationChannel in workqueue but got %#v", obj))
+	if dataSource, ok = obj.(*v1alpha1.GrafanaDataSource); !ok {
+		utilruntime.HandleError(fmt.Errorf("expected GrafanaDataSource in workqueue but got %#v", obj))
 		return nil
 	}
 
-	item := NewWorkQueueItem(key, NotificationChannel, grafanaNotificationChannel.Status.GrafanaID) // todo: confirm this doesnt need null checking
+	item := NewWorkQueueItem(key, DataSource, dataSource.Status.GrafanaID) // todo: confirm this doesnt need null checking
 
 	return &item
 }

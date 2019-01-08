@@ -10,11 +10,14 @@ setup(){
 }
 
 teardown(){
+    dumpState
+
     run kubectl scale --replicas=0 deployment/kubernetes-grafana-test
     run kubectl scale --replicas=0 deployment/grafana
 
     kubectl delete GrafanaDashboard --ignore-not-found=true --all
     kubectl delete GrafanaNotificationChannel --ignore-not-found=true --all
+    kubectl delete GrafanaDataSource --ignore-not-found=true --all
 
     # clean up comparison files if they exist
     rm -f a.json
@@ -144,5 +147,71 @@ teardown(){
         validateNotificationChannelContents $filename
 
         validateNotificationChannelCount $count
+    done
+}
+
+#
+# data sources
+#
+@test "creating a GrafanaDataSource object creates a Grafana DataSource" {
+    count=0
+
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        echo "Test Creating $filename ($sourceId)"
+
+        (( count++ ))
+        validateDataSourceCount $count
+    done
+}
+
+@test "deleting a GrafanaDataSource object deletes the Grafana DataSource" {
+
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        echo "Test Deleting $filename ($sourceId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+
+        echo "status $httpStatus"
+        curl ${GRAFANA_URL}/api/datasources
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateDataSourceCount 0
+    done
+}
+
+@test "creating a GrafanaDataSource object creates the same datasource in Grafana" {
+    count=0
+
+    for filename in datasources/*.yaml; do
+        validateDataSourceContents $filename
+
+        (( count++ ))
+        validateDataSourceCount $count
+    done
+}
+
+@test "updating a GrafanaDataSource object updates the datasource in Grafana" {
+    count=0
+    
+    for filename in datasources/*.yaml; do
+        validateDataSourceContents $filename
+
+        (( count++ ))
+        validateDataSourceCount $count
+    done
+
+    for filename in datasources/*.update; do
+        validateDataSourceContents $filename
+
+        validateDataSourceCount $count
     done
 }

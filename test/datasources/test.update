@@ -1,0 +1,27 @@
+apiVersion: grafana.k8s.io/v1alpha1
+kind: GrafanaDataSource
+metadata:
+  name: test
+spec:
+  dataSourceJson: '{
+  "orgId": 1,
+  "name": "Prometheus",
+  "type": "prometheus",
+  "typeLogoUrl": "",
+  "access": "proxy",
+  "url": "http://localhost:9091",
+  "password": "",
+  "user": "",
+  "database": "",
+  "basicAuth": false,
+  "basicAuthUser": "",
+  "basicAuthPassword": "",
+  "withCredentials": false,
+  "isDefault": true,
+  "jsonData": {
+    "httpMethod": "GET",
+    "keepCookies": []
+  },
+  "secureJsonFields": {},
+  "readOnly": false
+}'

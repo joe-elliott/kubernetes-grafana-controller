@@ -5,6 +5,7 @@ type GrafanaObject int
 const (
 	Dashboard           = 0
 	NotificationChannel = 1
+	DataSource          = 2
 )
 
 type WorkQueueItem struct {
