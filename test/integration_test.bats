@@ -198,3 +198,20 @@ teardown(){
         validateDataSourceCount $count
     done
 }
+
+@test "updating a GrafanaDataSource object updates the datasource in Grafana" {
+    count=0
+    
+    for filename in datasources/*.yaml; do
+        validateDataSourceContents $filename
+
+        (( count++ ))
+        validateDataSourceCount $count
+    done
+
+    for filename in datasources/*.update; do
+        validateDataSourceContents $filename
+
+        validateDataSourceCount $count
+    done
+}

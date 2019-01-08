@@ -102,7 +102,7 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 			return "", err
 		}
 
-		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", (*matchingChannel)["id"]), "id")
+		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", postChannel["id"]), "id")
 
 	} else {
 		return client.postGrafanaObject(notificationChannelJson, "/api/alert-notifications", "id")
@@ -163,13 +163,13 @@ func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
 
 		// grafana requires an ID on put
 		postDataSource["id"] = (*matchingDataSource)["id"]
-		postJSON, err := json.Marshal(matchingDataSource)
+		postJSON, err := json.Marshal(postDataSource)
 
 		if err != nil {
 			return "", err
 		}
 
-		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/datasources/%v", (*matchingDataSource)["id"]), "id")
+		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/datasources/%v", postDataSource["id"]), "id")
 
 	} else {
 		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")

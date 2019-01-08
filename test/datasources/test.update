@@ -23,6 +23,5 @@ spec:
     "keepCookies": []
   },
   "secureJsonFields": {},
-  "version": 2,
   "readOnly": false
 }'
