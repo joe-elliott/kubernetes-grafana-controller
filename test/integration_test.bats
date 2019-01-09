@@ -117,6 +117,8 @@ teardown(){
 
         (( count++ ))
         validateNotificationChannelCount $count
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
     done
 }
 
@@ -137,6 +139,9 @@ teardown(){
         [ "$httpStatus" -eq "500" ]
 
         validateNotificationChannelCount 0
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount GrafanaNotificationChannel Deleted $(objectNameFromFile $filename) 1
     done
 }
 
@@ -148,6 +153,8 @@ teardown(){
 
         (( count++ ))
         validateNotificationChannelCount $count
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
     done
 }
 
@@ -159,12 +166,16 @@ teardown(){
 
         (( count++ ))
         validateNotificationChannelCount $count
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
     done
 
     for filename in notification_channels/*.update; do
         validateNotificationChannelContents $filename
 
         validateNotificationChannelCount $count
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 2
     done
 }
 
@@ -181,6 +192,8 @@ teardown(){
 
         (( count++ ))
         validateDataSourceCount $count
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
     done
 }
 
@@ -203,6 +216,9 @@ teardown(){
         [ "$httpStatus" -eq "404" ]
 
         validateDataSourceCount 0
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
+        validateEventCount GrafanaDataSource Deleted $(objectNameFromFile $filename) 1
     done
 }
 
@@ -214,6 +230,8 @@ teardown(){
 
         (( count++ ))
         validateDataSourceCount $count
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
     done
 }
 
@@ -225,11 +243,15 @@ teardown(){
 
         (( count++ ))
         validateDataSourceCount $count
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
     done
 
     for filename in datasources/*.update; do
         validateDataSourceContents $filename
 
         validateDataSourceCount $count
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 2
     done
 }
