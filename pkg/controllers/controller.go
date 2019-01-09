@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -43,7 +44,13 @@ func NewController(controllerAgentName string,
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: controller.enqueueWorkQueueItem,
 		UpdateFunc: func(old, new interface{}) {
-			controller.enqueueWorkQueueItem(new)
+
+			oldSpec := reflect.ValueOf(old).Elem().FieldByName("Spec").Interface()
+			newSpec := reflect.ValueOf(new).Elem().FieldByName("Spec").Interface()
+
+			if !reflect.DeepEqual(oldSpec, newSpec) {
+				controller.enqueueWorkQueueItem(new)
+			}
 		},
 		DeleteFunc: controller.enqueueWorkQueueItem,
 	})

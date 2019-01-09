@@ -5,7 +5,7 @@ GRAFANA_URL=""
 
 validateGrafanaUrl() {
     # get grafana url
-    GRAFANA_URL=$(minikube service grafana --url --interval=1)
+    GRAFANA_URL=$(minikube service grafana --url --interval=1 --wait=60)
 
     echo "grafana url: " $GRAFANA_URL
     httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL})
@@ -283,9 +283,9 @@ validateEventCount() {
     actualCount=$(kubectl get events | grep $1 | grep $2 | grep $3 | awk -F" " '{print $3}')
     expectedCount=$4
 
-    if [ "$actualCount" -eq "$expectedCount" ]; then
+    if [ "$actualCount" != "$expectedCount" ]; then
         echo "$actualCount does not equal expected $expectedCount"
     fi
 
-    [ "$actualCount" -eq "$expectedCount" ]
+    [ "$actualCount" == "$expectedCount" ]
 }

@@ -3,6 +3,11 @@
 load bats_utils
 
 setup(){
+
+    if [ "$BATS_TEST_NUMBER" -eq "1" ]; then
+        teardown
+    fi
+
     run kubectl scale --replicas=1 deployment/kubernetes-grafana-test
     run kubectl scale --replicas=1 deployment/grafana
 
@@ -10,7 +15,7 @@ setup(){
 }
 
 teardown(){
-    dumpState
+    #dumpState
 
     kubectl delete events --all
 
@@ -60,7 +65,7 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 1
+        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
         validateEventCount GrafanaDashboard Deleted $(objectNameFromFile $filename) 1
     done
 }
@@ -74,7 +79,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 1
+        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
     done
 }
 
@@ -87,7 +92,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 1
+        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
     done
 
     # the .update files have dashboards with the same ids and different contents. 
@@ -97,7 +102,7 @@ teardown(){
 
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 2
+        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 2
     done
 }
 
