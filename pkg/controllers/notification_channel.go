@@ -87,8 +87,8 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 			// channel was deleted, so delete from grafana
 			err = s.grafanaClient.DeleteNotificationChannel(item.uuid)
 
-			if err != nil {
-				s.recorder.Event(grafanaNotificationChannel, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
+			if err == nil {
+				s.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
 			}
 		}
 
@@ -151,7 +151,7 @@ func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQu
 		return nil
 	}
 
-	item := NewWorkQueueItem(key, NotificationChannel, grafanaNotificationChannel.Status.GrafanaID) // todo: confirm this doesnt need null checking
+	item := NewWorkQueueItem(key, grafanaNotificationChannel.DeepCopyObject(), grafanaNotificationChannel.Status.GrafanaID) // todo: confirm this doesnt need null checking
 
 	return &item
 }

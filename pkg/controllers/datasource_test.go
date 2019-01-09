@@ -52,7 +52,7 @@ func TestCreatesGrafanaDataSource(t *testing.T) {
 	dataSourceJson := "{ 'test': 'test' }"
 
 	dataSource := newGrafanaDataSource("test", dataSourceJson)
-	item := NewWorkQueueItem(getKey(dataSource, t), DataSource, "")
+	item := NewWorkQueueItem(getKey(dataSource, t), nil, "")
 
 	f.grafanaDataSourceLister = append(f.grafanaDataSourceLister, dataSource)
 	f.objects = append(f.objects, dataSource)

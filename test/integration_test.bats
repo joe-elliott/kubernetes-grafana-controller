@@ -4,9 +4,9 @@ load bats_utils
 
 setup(){
 
-    if [ "$BATS_TEST_NUMBER" -eq "1" ]; then
-        teardown
-    fi
+ #   if [ "$BATS_TEST_NUMBER" -eq "1" ]; then
+ #       teardown
+ #   fi
 
     run kubectl scale --replicas=1 deployment/kubernetes-grafana-test
     run kubectl scale --replicas=1 deployment/grafana
@@ -15,7 +15,7 @@ setup(){
 }
 
 teardown(){
-    #dumpState
+    dumpState
 
     kubectl delete events --all
 

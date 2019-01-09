@@ -87,8 +87,8 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 			// dashboard was deleted, so delete from grafana
 			err = s.grafanaClient.DeleteDashboard(item.uuid)
 
-			if err != nil {
-				s.recorder.Event(grafanaDashboard, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
+			if err == nil {
+				s.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
 			}
 		}
 
@@ -151,7 +151,7 @@ func (s *DashboardSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 		return nil
 	}
 
-	item := NewWorkQueueItem(key, Dashboard, dashboard.Status.GrafanaUID) // todo: confirm this doesnt need null checking
+	item := NewWorkQueueItem(key, dashboard.DeepCopyObject(), dashboard.Status.GrafanaUID) // todo: confirm this doesnt need null checking
 
 	return &item
 }

@@ -87,8 +87,8 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 			// DataSource was deleted, so delete from grafana
 			err = s.grafanaClient.DeleteDataSource(item.uuid)
 
-			if err != nil {
-				s.recorder.Event(grafanaDataSource, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
+			if err == nil {
+				s.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
 			}
 		}
 
@@ -151,7 +151,7 @@ func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 		return nil
 	}
 
-	item := NewWorkQueueItem(key, DataSource, dataSource.Status.GrafanaID) // todo: confirm this doesnt need null checking
+	item := NewWorkQueueItem(key, dataSource.DeepCopyObject(), dataSource.Status.GrafanaID) // todo: confirm this doesnt need null checking
 
 	return &item
 }

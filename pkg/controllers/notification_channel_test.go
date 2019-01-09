@@ -52,7 +52,7 @@ func TestCreatesGrafanaNotificationChannel(t *testing.T) {
 	channelJson := "{ 'test': 'test' }"
 
 	channel := newGrafanaNotificationChannel("test", channelJson)
-	item := NewWorkQueueItem(getKey(channel, t), NotificationChannel, "")
+	item := NewWorkQueueItem(getKey(channel, t), nil, "")
 
 	f.grafanaChannelLister = append(f.grafanaChannelLister, channel)
 	f.objects = append(f.objects, channel)
