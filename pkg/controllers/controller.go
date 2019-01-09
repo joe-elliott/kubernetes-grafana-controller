@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
-	SuccessSynced = "Synced"
-	// MessageResourceSynced is the message used for an Event fired when a GrafanaDashboard
-	// is synced successfully
+	SuccessSynced         = "Synced"
 	MessageResourceSynced = "Grafana Object synced successfully"
+
+	SuccessDeleted         = "Deleted"
+	MessageResourceDeleted = "Grafana Object deleted successfully"
 )
 
 type Controller struct {
