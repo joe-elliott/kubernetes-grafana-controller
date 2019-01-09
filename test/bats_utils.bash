@@ -5,7 +5,7 @@ GRAFANA_URL=""
 
 validateGrafanaUrl() {
     # get grafana url
-    GRAFANA_URL=$(minikube service grafana --url --interval=1)
+    GRAFANA_URL=$(minikube service grafana --url --interval=1 --wait=60)
 
     echo "grafana url: " $GRAFANA_URL
     httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL})
@@ -33,8 +33,7 @@ validateDashboardCount() {
 validatePostDashboard() {
     specfile=$1
 
-    dashboardName="${specfile##*/}"
-    dashboardName="${dashboardName%.*}"
+    dashboardName=$(objectNameFromFile $specfile)
 
     # create in kubernetes
     kubectl apply -f $specfile >&2
@@ -96,8 +95,7 @@ validateDashboardContents() {
 validatePostNotificationChannel() {
     specfile=$1
 
-    channelName="${specfile##*/}"
-    channelName="${channelName%.*}"
+    channelName=$(objectNameFromFile $specfile)
 
     # create in kubernetes
     kubectl apply -f $specfile >&2
@@ -173,8 +171,7 @@ validateNotificationChannelContents() {
 validatePostDataSource() {
     specfile=$1
 
-    sourceName="${specfile##*/}"
-    sourceName="${sourceName%.*}"
+    sourceName=$(objectNameFromFile $specfile)
 
     # create in kubernetes
     kubectl apply -f $specfile >&2
@@ -247,6 +244,9 @@ validateDataSourceContents() {
 # utils
 #
 dumpState() {
+    echo "-----------events--------------"
+    kubectl get events
+
     echo "-----------controller logs--------------"
     kubectl logs $(kubectl get po -l=run=kubernetes-grafana-test --no-headers=true | cut -d ' ' -f 1)
     echo "-----------grafana logs--------------"
@@ -258,4 +258,34 @@ dumpState() {
     kubectl describe GrafanaNotificationChannel
     echo "-----------GrafanaDataSources --------------"
     kubectl describe GrafanaDataSource
+}
+
+#
+# objectNameFromFile <filename>
+#
+objectNameFromFile() {
+    file=$1
+
+    name="${file##*/}"
+    name="${name%.*}"
+
+    echo $name
+}
+
+#
+# validateEventCount <datatype> <eventname> <object name> <expected count>
+#
+#  kubectl get events puts out events in this format:  grep by all
+# LAST SEEN   FIRST SEEN   COUNT   NAME                                                        KIND                         SUBOBJECT                                  TYPE      REASON                  SOURCE                                   MESSAGE
+# 31m         31m          2       other-dash.15784304888c3b93                                 GrafanaDashboard                                                        Normal    Synced                  grafana-dashboard-controller             Grafana Object synced successfully 
+#
+validateEventCount() {
+    actualCount=$(kubectl get events | grep $1 | grep $2 | grep $3 | awk -F" " '{print $3}')
+    expectedCount=$4
+
+    if [ "$actualCount" != "$expectedCount" ]; then
+        echo "$actualCount does not equal expected $expectedCount"
+    fi
+
+    [ "$actualCount" == "$expectedCount" ]
 }

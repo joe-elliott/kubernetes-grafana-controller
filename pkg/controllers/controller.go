@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -13,11 +14,11 @@ import (
 )
 
 const (
-	// SuccessSynced is used as part of the Event 'reason' when a GrafanaDashboard is synced
-	SuccessSynced = "Synced"
-	// MessageResourceSynced is the message used for an Event fired when a GrafanaDashboard
-	// is synced successfully
+	SuccessSynced         = "Synced"
 	MessageResourceSynced = "Grafana Object synced successfully"
+
+	SuccessDeleted         = "Deleted"
+	MessageResourceDeleted = "Grafana Object deleted successfully"
 )
 
 type Controller struct {
@@ -43,7 +44,13 @@ func NewController(controllerAgentName string,
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: controller.enqueueWorkQueueItem,
 		UpdateFunc: func(old, new interface{}) {
-			controller.enqueueWorkQueueItem(new)
+
+			oldSpec := reflect.ValueOf(old).Elem().FieldByName("Spec").Interface()
+			newSpec := reflect.ValueOf(new).Elem().FieldByName("Spec").Interface()
+
+			if !reflect.DeepEqual(oldSpec, newSpec) {
+				controller.enqueueWorkQueueItem(new)
+			}
 		},
 		DeleteFunc: controller.enqueueWorkQueueItem,
 	})

@@ -124,8 +124,6 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - Support interpolation of k8s secrets into datasources
   - Since Grafana wants to use the name as a unique key should we stop storing IDs in status and just query the id using the name when we want to delete/update?
   - Grafana client is a mess.  clean it up
-  - Controller gets caught in update loops sometimes
   - clean up copyright headers
-  - add license
   - leaving version in a grafana object can cause failed updates.  remove?
   - create issues from this list ^

@@ -1,23 +1,17 @@
 package controllers
 
-type GrafanaObject int
-
-const (
-	Dashboard           = 0
-	NotificationChannel = 1
-	DataSource          = 2
-)
+import "k8s.io/apimachinery/pkg/runtime"
 
 type WorkQueueItem struct {
-	key        string
-	objectType GrafanaObject
-	uuid       string
+	key            string
+	originalObject runtime.Object
+	uuid           string
 }
 
-func NewWorkQueueItem(key string, objectType GrafanaObject, uuid string) WorkQueueItem {
+func NewWorkQueueItem(key string, originalObject runtime.Object, uuid string) WorkQueueItem {
 	return WorkQueueItem{
-		key:        key,
-		objectType: objectType,
-		uuid:       uuid,
+		key:            key,
+		originalObject: originalObject,
+		uuid:           uuid,
 	}
 }

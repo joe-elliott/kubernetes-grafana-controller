@@ -52,7 +52,7 @@ func TestCreatesGrafanaDashboard(t *testing.T) {
 	dashboardJson := "{ 'test': 'test' }"
 
 	dashboard := newGrafanaDashboard("test", dashboardJson)
-	item := NewWorkQueueItem(getKey(dashboard, t), Dashboard, "")
+	item := NewWorkQueueItem(getKey(dashboard, t), nil, "")
 
 	f.grafanaDashboardLister = append(f.grafanaDashboardLister, dashboard)
 	f.objects = append(f.objects, dashboard)
