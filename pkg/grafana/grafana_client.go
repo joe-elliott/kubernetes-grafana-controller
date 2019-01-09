@@ -224,7 +224,7 @@ func (client *Client) postGrafanaObject(postJSON string, path string, idField st
 	id, ok := responseBody[idField]
 
 	if !ok {
-		return "", fmt.Errorf("Respone Body did not have field %s", idField)
+		return "", fmt.Errorf("Response Body did not have field %s", idField)
 	}
 
 	// is there a better way to generically convert to string?
@@ -264,7 +264,7 @@ func (client *Client) putGrafanaObject(putJSON string, path string, idField stri
 	id, ok := responseBody[idField]
 
 	if !ok {
-		return "", fmt.Errorf("Respone Body did not have field %s", idField)
+		return "", fmt.Errorf("Response Body did not have field %s", idField)
 	}
 
 	// is there a better way to generically convert to string?
