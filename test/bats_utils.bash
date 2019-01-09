@@ -247,6 +247,9 @@ validateDataSourceContents() {
 # utils
 #
 dumpState() {
+    echo "-----------events--------------"
+    kubectl get events
+
     echo "-----------controller logs--------------"
     kubectl logs $(kubectl get po -l=run=kubernetes-grafana-test --no-headers=true | cut -d ' ' -f 1)
     echo "-----------grafana logs--------------"
