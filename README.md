@@ -126,6 +126,5 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - Grafana client is a mess.  clean it up
   - Controller gets caught in update loops sometimes
   - clean up copyright headers
-  - add license
   - leaving version in a grafana object can cause failed updates.  remove?
   - create issues from this list ^
