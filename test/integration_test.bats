@@ -59,6 +59,8 @@ teardown(){
         [ "$httpStatus" -eq "404" ]
 
         validateDashboardCount 0
+
+        validateEventCount GrafanaDashboard Deleted $(objectNameFromFile $filename) 1
     done
 }
 
@@ -70,6 +72,8 @@ teardown(){
 
         (( count++ ))
         validateDashboardCount $count
+
+        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 1
     done
 }
 
@@ -81,6 +85,8 @@ teardown(){
 
         (( count++ ))
         validateDashboardCount $count
+
+        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 1
     done
 
     # the .update files have dashboards with the same ids and different contents. 
@@ -89,6 +95,8 @@ teardown(){
         validateDashboardContents $filename
 
         validateDashboardCount $count
+
+        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 2
     done
 }
 
