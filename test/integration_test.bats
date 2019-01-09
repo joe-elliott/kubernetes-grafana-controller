@@ -39,6 +39,8 @@ teardown(){
 
         (( count++ ))
         validateDashboardCount $count
+
+        validateEventCount GrafanaDashboard Updated $(objectNameFromFile $filename) 1
     done
 }
 
