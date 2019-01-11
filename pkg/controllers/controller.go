@@ -130,12 +130,22 @@ func (c *Controller) processNextWorkItem() bool {
 			utilruntime.HandleError(fmt.Errorf("expected string in workqueue but got %#v", obj))
 			return nil
 		}
-		// Run the syncHandler, passing it the namespace/name string of the
-		// GrafanaDashboard resource to be synced.
-		if err := c.syncer.syncHandler(item); err != nil {
-			// Put the item back on the workqueue to handle any transient errors.
-			c.workqueue.AddRateLimited(item)
-			return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
+
+		if item.isResyncAll() {
+
+			if err := c.syncer.resyncAll(); err != nil {
+				c.workqueue.AddRateLimited(item)
+				return fmt.Errorf("error resyncing all %s, requeuing", err.Error())
+			}
+		} else {
+
+			// Run the syncHandler, passing it the namespace/name string of the
+			// GrafanaDashboard resource to be synced.
+			if err := c.syncer.syncHandler(item); err != nil {
+				// Put the item back on the workqueue to handle any transient errors.
+				c.workqueue.AddRateLimited(item)
+				return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
+			}
 		}
 
 		// Finally, if no error occurs we Forget this item so it does not

@@ -76,11 +76,6 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
-	if item.isResyncAll() {
-		utilruntime.HandleError(fmt.Errorf("received resync all"))
-		return nil
-	}
-
 	// Get the GrafanaDataSource resource with this namespace/name
 	grafanaDataSource, err := s.grafanaDataSourcesLister.GrafanaDataSources(namespace).Get(name)
 	if err != nil {
@@ -117,6 +112,11 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 	}
 
 	s.recorder.Event(grafanaDataSource, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	return nil
+}
+
+func (s *DataSourceSyncer) resyncAll() error {
+	fmt.Println("resyncing all!")
 	return nil
 }
 

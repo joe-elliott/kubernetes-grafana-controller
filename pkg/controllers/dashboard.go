@@ -76,11 +76,6 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
-	if item.isResyncAll() {
-		utilruntime.HandleError(fmt.Errorf("received resync all"))
-		return nil
-	}
-
 	// Get the GrafanaDashboard resource with this namespace/name
 	grafanaDashboard, err := s.grafanaDashboardsLister.GrafanaDashboards(namespace).Get(name)
 	if err != nil {
@@ -138,6 +133,11 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 
 	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
 	return err
+}
+
+func (s *DashboardSyncer) resyncAll() error {
+	fmt.Println("resyncing all!")
+	return nil
 }
 
 func (s *DashboardSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
