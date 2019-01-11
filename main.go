@@ -17,15 +17,17 @@ import (
 )
 
 var (
-	masterURL  string
-	kubeconfig string
-	grafanaURL string
+	masterURL       string
+	kubeconfig      string
+	grafanaURL      string
+	resyncAllPeriod time.Duration
 )
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.")
+	flag.DurationVar(&resyncAllPeriod, "resyncall", "30s", "Periodic interval in which to force resync the state of grafana")
 
 	klog.InitFlags(nil)
 }
@@ -71,21 +73,21 @@ func main() {
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		if err = dashboardController.Run(2, stopCh); err != nil {
+		if err = dashboardController.Run(2, resyncAllPeriod, stopCh); err != nil {
 			klog.Fatalf("Error running dashboardController: %s", err.Error())
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		if err = notificationChannelController.Run(2, stopCh); err != nil {
+		if err = notificationChannelController.Run(2, resyncAllPeriod, stopCh); err != nil {
 			klog.Fatalf("Error running notificationChannelController: %s", err.Error())
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
-		if err = dataSourceController.Run(2, stopCh); err != nil {
+		if err = dataSourceController.Run(2, resyncAllPeriod, stopCh); err != nil {
 			klog.Fatalf("Error running dataSourceController: %s", err.Error())
 		}
 	}()

@@ -62,7 +62,7 @@ func NewController(controllerAgentName string,
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
 // workers to finish processing their current work items.
-func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
+func (c *Controller) Run(threadiness int, resyncAllPeriod time.Duration, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
 
@@ -82,7 +82,7 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	}
 
 	// launch resync all thing
-	go wait.Until(c.enqueueResyncAll, time.Second*30, stopCh)
+	go wait.Until(c.enqueueResyncAll, resyncAllPeriod, stopCh)
 
 	klog.Info("Started workers")
 
