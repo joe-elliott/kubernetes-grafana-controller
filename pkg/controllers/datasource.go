@@ -116,7 +116,7 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 }
 
 func (s *DataSourceSyncer) resyncAll() error {
-	fmt.Println("resyncing all!")
+	fmt.Println("resyncing all datasources!")
 	return nil
 }
 

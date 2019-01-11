@@ -136,7 +136,7 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 }
 
 func (s *DashboardSyncer) resyncAll() error {
-	fmt.Println("resyncing all!")
+	fmt.Println("resyncing all dashboards!")
 	return nil
 }
 

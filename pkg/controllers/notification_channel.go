@@ -136,7 +136,7 @@ func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafa
 }
 
 func (s *NotificationChannelSyncer) resyncAll() error {
-	fmt.Println("resyncing all!")
+	fmt.Println("resyncing all notification channels!")
 	return nil
 }
 
