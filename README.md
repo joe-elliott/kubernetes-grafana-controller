@@ -127,4 +127,6 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - leaving version in a grafana object can cause failed updates.  remove?
   - consolidate integration test logic: i.e. all post tests are basically the same
   - test that tests to see if the controller will eventually sync even if grafana is down
+  - the logic to prevent re-updates is terrible.  check actual state of grafana?
+  - confirm 30 second resync works
   - create issues from this list ^
