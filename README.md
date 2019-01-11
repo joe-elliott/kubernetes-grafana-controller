@@ -129,4 +129,5 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - test that tests to see if the controller will eventually sync even if grafana is down
   - the logic to prevent re-updates is terrible.  check actual state of grafana?
   - confirm 30 second resync works
+  - confirm appropriate use of utilruntime.HandleError vs. return err
   - create issues from this list ^
