@@ -76,6 +76,11 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
+	if item.isResyncAll() {
+		utilruntime.HandleError(fmt.Errorf("received resync all"))
+		return nil
+	}
+
 	// Get the GrafanaNotificationChannel resource with this namespace/name
 	grafanaNotificationChannel, err := s.grafanaNotificationChannelLister.GrafanaNotificationChannels(namespace).Get(name)
 	if err != nil {

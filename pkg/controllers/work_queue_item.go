@@ -15,3 +15,15 @@ func NewWorkQueueItem(key string, originalObject runtime.Object, uuid string) Wo
 		uuid:           uuid,
 	}
 }
+
+func NewResyncAllItem() WorkQueueItem {
+	return WorkQueueItem{
+		key:            "",
+		originalObject: nil,
+		uuid:           "",
+	}
+}
+
+func (w *WorkQueueItem) isResyncAll() bool {
+	return w.key == ""
+}

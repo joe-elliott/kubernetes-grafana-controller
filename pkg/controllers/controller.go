@@ -81,6 +81,9 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 		go wait.Until(c.runWorker, time.Second, stopCh)
 	}
 
+	// launch resync all thing
+	go wait.Until(c.enqueueResyncAll, time.Second*30, stopCh)
+
 	klog.Info("Started workers")
 
 	<-stopCh
@@ -148,6 +151,10 @@ func (c *Controller) processNextWorkItem() bool {
 	}
 
 	return true
+}
+
+func (c *Controller) enqueueResyncAll() {
+	c.workqueue.AddRateLimited(NewResyncAllItem())
 }
 
 func (c *Controller) enqueueWorkQueueItem(obj interface{}) {
