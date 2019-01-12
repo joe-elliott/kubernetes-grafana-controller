@@ -115,7 +115,7 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (s *DataSourceSyncer) resyncAll() error {
+func (s *DataSourceSyncer) enqueueResyncDeletedObjects() error {
 	fmt.Println("resyncing all datasources!")
 	return nil
 }

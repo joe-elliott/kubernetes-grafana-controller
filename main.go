@@ -17,17 +17,17 @@ import (
 )
 
 var (
-	masterURL       string
-	kubeconfig      string
-	grafanaURL      string
-	resyncAllPeriod time.Duration
+	masterURL          string
+	kubeconfig         string
+	grafanaURL         string
+	resyncDeletePeriod time.Duration
 )
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.")
-	flag.DurationVar(&resyncAllPeriod, "resyncall", time.Second*30, "Periodic interval in which to force resync the state of grafana")
+	flag.DurationVar(&resyncDeletePeriod, "resync-delete", time.Second*30, "Periodic interval in which to force resync deleted objects.  Pass 0s to disable.")
 
 	klog.InitFlags(nil)
 }
@@ -85,7 +85,7 @@ func main() {
 		go func(c *controllers.Controller) {
 			defer wg.Done()
 
-			if err := c.Run(2, resyncAllPeriod, stopCh); err != nil {
+			if err := c.Run(2, resyncDeletePeriod, stopCh); err != nil {
 				klog.Fatalf("Error running controller: %s", err.Error())
 			}
 		}(controller)

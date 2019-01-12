@@ -62,7 +62,7 @@ func NewController(controllerAgentName string,
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
 // workers to finish processing their current work items.
-func (c *Controller) Run(threadiness int, resyncAllPeriod time.Duration, stopCh <-chan struct{}) error {
+func (c *Controller) Run(threadiness int, resyncDeletePeriod time.Duration, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
 
@@ -82,7 +82,9 @@ func (c *Controller) Run(threadiness int, resyncAllPeriod time.Duration, stopCh 
 	}
 
 	// launch resync all thing
-	go wait.Until(c.enqueueResyncAll, resyncAllPeriod, stopCh)
+	if resyncDeletePeriod != 0 {
+		go wait.Until(c.enqueueResyncDeletedObjects, resyncDeletePeriod, stopCh)
+	}
 
 	klog.Info("Started workers")
 
@@ -131,9 +133,9 @@ func (c *Controller) processNextWorkItem() bool {
 			return nil
 		}
 
-		if item.isResyncAll() {
+		if item.isResyncDeletedObjects() {
 
-			if err := c.syncer.resyncAll(); err != nil {
+			if err := c.syncer.enqueueResyncDeletedObjects(); err != nil {
 				c.workqueue.AddRateLimited(item)
 				return fmt.Errorf("error resyncing all %s, requeuing", err.Error())
 			}
@@ -163,8 +165,8 @@ func (c *Controller) processNextWorkItem() bool {
 	return true
 }
 
-func (c *Controller) enqueueResyncAll() {
-	c.workqueue.AddRateLimited(NewResyncAllItem())
+func (c *Controller) enqueueResyncDeletedObjects() {
+	c.workqueue.AddRateLimited(NewResyncDeletedObjects())
 }
 
 func (c *Controller) enqueueWorkQueueItem(obj interface{}) {
