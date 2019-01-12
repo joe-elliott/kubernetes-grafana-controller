@@ -11,6 +11,7 @@ import (
 type Interface interface {
 	PostDashboard(string) (string, error)
 	DeleteDashboard(string) error
+	GetAllDashboardUids() ([]string, error)
 
 	PostNotificationChannel(string) (string, error)
 	DeleteNotificationChannel(string) error
@@ -54,6 +55,29 @@ func (client *Client) DeleteDashboard(uid string) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetAllDashboardUids() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var dashboards []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/search"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&dashboards); err != nil {
+		return nil, err
+	}
+
+	var uids []string
+
+	for _, dashboard := range dashboards {
+		uids = append(uids, dashboard["uid"].(string))
+	}
+
+	return uids, nil
 }
 
 func (client *Client) PostNotificationChannel(notificationChannelJson string) (string, error) {

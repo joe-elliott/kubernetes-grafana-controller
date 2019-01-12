@@ -5,6 +5,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -137,6 +138,43 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 
 func (s *DashboardSyncer) resyncDeletedObjects() error {
 	fmt.Println("resyncing all dashboards!")
+
+	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
+	uids, err := s.grafanaClient.GetAllDashboardUids()
+
+	if err != nil {
+		return err
+	}
+
+	desiredDashboards, err := s.grafanaDashboardsLister.List(labels.Everything())
+
+	if err != nil {
+		return err
+	}
+
+	for _, uid := range uids {
+		var found = false
+
+		for _, dashboard := range desiredDashboards {
+
+			if dashboard.Status.GrafanaUID == uid {
+				found = true
+				break
+			}
+
+			if !found {
+				klog.Infof("Dashboard %v found in grafana but not k8s.  Deleting.", uid)
+				err = s.grafanaClient.DeleteDashboard(uid)
+
+				// if one fails just go ahead and bail out.  controlling logic will requeue
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+	}
+
 	return nil
 }
 

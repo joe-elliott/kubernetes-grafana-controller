@@ -28,6 +28,10 @@ func (client *ClientFake) DeleteDashboard(uid string) error {
 	return nil
 }
 
+func (client *ClientFake) GetAllDashboardUids() ([]string, error) {
+	return nil, nil
+}
+
 func (client *ClientFake) PostNotificationChannel(notificationChannelJson string) (string, error) {
 	client.PostedJson = &notificationChannelJson
 
