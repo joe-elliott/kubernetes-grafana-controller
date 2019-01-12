@@ -135,7 +135,7 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 	return err
 }
 
-func (s *DashboardSyncer) enqueueResyncDeletedObjects() error {
+func (s *DashboardSyncer) resyncDeletedObjects() error {
 	fmt.Println("resyncing all dashboards!")
 	return nil
 }

@@ -135,7 +135,7 @@ func (c *Controller) processNextWorkItem() bool {
 
 		if item.isResyncDeletedObjects() {
 
-			if err := c.syncer.enqueueResyncDeletedObjects(); err != nil {
+			if err := c.syncer.resyncDeletedObjects(); err != nil {
 				c.workqueue.AddRateLimited(item)
 				return fmt.Errorf("error resyncing all %s, requeuing", err.Error())
 			}
