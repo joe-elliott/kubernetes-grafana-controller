@@ -120,6 +120,7 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - Change "Notification Channels" to "Alert Notifications"
   - Add prometheus metrics
   - Determine/document the behavior of a dashboard with a uid vs one without.  Confirm sanity.
+     - use uid?  use id?  just use name as primary key?  need to investigate various options and pick a path
   - Fix API objects naming to be less verbose and redundant
   - Support interpolation of k8s secrets into datasources
   - Since Grafana wants to use the name as a unique key should we stop storing IDs in status and just query the id using the name when we want to delete/update?
@@ -131,3 +132,4 @@ Unit tests for the controller technically pass, but they only test creating a ne
   - confirm 30 second resync works
   - confirm appropriate use of utilruntime.HandleError vs. return err
   - create issues from this list ^
+  - improve logging considerably
