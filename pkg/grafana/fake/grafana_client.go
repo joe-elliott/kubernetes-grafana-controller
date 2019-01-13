@@ -55,3 +55,7 @@ func (client *ClientFake) DeleteDataSource(id string) error {
 func (client *ClientFake) GetAllDatasourceIds() ([]string, error) {
 	return nil, nil
 }
+
+func (client *ClientFake) GetAllNotificationChannelIds() ([]string, error) {
+	return nil, nil
+}

@@ -171,6 +171,35 @@ teardown(){
     done
 }
 
+@test "deleting a GrafanaNotificationChannel while the controller is not running deletes the notification channel in Grafana" {
+
+    for filename in notification_channels/*.yaml; do
+        channelId=$(validatePostNotificationChannel $filename)
+
+        kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
+        echo "Test Deleting $filename ($channelId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        kubectl scale --replicas=1 deployment/kubernetes-grafana-test
+
+        sleep 10s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+
+        # for some reason grafana 500s when you GET a non-existent alert-notifications?
+        [ "$httpStatus" -eq "500" ]
+
+        validateNotificationChannelCount 0
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+    done
+}
+
+
 @test "creating a GrafanaNotificationChannel object creates the same channel in Grafana" {
     count=0
 

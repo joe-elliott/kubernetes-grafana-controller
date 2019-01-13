@@ -15,6 +15,7 @@ type Interface interface {
 
 	PostNotificationChannel(string) (string, error)
 	DeleteNotificationChannel(string) error
+	GetAllNotificationChannelIds() ([]string, error)
 
 	PostDataSource(string) (string, error)
 	DeleteDataSource(string) error
@@ -146,6 +147,29 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetAllNotificationChannelIds() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var channels []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/alert-notifications"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&channels); err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	for _, channel := range channels {
+		ids = append(ids, fmt.Sprintf("%v", channel["id"]))
+	}
+
+	return ids, nil
 }
 
 func (client *Client) GetAllDataSourceIds() ([]string, error) {
