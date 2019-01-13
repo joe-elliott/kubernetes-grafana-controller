@@ -248,6 +248,36 @@ teardown(){
     done
 }
 
+@test "deleting a GrafanaDataSource while the controller is not running deletes the datasource in Grafana" {
+
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
+        echo "Test Deleting $filename ($sourceId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        kubectl scale --replicas=1 deployment/kubernetes-grafana-test
+
+        sleep 10s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+
+        echo "status $httpStatus"
+        curl ${GRAFANA_URL}/api/datasources
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateDataSourceCount 0
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
+    done
+}
+
 @test "creating a GrafanaDataSource object creates the same datasource in Grafana" {
     count=0
 
