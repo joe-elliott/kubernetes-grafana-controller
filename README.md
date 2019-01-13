@@ -113,23 +113,24 @@ Unit tests for the controller technically pass, but they only test creating a ne
     - [x] Update
     - [x] Delete
 - Refactoring/Cleanup/Additional
-  - Full refresh functionality in case the controller goes offline or someone mucks with state in Grafana
   - Add comments where go wants me to
   - The dashboard object is currently `grafanadashboard.grafana.k8s.io`.  This feels wrong.  Revisit object naming.  Should it be `dashboard.grafana.com`, `dashboard.kubernetes-grafana-controller`?
-  - Drop "Grafana" on all objects
-  - Change "Notification Channels" to "Alert Notifications"
   - Add prometheus metrics
   - Determine/document the behavior of a dashboard with a uid vs one without.  Confirm sanity.
      - use uid?  use id?  just use name as primary key?  need to investigate various options and pick a path
+     - Since Grafana wants to use the name as a unique key should we stop storing IDs in status and just query the id using the name when we want to delete/update?
   - Fix API objects naming to be less verbose and redundant
+    - Drop "Grafana" on all objects
+    - Change "Notification Channels" to "Alert Notifications"
   - Support interpolation of k8s secrets into datasources
-  - Since Grafana wants to use the name as a unique key should we stop storing IDs in status and just query the id using the name when we want to delete/update?
   - Grafana client is a mess.  clean it up
   - leaving version in a grafana object can cause failed updates.  remove?
-  - consolidate integration test logic: i.e. all post tests are basically the same
-  - test that tests to see if the controller will eventually sync even if grafana is down
   - the logic to prevent re-updates is terrible.  check actual state of grafana?
   - confirm 30 second resync works
   - confirm appropriate use of utilruntime.HandleError vs. return err
   - improve logging considerably
+  - Tests
+    - test that tests to see if the controller will eventually sync even if grafana is down
+    - consolidate integration test logic: i.e. all post tests are basically the same
+    - create more focused tests.  each test tests too many things
   - create issues from this list ^
