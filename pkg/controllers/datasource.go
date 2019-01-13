@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -81,7 +83,7 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 	if err != nil {
 		// The GrafanaDataSource resource may no longer exist, in which case we stop
 		// processing.
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaDataSource '%s' in work queue no longer exists", item.key))
 
 			// DataSource was deleted, so delete from grafana
@@ -116,7 +118,45 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 }
 
 func (s *DataSourceSyncer) resyncDeletedObjects() error {
-	fmt.Println("resyncing all datasources!")
+	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
+	ids, err := s.grafanaClient.GetAllDataSourceIds()
+
+	if err != nil {
+		return err
+	}
+
+	desiredDataSources, err := s.grafanaDataSourcesLister.List(labels.Everything())
+
+	if err != nil {
+		return err
+	}
+
+	for _, id := range ids {
+		var found = false
+
+		for _, datasource := range desiredDataSources {
+
+			if datasource.Status.GrafanaID == "" {
+				return errors.New("found datasource with unitialized state, bailing")
+			}
+
+			if datasource.Status.GrafanaID == id {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			klog.Infof("Datasource %v found in grafana but not k8s.  Deleting.", id)
+			err = s.grafanaClient.DeleteDataSource(id)
+
+			// if one fails just go ahead and bail out.  controlling logic will requeue
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 

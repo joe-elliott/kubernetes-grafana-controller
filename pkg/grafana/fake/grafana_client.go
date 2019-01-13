@@ -51,3 +51,7 @@ func (client *ClientFake) PostDataSource(notificationChannelJson string) (string
 func (client *ClientFake) DeleteDataSource(id string) error {
 	return nil
 }
+
+func (client *ClientFake) GetAllDatasourceIds() ([]string, error) {
+	return nil, nil
+}

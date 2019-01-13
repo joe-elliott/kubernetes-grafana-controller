@@ -18,6 +18,7 @@ type Interface interface {
 
 	PostDataSource(string) (string, error)
 	DeleteDataSource(string) error
+	GetAllDataSourceIds() ([]string, error)
 }
 
 type Client struct {
@@ -145,6 +146,29 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetAllDataSourceIds() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var datasources []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/datasources"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&datasources); err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	for _, datasource := range datasources {
+		ids = append(ids, datasource["id"].(string))
+	}
+
+	return ids, nil
 }
 
 func (client *Client) PostDataSource(dataSourceJson string) (string, error) {

@@ -140,7 +140,6 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 }
 
 func (s *DashboardSyncer) resyncDeletedObjects() error {
-	fmt.Println("resyncing all dashboards!")
 
 	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
 	uids, err := s.grafanaClient.GetAllDashboardUids()
@@ -173,8 +172,6 @@ func (s *DashboardSyncer) resyncDeletedObjects() error {
 		if !found {
 			klog.Infof("Dashboard %v found in grafana but not k8s.  Deleting.", uid)
 			err = s.grafanaClient.DeleteDashboard(uid)
-
-			fmt.Println("deleting: ", uid)
 
 			// if one fails just go ahead and bail out.  controlling logic will requeue
 			if err != nil {
