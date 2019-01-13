@@ -93,7 +93,6 @@ teardown(){
         validateDashboardCount 0
 
         validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
-        validateEventCount GrafanaDashboard Deleted $(objectNameFromFile $filename) 1
     done
 }
 
