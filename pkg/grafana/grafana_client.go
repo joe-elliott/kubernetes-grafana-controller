@@ -165,7 +165,7 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 	var ids []string
 
 	for _, datasource := range datasources {
-		ids = append(ids, datasource["id"].(string))
+		ids = append(ids, fmt.Sprintf("%v", datasource["id"]))
 	}
 
 	return ids, nil
