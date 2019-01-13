@@ -22,6 +22,10 @@ validateDashboardCount() {
 
     count=$(echo $searchJson | jq length)
 
+    if [ "$count" -ne "$1" ]; then
+        echo "count: $count param: $1"
+    fi
+
     [ "$count" -eq "$1" ]
 }
 

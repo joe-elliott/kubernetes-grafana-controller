@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -81,7 +83,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 	if err != nil {
 		// The GrafanaNotificationChannel resource may no longer exist, in which case we stop
 		// processing.
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaNotificationChannel '%s' in work queue no longer exists", item.key))
 
 			// channel was deleted, so delete from grafana
@@ -133,6 +135,49 @@ func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafa
 
 	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaNotificationChannels(grafanaNotificationChannel.Namespace).Update(grafanaNotificationChannelCopy)
 	return err
+}
+
+func (s *NotificationChannelSyncer) resyncDeletedObjects() error {
+	// get all notification channels in grafana.  anything in grafana that's not in k8s gets nuked
+	ids, err := s.grafanaClient.GetAllNotificationChannelIds()
+
+	if err != nil {
+		return err
+	}
+
+	desiredChannels, err := s.grafanaNotificationChannelLister.List(labels.Everything())
+
+	if err != nil {
+		return err
+	}
+
+	for _, id := range ids {
+		var found = false
+
+		for _, channel := range desiredChannels {
+
+			if channel.Status.GrafanaID == "" {
+				return errors.New("found channel with unitialized state, bailing")
+			}
+
+			if channel.Status.GrafanaID == id {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			klog.Infof("Channel %v found in grafana but not k8s.  Deleting.", id)
+			err = s.grafanaClient.DeleteNotificationChannel(id)
+
+			// if one fails just go ahead and bail out.  controlling logic will requeue
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {

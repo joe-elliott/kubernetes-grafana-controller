@@ -70,6 +70,32 @@ teardown(){
     done
 }
 
+@test "deleting a GrafanaDashboard while the controller is not running deletes the dashboard in Grafana" {
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
+
+        kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
+        echo "Test Deleting $filename ($dashboardId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        kubectl scale --replicas=1 deployment/kubernetes-grafana-test
+
+        sleep 10s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateDashboardCount 0
+
+        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
+    done
+}
+
 @test "creating a GrafanaDashboard object creates the same dashboard in Grafana" {
     count=0
 
@@ -145,6 +171,35 @@ teardown(){
     done
 }
 
+@test "deleting a GrafanaNotificationChannel while the controller is not running deletes the notification channel in Grafana" {
+
+    for filename in notification_channels/*.yaml; do
+        channelId=$(validatePostNotificationChannel $filename)
+
+        kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
+        echo "Test Deleting $filename ($channelId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        kubectl scale --replicas=1 deployment/kubernetes-grafana-test
+
+        sleep 10s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+
+        # for some reason grafana 500s when you GET a non-existent alert-notifications?
+        [ "$httpStatus" -eq "500" ]
+
+        validateNotificationChannelCount 0
+
+        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+    done
+}
+
+
 @test "creating a GrafanaNotificationChannel object creates the same channel in Grafana" {
     count=0
 
@@ -219,6 +274,36 @@ teardown(){
 
         validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
         validateEventCount GrafanaDataSource Deleted $(objectNameFromFile $filename) 1
+    done
+}
+
+@test "deleting a GrafanaDataSource while the controller is not running deletes the datasource in Grafana" {
+
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
+        echo "Test Deleting $filename ($sourceId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        kubectl scale --replicas=1 deployment/kubernetes-grafana-test
+
+        sleep 10s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+
+        echo "status $httpStatus"
+        curl ${GRAFANA_URL}/api/datasources
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateDataSourceCount 0
+
+        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
     done
 }
 

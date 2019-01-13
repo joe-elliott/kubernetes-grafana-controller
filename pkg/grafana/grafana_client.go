@@ -11,12 +11,15 @@ import (
 type Interface interface {
 	PostDashboard(string) (string, error)
 	DeleteDashboard(string) error
+	GetAllDashboardUids() ([]string, error)
 
 	PostNotificationChannel(string) (string, error)
 	DeleteNotificationChannel(string) error
+	GetAllNotificationChannelIds() ([]string, error)
 
 	PostDataSource(string) (string, error)
 	DeleteDataSource(string) error
+	GetAllDataSourceIds() ([]string, error)
 }
 
 type Client struct {
@@ -54,6 +57,29 @@ func (client *Client) DeleteDashboard(uid string) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetAllDashboardUids() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var dashboards []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/search"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&dashboards); err != nil {
+		return nil, err
+	}
+
+	var uids []string
+
+	for _, dashboard := range dashboards {
+		uids = append(uids, dashboard["uid"].(string))
+	}
+
+	return uids, nil
 }
 
 func (client *Client) PostNotificationChannel(notificationChannelJson string) (string, error) {
@@ -121,6 +147,52 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetAllNotificationChannelIds() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var channels []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/alert-notifications"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&channels); err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	for _, channel := range channels {
+		ids = append(ids, fmt.Sprintf("%v", channel["id"]))
+	}
+
+	return ids, nil
+}
+
+func (client *Client) GetAllDataSourceIds() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var datasources []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/datasources"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&datasources); err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	for _, datasource := range datasources {
+		ids = append(ids, fmt.Sprintf("%v", datasource["id"]))
+	}
+
+	return ids, nil
 }
 
 func (client *Client) PostDataSource(dataSourceJson string) (string, error) {

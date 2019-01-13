@@ -15,3 +15,15 @@ func NewWorkQueueItem(key string, originalObject runtime.Object, uuid string) Wo
 		uuid:           uuid,
 	}
 }
+
+func NewResyncDeletedObjects() WorkQueueItem {
+	return WorkQueueItem{
+		key:            "",
+		originalObject: nil,
+		uuid:           "",
+	}
+}
+
+func (w *WorkQueueItem) isResyncDeletedObjects() bool {
+	return w.key == "" && w.originalObject == nil && w.uuid == ""
+}

@@ -3,8 +3,12 @@ package controllers
 import (
 	"fmt"
 
+	"errors"
+
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -81,7 +85,7 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 	if err != nil {
 		// The GrafanaDashboard resource may no longer exist, in which case we stop
 		// processing.
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaDashboard '%s' in work queue no longer exists", item.key))
 
 			// dashboard was deleted, so delete from grafana
@@ -133,6 +137,50 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 
 	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaDashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
 	return err
+}
+
+func (s *DashboardSyncer) resyncDeletedObjects() error {
+
+	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
+	uids, err := s.grafanaClient.GetAllDashboardUids()
+
+	if err != nil {
+		return err
+	}
+
+	desiredDashboards, err := s.grafanaDashboardsLister.List(labels.Everything())
+
+	if err != nil {
+		return err
+	}
+
+	for _, uid := range uids {
+		var found = false
+
+		for _, dashboard := range desiredDashboards {
+
+			if dashboard.Status.GrafanaUID == "" {
+				return errors.New("found dashboard with unitialized state, bailing")
+			}
+
+			if dashboard.Status.GrafanaUID == uid {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			klog.Infof("Dashboard %v found in grafana but not k8s.  Deleting.", uid)
+			err = s.grafanaClient.DeleteDashboard(uid)
+
+			// if one fails just go ahead and bail out.  controlling logic will requeue
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *DashboardSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {

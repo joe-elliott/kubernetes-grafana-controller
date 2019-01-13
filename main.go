@@ -17,15 +17,17 @@ import (
 )
 
 var (
-	masterURL  string
-	kubeconfig string
-	grafanaURL string
+	masterURL          string
+	kubeconfig         string
+	grafanaURL         string
+	resyncDeletePeriod time.Duration
 )
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.")
+	flag.DurationVar(&resyncDeletePeriod, "resync-delete", time.Second*30, "Periodic interval in which to force resync deleted objects.  Pass 0s to disable.")
 
 	klog.InitFlags(nil)
 }
@@ -52,15 +54,24 @@ func main() {
 	}
 
 	grafanaClient := grafana.NewClient(grafanaURL)
-
 	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
 
-	dashboardController := controllers.NewDashboardController(client, kubeClient, grafanaClient,
-		informerFactory.Grafana().V1alpha1().GrafanaDashboards())
-	notificationChannelController := controllers.NewNotificationChannelController(client, kubeClient, grafanaClient,
-		informerFactory.Grafana().V1alpha1().GrafanaNotificationChannels())
-	dataSourceController := controllers.NewDataSourceController(client, kubeClient, grafanaClient,
-		informerFactory.Grafana().V1alpha1().GrafanaDataSources())
+	var allControllers []*controllers.Controller
+
+	allControllers = append(allControllers, controllers.NewDashboardController(client,
+		kubeClient,
+		grafanaClient,
+		informerFactory.Grafana().V1alpha1().GrafanaDashboards()))
+
+	allControllers = append(allControllers, controllers.NewNotificationChannelController(client,
+		kubeClient,
+		grafanaClient,
+		informerFactory.Grafana().V1alpha1().GrafanaNotificationChannels()))
+
+	allControllers = append(allControllers, controllers.NewDataSourceController(client,
+		kubeClient,
+		grafanaClient,
+		informerFactory.Grafana().V1alpha1().GrafanaDataSources()))
 
 	stopCh := signals.SetupSignalHandler()
 
@@ -68,27 +79,17 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
-		if err = dashboardController.Run(2, stopCh); err != nil {
-			klog.Fatalf("Error running dashboardController: %s", err.Error())
-		}
-	}()
+	for _, controller := range allControllers {
+		wg.Add(1)
 
-	go func() {
-		defer wg.Done()
-		if err = notificationChannelController.Run(2, stopCh); err != nil {
-			klog.Fatalf("Error running notificationChannelController: %s", err.Error())
-		}
-	}()
+		go func(c *controllers.Controller) {
+			defer wg.Done()
 
-	go func() {
-		defer wg.Done()
-		if err = dataSourceController.Run(2, stopCh); err != nil {
-			klog.Fatalf("Error running dataSourceController: %s", err.Error())
-		}
-	}()
+			if err := c.Run(2, resyncDeletePeriod, stopCh); err != nil {
+				klog.Fatalf("Error running controller: %s", err.Error())
+			}
+		}(controller)
+	}
 
 	wg.Wait()
 }

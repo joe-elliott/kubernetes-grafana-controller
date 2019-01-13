@@ -62,7 +62,7 @@ func NewController(controllerAgentName string,
 // as syncing informer caches and starting workers. It will block until stopCh
 // is closed, at which point it will shutdown the workqueue and wait for
 // workers to finish processing their current work items.
-func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
+func (c *Controller) Run(threadiness int, resyncDeletePeriod time.Duration, stopCh <-chan struct{}) error {
 	defer utilruntime.HandleCrash()
 	defer c.workqueue.ShutDown()
 
@@ -79,6 +79,11 @@ func (c *Controller) Run(threadiness int, stopCh <-chan struct{}) error {
 	// Launch two workers to process GrafanaDashboard resources
 	for i := 0; i < threadiness; i++ {
 		go wait.Until(c.runWorker, time.Second, stopCh)
+	}
+
+	// launch resync all thing
+	if resyncDeletePeriod != 0 {
+		go wait.Until(c.enqueueResyncDeletedObjects, resyncDeletePeriod, stopCh)
 	}
 
 	klog.Info("Started workers")
@@ -127,12 +132,22 @@ func (c *Controller) processNextWorkItem() bool {
 			utilruntime.HandleError(fmt.Errorf("expected string in workqueue but got %#v", obj))
 			return nil
 		}
-		// Run the syncHandler, passing it the namespace/name string of the
-		// GrafanaDashboard resource to be synced.
-		if err := c.syncer.syncHandler(item); err != nil {
-			// Put the item back on the workqueue to handle any transient errors.
-			c.workqueue.AddRateLimited(item)
-			return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
+
+		if item.isResyncDeletedObjects() {
+
+			if err := c.syncer.resyncDeletedObjects(); err != nil {
+				c.workqueue.AddRateLimited(item)
+				return fmt.Errorf("error resyncing all %s, requeuing", err.Error())
+			}
+		} else {
+
+			// Run the syncHandler, passing it the namespace/name string of the
+			// GrafanaDashboard resource to be synced.
+			if err := c.syncer.syncHandler(item); err != nil {
+				// Put the item back on the workqueue to handle any transient errors.
+				c.workqueue.AddRateLimited(item)
+				return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
+			}
 		}
 
 		// Finally, if no error occurs we Forget this item so it does not
@@ -148,6 +163,10 @@ func (c *Controller) processNextWorkItem() bool {
 	}
 
 	return true
+}
+
+func (c *Controller) enqueueResyncDeletedObjects() {
+	c.workqueue.AddRateLimited(NewResyncDeletedObjects())
 }
 
 func (c *Controller) enqueueWorkQueueItem(obj interface{}) {
