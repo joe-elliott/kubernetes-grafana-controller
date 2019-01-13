@@ -3,8 +3,11 @@ package controllers
 import (
 	"fmt"
 
+	"errors"
+
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -82,7 +85,7 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 	if err != nil {
 		// The GrafanaDashboard resource may no longer exist, in which case we stop
 		// processing.
-		if errors.IsNotFound(err) {
+		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaDashboard '%s' in work queue no longer exists", item.key))
 
 			// dashboard was deleted, so delete from grafana
@@ -157,22 +160,27 @@ func (s *DashboardSyncer) resyncDeletedObjects() error {
 
 		for _, dashboard := range desiredDashboards {
 
+			if dashboard.Status.GrafanaUID == "" {
+				return errors.New("found dashboard with unitialized state, bailing")
+			}
+
 			if dashboard.Status.GrafanaUID == uid {
 				found = true
 				break
 			}
-
-			if !found {
-				klog.Infof("Dashboard %v found in grafana but not k8s.  Deleting.", uid)
-				err = s.grafanaClient.DeleteDashboard(uid)
-
-				// if one fails just go ahead and bail out.  controlling logic will requeue
-				if err != nil {
-					return err
-				}
-			}
 		}
 
+		if !found {
+			klog.Infof("Dashboard %v found in grafana but not k8s.  Deleting.", uid)
+			err = s.grafanaClient.DeleteDashboard(uid)
+
+			fmt.Println("deleting: ", uid)
+
+			// if one fails just go ahead and bail out.  controlling logic will requeue
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

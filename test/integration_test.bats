@@ -70,6 +70,33 @@ teardown(){
     done
 }
 
+@test "deleting a GrafanaDashboard while the controller is not running deletes the dashboard in Grafana" {
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
+
+        kubectl scale --replicas=0 deployment/kubernetes-grafana-test
+
+        echo "Test Deleting $filename ($dashboardId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        kubectl scale --replicas=1 deployment/kubernetes-grafana-test
+
+        sleep 10s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateDashboardCount 0
+
+        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
+        validateEventCount GrafanaDashboard Deleted $(objectNameFromFile $filename) 1
+    done
+}
+
 @test "creating a GrafanaDashboard object creates the same dashboard in Grafana" {
     count=0
 
