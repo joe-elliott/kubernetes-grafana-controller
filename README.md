@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/number101010/kubernetes-grafana-controller)](https://goreportcard.com/report/github.com/number101010/kubernetes-grafana-controller)
 
-This controller will maintain the state of a Grafana instance by syncing it with CRDs created in Kubernetes.  It is under active development.
+This controller will maintain the state of a Grafana instance by syncing it with objects created in Kubernetes.  It is under active development.
 
 The primary motivator for creating this controller is to allow development teams to include their Grafana dashboards in the same source repos as their code alongside other Kubernetes objects.
 
@@ -40,18 +40,44 @@ klog
 
 ## Custom Resource Definitions
 
+The kubernetes-grafana-controller currently will sync the following objects.
+
 ### Dashboards
 
 ```
 apiVersion: grafana.k8s.io/v1alpha1
 kind: GrafanaDashboard
 metadata:
-  name: test-dash
+  name: test
 spec:
   dashboardJson: <dashboard json as string>
 ```
 
+### Notification Channels
+
+```
+apiVersion: grafana.k8s.io/v1alpha1
+kind: GrafanaNotificationChannel
+metadata:
+  name: test
+spec:
+  notificationChannelJson: <channel json as string>
+```
+
+### Datasources
+
+```
+apiVersion: grafana.k8s.io/v1alpha1
+kind: GrafanaDataSource
+metadata:
+  name: test
+spec:
+  dataSourceJson: <data source json as string>
+```
+
 ## Tests
+
+[tests](test/readme.md)
 
 ### Integration
 
