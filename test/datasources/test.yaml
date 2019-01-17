@@ -3,7 +3,7 @@ kind: GrafanaDataSource
 metadata:
   name: test
 spec:
-  dataSourceJson: '{
+  json: '{
   "orgId": 1,
   "name": "Prometheus",
   "type": "prometheus",

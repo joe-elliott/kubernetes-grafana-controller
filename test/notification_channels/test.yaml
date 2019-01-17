@@ -3,7 +3,7 @@ kind: GrafanaNotificationChannel
 metadata:
   name: test
 spec:
-  notificationChannelJson: '{
+  json: '{
   "name": "new alert notification",
   "type":  "email",
   "isDefault": false,

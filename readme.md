@@ -48,31 +48,31 @@ The kubernetes-grafana-controller currently will sync the following objects.
 
 ```
 apiVersion: grafana.com/v1alpha1
-kind: GrafanaDashboard
+kind: Dashboard
 metadata:
   name: test
 spec:
-  dashboardJson: <dashboard json as string>
+  json: <dashboard json as string>
 ```
 
 ### Notification Channels
 
 ```
 apiVersion: grafana.com/v1alpha1
-kind: GrafanaNotificationChannel
+kind: NotificationChannel
 metadata:
   name: test
 spec:
-  notificationChannelJson: <channel json as string>
+  json: <channel json as string>
 ```
 
 ### Datasources
 
 ```
 apiVersion: grafana.com/v1alpha1
-kind: GrafanaDataSource
+kind: DataSource
 metadata:
   name: test
 spec:
-  dataSourceJson: <data source json as string>
+  json: <data source json as string>
 ```

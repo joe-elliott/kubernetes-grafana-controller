@@ -3,7 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: other-dash
 spec:
-  dashboardJson: '{
+  json: '{
   "__inputs": [
     {
       "name": "DS_PROMETHEUS",

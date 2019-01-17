@@ -3,7 +3,7 @@ kind: GrafanaDashboard
 metadata:
   name: test-dash
 spec:
-  dashboardJson: '{
+  json: '{
   "__inputs": [],
   "__requires": [
     {
