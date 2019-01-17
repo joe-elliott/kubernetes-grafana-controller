@@ -26,7 +26,7 @@ import (
 
 // NotificationChannelSyncer is the controller implementation for GrafanaNotificationChannel resources
 type NotificationChannelSyncer struct {
-	grafanaNotificationChannelLister listers.GrafanaNotificationChannelLister
+	grafanaNotificationChannelLister listers.NotificationChannelLister
 	grafanaClient                    grafana.Interface
 	grafanaclientset                 clientset.Interface
 	recorder                         record.EventRecorder
@@ -37,7 +37,7 @@ func NewNotificationChannelController(
 	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
-	grafanaNotificationChannelInformer informers.GrafanaNotificationChannelInformer) *Controller {
+	grafanaNotificationChannelInformer informers.NotificationChannelInformer) *Controller {
 
 	controllerAgentName := "grafana-notificationchannel-controller"
 
@@ -116,7 +116,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.NotificationChannel, id string) error {
+func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *v1alpha1.NotificationChannel, id string) error {
 
 	if grafanaNotificationChannel.Status.GrafanaID == id {
 		return nil

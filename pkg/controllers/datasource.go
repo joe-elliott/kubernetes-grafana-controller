@@ -27,7 +27,7 @@ import (
 
 // DataSourceSyncer is the controller implementation for DataSource resources
 type DataSourceSyncer struct {
-	grafanaDataSourcesLister listers.GrafanaDataSourceLister
+	grafanaDataSourcesLister listers.DataSourceLister
 	grafanaClient            grafana.Interface
 	grafanaclientset         clientset.Interface
 	recorder                 record.EventRecorder
@@ -191,7 +191,7 @@ func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 		return nil
 	}
 
-	if dataSource, ok = obj.(*v1alpha1.GrafanaDataSource); !ok {
+	if dataSource, ok = obj.(*v1alpha1.DataSource); !ok {
 		utilruntime.HandleError(fmt.Errorf("expected dataSource in workqueue but got %#v", obj))
 		return nil
 	}
