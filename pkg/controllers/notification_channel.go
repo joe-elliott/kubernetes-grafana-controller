@@ -14,7 +14,6 @@ import (
 	"k8s.io/klog"
 
 	"kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
-	grafanav1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	grafanascheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
@@ -78,16 +77,16 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
-	// Get the GrafanaNotificationChannel resource with this namespace/name
-	grafanaNotificationChannel, err := s.grafanaNotificationChannelLister.GrafanaNotificationChannels(namespace).Get(name)
+	// Get the NotificationChannel resource with this namespace/name
+	grafanaNotificationChannel, err := s.grafanaNotificationChannelLister.NotificationChannels(namespace).Get(name)
 	if err != nil {
-		// The GrafanaNotificationChannel resource may no longer exist, in which case we stop
+		// The NotificationChannel resource may no longer exist, in which case we stop
 		// processing.
 		if k8serrors.IsNotFound(err) {
 			utilruntime.HandleError(fmt.Errorf("grafanaNotificationChannel '%s' in work queue no longer exists", item.key))
 
 			// channel was deleted, so delete from grafana
-			err = s.grafanaClient.DeleteNotificationChannel(item.uuid)
+			err = s.grafanaClient.DeleteNotificationChannel(item.id)
 
 			if err == nil {
 				s.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
@@ -97,7 +96,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	id, err := s.grafanaClient.PostNotificationChannel(grafanaNotificationChannel.Spec.NotificationChannelJSON)
+	id, err := s.grafanaClient.PostNotificationChannel(grafanaNotificationChannel.Spec.JSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
@@ -106,7 +105,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	// Finally, we update the status block of the GrafanaNotificationChannel resource to reflect the
+	// Finally, we update the status block of the NotificationChannel resource to reflect the
 	// current state of the world
 	err = s.updateGrafanaNotificationChannelStatus(grafanaNotificationChannel, id)
 	if err != nil {
@@ -117,7 +116,7 @@ func (s *NotificationChannelSyncer) syncHandler(item WorkQueueItem) error {
 	return nil
 }
 
-func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.GrafanaNotificationChannel, id string) error {
+func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafanaNotificationChannel *grafanav1alpha1.NotificationChannel, id string) error {
 
 	if grafanaNotificationChannel.Status.GrafanaID == id {
 		return nil
@@ -133,7 +132,7 @@ func (s *NotificationChannelSyncer) updateGrafanaNotificationChannelStatus(grafa
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaNotificationChannels(grafanaNotificationChannel.Namespace).Update(grafanaNotificationChannelCopy)
+	_, err := s.grafanaclientset.GrafanaV1alpha1().NotificationChannels(grafanaNotificationChannel.Namespace).Update(grafanaNotificationChannelCopy)
 	return err
 }
 
@@ -183,7 +182,7 @@ func (s *NotificationChannelSyncer) resyncDeletedObjects() error {
 func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 	var key string
 	var err error
-	var grafanaNotificationChannel *v1alpha1.GrafanaNotificationChannel
+	var grafanaNotificationChannel *v1alpha1.NotificationChannel
 	var ok bool
 
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -191,8 +190,8 @@ func (s *NotificationChannelSyncer) createWorkQueueItem(obj interface{}) *WorkQu
 		return nil
 	}
 
-	if grafanaNotificationChannel, ok = obj.(*v1alpha1.GrafanaNotificationChannel); !ok {
-		utilruntime.HandleError(fmt.Errorf("expected GrafanaNotificationChannel in workqueue but got %#v", obj))
+	if grafanaNotificationChannel, ok = obj.(*v1alpha1.NotificationChannel); !ok {
+		utilruntime.HandleError(fmt.Errorf("expected NotificationChannel in workqueue but got %#v", obj))
 		return nil
 	}
 

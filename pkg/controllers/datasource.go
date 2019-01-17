@@ -25,7 +25,7 @@ import (
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-// DataSourceSyncer is the controller implementation for GrafanaDataSource resources
+// DataSourceSyncer is the controller implementation for DataSource resources
 type DataSourceSyncer struct {
 	grafanaDataSourcesLister listers.GrafanaDataSourceLister
 	grafanaClient            grafana.Interface
@@ -38,7 +38,7 @@ func NewDataSourceController(
 	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
-	grafanaDataSourceInformer informers.GrafanaDataSourceInformer) *Controller {
+	grafanaDataSourceInformer informers.DataSourceInformer) *Controller {
 
 	controllerAgentName := "grafana-DataSource-controller"
 
@@ -68,7 +68,7 @@ func NewDataSourceController(
 }
 
 // syncHandler compares the actual state with the desired, and attempts to
-// converge the two. It then updates the Status block of the GrafanaDataSource resource
+// converge the two. It then updates the Status block of the DataSource resource
 // with the current status of the resource.
 func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 	// Convert the namespace/name string into a distinct namespace and name
@@ -78,16 +78,16 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
-	// Get the GrafanaDataSource resource with this namespace/name
-	grafanaDataSource, err := s.grafanaDataSourcesLister.GrafanaDataSources(namespace).Get(name)
+	// Get the DataSource resource with this namespace/name
+	grafanaDataSource, err := s.grafanaDataSourcesLister.DataSources(namespace).Get(name)
 	if err != nil {
-		// The GrafanaDataSource resource may no longer exist, in which case we stop
+		// The DataSource resource may no longer exist, in which case we stop
 		// processing.
 		if k8serrors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("grafanaDataSource '%s' in work queue no longer exists", item.key))
+			utilruntime.HandleError(fmt.Errorf("DataSource '%s' in work queue no longer exists", item.key))
 
 			// DataSource was deleted, so delete from grafana
-			err = s.grafanaClient.DeleteDataSource(item.uuid)
+			err = s.grafanaClient.DeleteDataSource(item.id)
 
 			if err == nil {
 				s.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
@@ -97,7 +97,7 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	id, err := s.grafanaClient.PostDataSource(grafanaDataSource.Spec.DataSourceJSON)
+	id, err := s.grafanaClient.PostDataSource(grafanaDataSource.Spec.JSON)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
@@ -160,7 +160,7 @@ func (s *DataSourceSyncer) resyncDeletedObjects() error {
 	return nil
 }
 
-func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *grafanav1alpha1.GrafanaDataSource, id string) error {
+func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *grafanav1alpha1.DataSource, id string) error {
 
 	if grafanaDataSource.Status.GrafanaID == id {
 		return nil
@@ -176,14 +176,14 @@ func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *graf
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := s.grafanaclientset.GrafanaV1alpha1().GrafanaDataSources(grafanaDataSource.Namespace).Update(grafanaDataSourceCopy)
+	_, err := s.grafanaclientset.GrafanaV1alpha1().DataSources(grafanaDataSource.Namespace).Update(grafanaDataSourceCopy)
 	return err
 }
 
 func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 	var key string
 	var err error
-	var dataSource *v1alpha1.GrafanaDataSource
+	var dataSource *v1alpha1.DataSource
 	var ok bool
 
 	if key, err = cache.MetaNamespaceKeyFunc(obj); err != nil {
@@ -192,7 +192,7 @@ func (s *DataSourceSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {
 	}
 
 	if dataSource, ok = obj.(*v1alpha1.GrafanaDataSource); !ok {
-		utilruntime.HandleError(fmt.Errorf("expected GrafanaDataSource in workqueue but got %#v", obj))
+		utilruntime.HandleError(fmt.Errorf("expected dataSource in workqueue but got %#v", obj))
 		return nil
 	}
 
