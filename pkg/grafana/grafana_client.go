@@ -11,7 +11,7 @@ import (
 type Interface interface {
 	PostDashboard(string) (string, error)
 	DeleteDashboard(string) error
-	GetAllDashboardUids() ([]string, error)
+	GetAllDashboardIds() ([]string, error)
 
 	PostNotificationChannel(string) (string, error)
 	DeleteNotificationChannel(string) error
@@ -45,8 +45,8 @@ func (client *Client) PostDashboard(dashboardJSON string) (string, error) {
 	return client.postGrafanaObject(postJSON, "/api/dashboards/db", "uid")
 }
 
-func (client *Client) DeleteDashboard(uid string) error {
-	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + uid)
+func (client *Client) DeleteDashboard(id string) error {
+	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + id)
 
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (client *Client) DeleteDashboard(uid string) error {
 	return nil
 }
 
-func (client *Client) GetAllDashboardUids() ([]string, error) {
+func (client *Client) GetAllDashboardIds() ([]string, error) {
 	var resp *req.Resp
 	var err error
 	var dashboards []map[string]interface{}
@@ -73,13 +73,13 @@ func (client *Client) GetAllDashboardUids() ([]string, error) {
 		return nil, err
 	}
 
-	var uids []string
+	var ids []string
 
 	for _, dashboard := range dashboards {
-		uids = append(uids, dashboard["uid"].(string))
+		uids = append(ids, dashboard["uid"].(string))
 	}
 
-	return uids, nil
+	return ids, nil
 }
 
 func (client *Client) PostNotificationChannel(notificationChannelJson string) (string, error) {
