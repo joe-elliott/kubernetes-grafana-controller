@@ -7,31 +7,31 @@ import (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// GrafanaDataSource is a specification for a GrafanaDataSource resource
-type GrafanaDataSource struct {
+// DataSource is a specification for a DataSource resource
+type DataSource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GrafanaDataSourceSpec   `json:"spec"`
-	Status GrafanaDataSourceStatus `json:"status"`
+	Spec   DataSourceSpec   `json:"spec"`
+	Status DataSourceStatus `json:"status"`
 }
 
-// GrafanaDataSourceSpec is the spec for a GrafanaDataSource resource
-type GrafanaDataSourceSpec struct {
-	DataSourceJSON string `json:"dataSourceJson"`
+// DataSourceSpec is the spec for a DataSource resource
+type DataSourceSpec struct {
+	JSON string `json:"json"`
 }
 
-// GrafanaDataSourceStatus is the status for a GrafanaDataSource resource
-type GrafanaDataSourceStatus struct {
+// DataSourceStatus is the status for a DataSource resource
+type DataSourceStatus struct {
 	GrafanaID string `json:"grafanaID"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// GrafanaDataSourceList is a list of GrafanaDataSource resources
-type GrafanaDataSourceList struct {
+// DataSourceList is a list of DataSource resources
+type DataSourceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 
-	Items []GrafanaDataSource `json:"items"`
+	Items []DataSource `json:"items"`
 }

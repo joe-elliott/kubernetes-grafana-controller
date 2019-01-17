@@ -18,8 +18,8 @@ limitations under the License.
 
 package v1alpha1
 
-type GrafanaDashboardExpansion interface{}
+type DashboardExpansion interface{}
 
-type GrafanaDataSourceExpansion interface{}
+type DataSourceExpansion interface{}
 
-type GrafanaNotificationChannelExpansion interface{}
+type NotificationChannelExpansion interface{}

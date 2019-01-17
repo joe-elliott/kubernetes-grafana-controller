@@ -28,26 +28,26 @@ import (
 
 type GrafanaV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	GrafanaDashboardsGetter
-	GrafanaDataSourcesGetter
-	GrafanaNotificationChannelsGetter
+	DashboardsGetter
+	DataSourcesGetter
+	NotificationChannelsGetter
 }
 
-// GrafanaV1alpha1Client is used to interact with features provided by the grafana.k8s.io group.
+// GrafanaV1alpha1Client is used to interact with features provided by the grafana.com group.
 type GrafanaV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *GrafanaV1alpha1Client) GrafanaDashboards(namespace string) GrafanaDashboardInterface {
-	return newGrafanaDashboards(c, namespace)
+func (c *GrafanaV1alpha1Client) Dashboards(namespace string) DashboardInterface {
+	return newDashboards(c, namespace)
 }
 
-func (c *GrafanaV1alpha1Client) GrafanaDataSources(namespace string) GrafanaDataSourceInterface {
-	return newGrafanaDataSources(c, namespace)
+func (c *GrafanaV1alpha1Client) DataSources(namespace string) DataSourceInterface {
+	return newDataSources(c, namespace)
 }
 
-func (c *GrafanaV1alpha1Client) GrafanaNotificationChannels(namespace string) GrafanaNotificationChannelInterface {
-	return newGrafanaNotificationChannels(c, namespace)
+func (c *GrafanaV1alpha1Client) NotificationChannels(namespace string) NotificationChannelInterface {
+	return newNotificationChannels(c, namespace)
 }
 
 // NewForConfig creates a new GrafanaV1alpha1Client for the given config.

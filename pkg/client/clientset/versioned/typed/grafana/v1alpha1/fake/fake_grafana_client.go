@@ -29,16 +29,16 @@ type FakeGrafanaV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeGrafanaV1alpha1) GrafanaDashboards(namespace string) v1alpha1.GrafanaDashboardInterface {
-	return &FakeGrafanaDashboards{c, namespace}
+func (c *FakeGrafanaV1alpha1) Dashboards(namespace string) v1alpha1.DashboardInterface {
+	return &FakeDashboards{c, namespace}
 }
 
-func (c *FakeGrafanaV1alpha1) GrafanaDataSources(namespace string) v1alpha1.GrafanaDataSourceInterface {
-	return &FakeGrafanaDataSources{c, namespace}
+func (c *FakeGrafanaV1alpha1) DataSources(namespace string) v1alpha1.DataSourceInterface {
+	return &FakeDataSources{c, namespace}
 }
 
-func (c *FakeGrafanaV1alpha1) GrafanaNotificationChannels(namespace string) v1alpha1.GrafanaNotificationChannelInterface {
-	return &FakeGrafanaNotificationChannels{c, namespace}
+func (c *FakeGrafanaV1alpha1) NotificationChannels(namespace string) v1alpha1.NotificationChannelInterface {
+	return &FakeNotificationChannels{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

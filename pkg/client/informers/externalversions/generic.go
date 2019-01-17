@@ -52,13 +52,13 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=grafana.k8s.io, Version=v1alpha1
-	case v1alpha1.SchemeGroupVersion.WithResource("grafanadashboards"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().GrafanaDashboards().Informer()}, nil
-	case v1alpha1.SchemeGroupVersion.WithResource("grafanadatasources"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().GrafanaDataSources().Informer()}, nil
-	case v1alpha1.SchemeGroupVersion.WithResource("grafananotificationchannels"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().GrafanaNotificationChannels().Informer()}, nil
+	// Group=grafana.com, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("dashboards"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().Dashboards().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("datasources"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().DataSources().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("notificationchannels"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().NotificationChannels().Informer()}, nil
 
 	}
 

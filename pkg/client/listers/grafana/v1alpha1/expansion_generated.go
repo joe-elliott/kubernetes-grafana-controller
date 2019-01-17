@@ -18,26 +18,26 @@ limitations under the License.
 
 package v1alpha1
 
-// GrafanaDashboardListerExpansion allows custom methods to be added to
-// GrafanaDashboardLister.
-type GrafanaDashboardListerExpansion interface{}
+// DashboardListerExpansion allows custom methods to be added to
+// DashboardLister.
+type DashboardListerExpansion interface{}
 
-// GrafanaDashboardNamespaceListerExpansion allows custom methods to be added to
-// GrafanaDashboardNamespaceLister.
-type GrafanaDashboardNamespaceListerExpansion interface{}
+// DashboardNamespaceListerExpansion allows custom methods to be added to
+// DashboardNamespaceLister.
+type DashboardNamespaceListerExpansion interface{}
 
-// GrafanaDataSourceListerExpansion allows custom methods to be added to
-// GrafanaDataSourceLister.
-type GrafanaDataSourceListerExpansion interface{}
+// DataSourceListerExpansion allows custom methods to be added to
+// DataSourceLister.
+type DataSourceListerExpansion interface{}
 
-// GrafanaDataSourceNamespaceListerExpansion allows custom methods to be added to
-// GrafanaDataSourceNamespaceLister.
-type GrafanaDataSourceNamespaceListerExpansion interface{}
+// DataSourceNamespaceListerExpansion allows custom methods to be added to
+// DataSourceNamespaceLister.
+type DataSourceNamespaceListerExpansion interface{}
 
-// GrafanaNotificationChannelListerExpansion allows custom methods to be added to
-// GrafanaNotificationChannelLister.
-type GrafanaNotificationChannelListerExpansion interface{}
+// NotificationChannelListerExpansion allows custom methods to be added to
+// NotificationChannelLister.
+type NotificationChannelListerExpansion interface{}
 
-// GrafanaNotificationChannelNamespaceListerExpansion allows custom methods to be added to
-// GrafanaNotificationChannelNamespaceLister.
-type GrafanaNotificationChannelNamespaceListerExpansion interface{}
+// NotificationChannelNamespaceListerExpansion allows custom methods to be added to
+// NotificationChannelNamespaceLister.
+type NotificationChannelNamespaceListerExpansion interface{}

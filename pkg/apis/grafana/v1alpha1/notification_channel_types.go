@@ -7,31 +7,31 @@ import (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// GrafanaNotificationChannel is a specification for a GrafanaNotificationChannel resource
-type GrafanaNotificationChannel struct {
+// NotificationChannel is a specification for a NotificationChannel resource
+type NotificationChannel struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GrafanaNotificationChannelSpec   `json:"spec"`
-	Status GrafanaNotificationChannelStatus `json:"status"`
+	Spec   NotificationChannelSpec   `json:"spec"`
+	Status NotificationChannelStatus `json:"status"`
 }
 
-// GrafanaNotificationChannelSpec is the spec for a GrafanaNotificationChannel resource
-type GrafanaNotificationChannelSpec struct {
-	NotificationChannelJSON string `json:"notificationChannelJson"`
+// NotificationChannelSpec is the spec for a NotificationChannel resource
+type NotificationChannelSpec struct {
+	JSON string `json:"json"`
 }
 
-// GrafanaNotificationChannelStatus is the status for a GrafanaNotificationChannel resource
-type GrafanaNotificationChannelStatus struct {
+// NotificationChannelStatus is the status for a NotificationChannel resource
+type NotificationChannelStatus struct {
 	GrafanaID string `json:"grafanaID"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// GrafanaNotificationChannelList is a list of GrafanaNotificationChannel resources
-type GrafanaNotificationChannelList struct {
+// NotificationChannelList is a list of NotificationChannel resources
+type NotificationChannelList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 
-	Items []GrafanaNotificationChannel `json:"items"`
+	Items []NotificationChannel `json:"items"`
 }

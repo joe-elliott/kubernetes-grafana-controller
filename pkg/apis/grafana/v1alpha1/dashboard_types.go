@@ -7,31 +7,31 @@ import (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// GrafanaDashboard is a specification for a GrafanaDashboard resource
-type GrafanaDashboard struct {
+// Dashboard is a specification for a Dashboard resource
+type Dashboard struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GrafanaDashboardSpec   `json:"spec"`
-	Status GrafanaDashboardStatus `json:"status"`
+	Spec   DashboardSpec   `json:"spec"`
+	Status DashboardStatus `json:"status"`
 }
 
-// GrafanaDashboardSpec is the spec for a GrafanaDashboard resource
-type GrafanaDashboardSpec struct {
-	DashboardJSON string `json:"dashboardJson"`
+// DashboardSpec is the spec for a Dashboard resource
+type DashboardSpec struct {
+	JSON string `json:"json"`
 }
 
-// GrafanaDashboardStatus is the status for a GrafanaDashboard resource
-type GrafanaDashboardStatus struct {
-	GrafanaUID string `json:"grafanaUID"`
+// DashboardStatus is the status for a Dashboard resource
+type DashboardStatus struct {
+	GrafanaID string `json:"grafanaID"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// GrafanaDashboardList is a list of GrafanaDashboard resources
-type GrafanaDashboardList struct {
+// DashboardList is a list of Dashboard resources
+type DashboardList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 
-	Items []GrafanaDashboard `json:"items"`
+	Items []Dashboard `json:"items"`
 }

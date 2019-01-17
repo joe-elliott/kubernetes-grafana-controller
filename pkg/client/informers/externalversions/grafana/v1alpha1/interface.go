@@ -24,12 +24,12 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// GrafanaDashboards returns a GrafanaDashboardInformer.
-	GrafanaDashboards() GrafanaDashboardInformer
-	// GrafanaDataSources returns a GrafanaDataSourceInformer.
-	GrafanaDataSources() GrafanaDataSourceInformer
-	// GrafanaNotificationChannels returns a GrafanaNotificationChannelInformer.
-	GrafanaNotificationChannels() GrafanaNotificationChannelInformer
+	// Dashboards returns a DashboardInformer.
+	Dashboards() DashboardInformer
+	// DataSources returns a DataSourceInformer.
+	DataSources() DataSourceInformer
+	// NotificationChannels returns a NotificationChannelInformer.
+	NotificationChannels() NotificationChannelInformer
 }
 
 type version struct {
@@ -43,17 +43,17 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// GrafanaDashboards returns a GrafanaDashboardInformer.
-func (v *version) GrafanaDashboards() GrafanaDashboardInformer {
-	return &grafanaDashboardInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// Dashboards returns a DashboardInformer.
+func (v *version) Dashboards() DashboardInformer {
+	return &dashboardInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// GrafanaDataSources returns a GrafanaDataSourceInformer.
-func (v *version) GrafanaDataSources() GrafanaDataSourceInformer {
-	return &grafanaDataSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// DataSources returns a DataSourceInformer.
+func (v *version) DataSources() DataSourceInformer {
+	return &dataSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
-// GrafanaNotificationChannels returns a GrafanaNotificationChannelInformer.
-func (v *version) GrafanaNotificationChannels() GrafanaNotificationChannelInformer {
-	return &grafanaNotificationChannelInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// NotificationChannels returns a NotificationChannelInformer.
+func (v *version) NotificationChannels() NotificationChannelInformer {
+	return &notificationChannelInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
