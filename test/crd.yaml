@@ -1,9 +1,9 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: grafanadashboards.grafana.k8s.io
+  name: grafanadashboards.grafana.com
 spec:
-  group: grafana.k8s.io
+  group: grafana.com
   version: v1alpha1
   names:
     kind: GrafanaDashboard
@@ -13,9 +13,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: grafananotificationchannels.grafana.k8s.io
+  name: grafananotificationchannels.grafana.com
 spec:
-  group: grafana.k8s.io
+  group: grafana.com
   version: v1alpha1
   names:
     kind: GrafanaNotificationChannel
@@ -25,9 +25,9 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: grafanadatasources.grafana.k8s.io
+  name: grafanadatasources.grafana.com
 spec:
-  group: grafana.k8s.io
+  group: grafana.com
   version: v1alpha1
   names:
     kind: GrafanaDataSource

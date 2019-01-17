@@ -1,4 +1,4 @@
-apiVersion: grafana.k8s.io/v1alpha1
+apiVersion: grafana.com/v1alpha1
 kind: GrafanaDashboard
 metadata:
   name: other-dash
