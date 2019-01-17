@@ -1,5 +1,5 @@
 apiVersion: grafana.com/v1alpha1
-kind: GrafanaDashboard
+kind: Dashboard
 metadata:
   name: test-dash
 spec:

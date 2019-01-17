@@ -1,5 +1,5 @@
 apiVersion: grafana.com/v1alpha1
-kind: GrafanaDataSource
+kind: DataSource
 metadata:
   name: test
 spec:
