@@ -76,7 +76,7 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	var ids []string
 
 	for _, dashboard := range dashboards {
-		uids = append(ids, dashboard["uid"].(string))
+		ids = append(ids, dashboard["uid"].(string))
 	}
 
 	return ids, nil
