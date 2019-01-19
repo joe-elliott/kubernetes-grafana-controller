@@ -1,5 +1,5 @@
 apiVersion: grafana.com/v1alpha1
-kind: NotificationChannel
+kind: AlertNotification
 metadata:
   name: test
 spec:

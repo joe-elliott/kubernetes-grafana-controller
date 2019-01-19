@@ -88,71 +88,70 @@ validateDashboardContents() {
 }
 
 #
-# notification channel
-#
+# alert notifications
 #
 
-# validatePostNotificationChannel <yaml file name>
-#   note that the channel file name must match the NotificationChannel object name ...
+# validatePostAlertNotification <yaml file name>
+#   note that the notification file name must match the AlertNotification object name ...
 #    ... b/c i'm lazy
 #
-validatePostNotificationChannel() {
+validatePostAlertNotification() {
     specfile=$1
 
-    channelName=$(objectNameFromFile $specfile)
+    notificationName=$(objectNameFromFile $specfile)
 
     # create in kubernetes
     kubectl apply -f $specfile >&2
 
 	sleep 5s
 
-    channelId=$(kubectl get NotificationChannel -o=jsonpath="{.items[?(@.metadata.name==\"${channelName}\")].status.grafanaID}")
+    notificationId=$(kubectl get AlertNotification -o=jsonpath="{.items[?(@.metadata.name==\"${notificationName}\")].status.grafanaID}")
 
-    [ "$channelId" != "" ]
+    [ "$notificationId" != "" ]
 
     # check if exists in grafana
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
     [ "$httpStatus" -eq "200" ]
 
-    echo $channelId
+    echo $notificationId
 }
 
 
 #
-# validateNotificationChannelCount <count>
+# validateAlertNotificationCount <count>
 #   use grafana search api to confirm that the count is what is expected 
 #
-validateNotificationChannelCount() {
-    channelJson=$(curl --silent ${GRAFANA_URL}/api/alert-notifications)
+validateAlertNotificationCount() {
+    notificationJson=$(curl --silent ${GRAFANA_URL}/api/alert-notifications)
 
-    count=$(echo $channelJson | jq length)
+    count=$(echo $notificationJson | jq length)
 
     [ "$count" -eq "$1" ]
 }
 
 #
-# validateNotificationChannelContents <yaml file name>
-#   creates a Notification Channel and both verifies it exists and that its content matches
+# validateAlertNotificationContents <yaml file name>
+#   creates a AlertNotification and both verifies it exists and that its content matches
 #
-validateNotificationChannelContents() {
+validateAlertNotificationContents() {
     filename=$1
 
-    channelId=$(validatePostNotificationChannel $filename)
+    notificationId=$(validatePostAlertNotification $filename)
 
-    echo "Test Json Content of $filename ($channelId)"
+    echo "Test Json Content of $filename ($notificationId)"
 
-    channelJsonFromYaml=$(grep -A9999 'json' $filename)
-    channelJsonFromYaml=${channelJsonFromYaml%?}   # strip final quote
-    channelJsonFromYaml=${channelJsonFromYaml#*\'} # strip up to and including the first quote
+    notificationJsonFromYaml=$(grep -A9999 'json' $filename)
+    notificationJsonFromYaml=${notificationJsonFromYaml%?}   # strip final quote
+    notificationJsonFromYaml=${notificationJsonFromYaml#*\'} # strip up to and including the first quote
 
-    echo $channelJsonFromYaml > b.json
+    echo $notificationJsonFromYaml > b.json
     fieldsToKeep=$(cat b.json | jq keys)
 
-    channelJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${channelId})
+    notificationJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${notificationId})
 
     # grafana can add fields to flesh out the object.  remove anything from grafana not present in the original
     #  spec file
-    echo $channelJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
+    echo $notificationJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
 
     equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
@@ -169,7 +168,7 @@ validateNotificationChannelContents() {
 }
 
 # validatePostDataSource <yaml file name>
-#   note that the channel file name must match the DataSource object name ...
+#   note that the notification file name must match the DataSource object name ...
 #    ... b/c i'm lazy
 #
 validatePostDataSource() {
@@ -258,8 +257,8 @@ dumpState() {
 
     echo "-----------Dashboards--------------"
     kubectl describe Dashboard
-    echo "-----------NotificationChannels--------------"
-    kubectl describe NotificationChannel
+    echo "-----------AlertNotification--------------"
+    kubectl describe AlertNotification
     echo "-----------DataSources --------------"
     kubectl describe DataSource
 }

@@ -13,9 +13,9 @@ type Interface interface {
 	DeleteDashboard(string) error
 	GetAllDashboardIds() ([]string, error)
 
-	PostNotificationChannel(string) (string, error)
-	DeleteNotificationChannel(string) error
-	GetAllNotificationChannelIds() ([]string, error)
+	PostAlertNotification(string) (string, error)
+	DeleteAlertNotification(string) error
+	GetAllAlertNotificationIds() ([]string, error)
 
 	PostDataSource(string) (string, error)
 	DeleteDataSource(string) error
@@ -82,13 +82,13 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	return ids, nil
 }
 
-func (client *Client) PostNotificationChannel(notificationChannelJson string) (string, error) {
+func (client *Client) PostAlertNotification(alertNotificationJson string) (string, error) {
 
 	// Grafana throws a 500 if you post 2 notification channels with the same name
 	//  search for a matching notification channel and put these changes to it
 
 	var postChannel map[string]interface{}
-	err := json.Unmarshal([]byte(notificationChannelJson), &postChannel)
+	err := json.Unmarshal([]byte(alertNotificationJson), &postChannel)
 
 	if err != nil {
 		return "", err
@@ -131,11 +131,11 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", postChannel["id"]), "id")
 
 	} else {
-		return client.postGrafanaObject(notificationChannelJson, "/api/alert-notifications", "id")
+		return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
 	}
 }
 
-func (client *Client) DeleteNotificationChannel(id string) error {
+func (client *Client) DeleteAlertNotification(id string) error {
 	resp, err := req.Delete(client.address + "/api/alert-notifications/" + id)
 
 	if err != nil {
@@ -149,7 +149,7 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 	return nil
 }
 
-func (client *Client) GetAllNotificationChannelIds() ([]string, error) {
+func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 	var resp *req.Resp
 	var err error
 	var channels []map[string]interface{}

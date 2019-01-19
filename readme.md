@@ -55,18 +55,18 @@ spec:
   json: <dashboard json as string>
 ```
 
-### Notification Channels
+### AlertNotifications (Notification Channels)
 
 ```
 apiVersion: grafana.com/v1alpha1
-kind: NotificationChannel
+kind: AlertNotification
 metadata:
   name: test
 spec:
-  json: <channel json as string>
+  json: <notification json as string>
 ```
 
-### Datasources
+### DataSources
 
 ```
 apiVersion: grafana.com/v1alpha1

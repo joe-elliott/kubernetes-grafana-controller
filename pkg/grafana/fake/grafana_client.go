@@ -32,13 +32,13 @@ func (client *ClientFake) GetAllDashboardIds() ([]string, error) {
 	return nil, nil
 }
 
-func (client *ClientFake) PostNotificationChannel(json string) (string, error) {
+func (client *ClientFake) PostAlertNotification(json string) (string, error) {
 	client.PostedJson = &json
 
 	return client.fakeID, nil
 }
 
-func (client *ClientFake) DeleteNotificationChannel(id string) error {
+func (client *ClientFake) DeleteAlertNotification(id string) error {
 	return nil
 }
 
@@ -56,6 +56,6 @@ func (client *ClientFake) GetAllDatasourceIds() ([]string, error) {
 	return nil, nil
 }
 
-func (client *ClientFake) GetAllNotificationChannelIds() ([]string, error) {
+func (client *ClientFake) GetAllAlertNotificationIds() ([]string, error) {
 	return nil, nil
 }

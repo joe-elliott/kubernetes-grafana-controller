@@ -63,10 +63,10 @@ func main() {
 		grafanaClient,
 		informerFactory.Grafana().V1alpha1().Dashboards()))
 
-	allControllers = append(allControllers, controllers.NewNotificationChannelController(client,
+	allControllers = append(allControllers, controllers.NewAlertNotificationController(client,
 		kubeClient,
 		grafanaClient,
-		informerFactory.Grafana().V1alpha1().NotificationChannels()))
+		informerFactory.Grafana().V1alpha1().AlertNotifications()))
 
 	allControllers = append(allControllers, controllers.NewDataSourceController(client,
 		kubeClient,
