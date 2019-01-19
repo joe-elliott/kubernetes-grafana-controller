@@ -11,11 +11,11 @@ import (
 type Interface interface {
 	PostDashboard(string) (string, error)
 	DeleteDashboard(string) error
-	GetAllDashboardUids() ([]string, error)
+	GetAllDashboardIds() ([]string, error)
 
-	PostNotificationChannel(string) (string, error)
-	DeleteNotificationChannel(string) error
-	GetAllNotificationChannelIds() ([]string, error)
+	PostAlertNotification(string) (string, error)
+	DeleteAlertNotification(string) error
+	GetAllAlertNotificationIds() ([]string, error)
 
 	PostDataSource(string) (string, error)
 	DeleteDataSource(string) error
@@ -45,8 +45,8 @@ func (client *Client) PostDashboard(dashboardJSON string) (string, error) {
 	return client.postGrafanaObject(postJSON, "/api/dashboards/db", "uid")
 }
 
-func (client *Client) DeleteDashboard(uid string) error {
-	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + uid)
+func (client *Client) DeleteDashboard(id string) error {
+	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + id)
 
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (client *Client) DeleteDashboard(uid string) error {
 	return nil
 }
 
-func (client *Client) GetAllDashboardUids() ([]string, error) {
+func (client *Client) GetAllDashboardIds() ([]string, error) {
 	var resp *req.Resp
 	var err error
 	var dashboards []map[string]interface{}
@@ -73,22 +73,22 @@ func (client *Client) GetAllDashboardUids() ([]string, error) {
 		return nil, err
 	}
 
-	var uids []string
+	var ids []string
 
 	for _, dashboard := range dashboards {
-		uids = append(uids, dashboard["uid"].(string))
+		ids = append(ids, dashboard["uid"].(string))
 	}
 
-	return uids, nil
+	return ids, nil
 }
 
-func (client *Client) PostNotificationChannel(notificationChannelJson string) (string, error) {
+func (client *Client) PostAlertNotification(alertNotificationJson string) (string, error) {
 
 	// Grafana throws a 500 if you post 2 notification channels with the same name
 	//  search for a matching notification channel and put these changes to it
 
 	var postChannel map[string]interface{}
-	err := json.Unmarshal([]byte(notificationChannelJson), &postChannel)
+	err := json.Unmarshal([]byte(alertNotificationJson), &postChannel)
 
 	if err != nil {
 		return "", err
@@ -131,11 +131,11 @@ func (client *Client) PostNotificationChannel(notificationChannelJson string) (s
 		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", postChannel["id"]), "id")
 
 	} else {
-		return client.postGrafanaObject(notificationChannelJson, "/api/alert-notifications", "id")
+		return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
 	}
 }
 
-func (client *Client) DeleteNotificationChannel(id string) error {
+func (client *Client) DeleteAlertNotification(id string) error {
 	resp, err := req.Delete(client.address + "/api/alert-notifications/" + id)
 
 	if err != nil {
@@ -149,7 +149,7 @@ func (client *Client) DeleteNotificationChannel(id string) error {
 	return nil
 }
 
-func (client *Client) GetAllNotificationChannelIds() ([]string, error) {
+func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 	var resp *req.Resp
 	var err error
 	var channels []map[string]interface{}

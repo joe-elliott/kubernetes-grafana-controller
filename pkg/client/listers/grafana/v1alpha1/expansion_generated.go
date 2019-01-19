@@ -18,26 +18,26 @@ limitations under the License.
 
 package v1alpha1
 
-// GrafanaDashboardListerExpansion allows custom methods to be added to
-// GrafanaDashboardLister.
-type GrafanaDashboardListerExpansion interface{}
+// AlertNotificationListerExpansion allows custom methods to be added to
+// AlertNotificationLister.
+type AlertNotificationListerExpansion interface{}
 
-// GrafanaDashboardNamespaceListerExpansion allows custom methods to be added to
-// GrafanaDashboardNamespaceLister.
-type GrafanaDashboardNamespaceListerExpansion interface{}
+// AlertNotificationNamespaceListerExpansion allows custom methods to be added to
+// AlertNotificationNamespaceLister.
+type AlertNotificationNamespaceListerExpansion interface{}
 
-// GrafanaDataSourceListerExpansion allows custom methods to be added to
-// GrafanaDataSourceLister.
-type GrafanaDataSourceListerExpansion interface{}
+// DashboardListerExpansion allows custom methods to be added to
+// DashboardLister.
+type DashboardListerExpansion interface{}
 
-// GrafanaDataSourceNamespaceListerExpansion allows custom methods to be added to
-// GrafanaDataSourceNamespaceLister.
-type GrafanaDataSourceNamespaceListerExpansion interface{}
+// DashboardNamespaceListerExpansion allows custom methods to be added to
+// DashboardNamespaceLister.
+type DashboardNamespaceListerExpansion interface{}
 
-// GrafanaNotificationChannelListerExpansion allows custom methods to be added to
-// GrafanaNotificationChannelLister.
-type GrafanaNotificationChannelListerExpansion interface{}
+// DataSourceListerExpansion allows custom methods to be added to
+// DataSourceLister.
+type DataSourceListerExpansion interface{}
 
-// GrafanaNotificationChannelNamespaceListerExpansion allows custom methods to be added to
-// GrafanaNotificationChannelNamespaceLister.
-type GrafanaNotificationChannelNamespaceListerExpansion interface{}
+// DataSourceNamespaceListerExpansion allows custom methods to be added to
+// DataSourceNamespaceLister.
+type DataSourceNamespaceListerExpansion interface{}

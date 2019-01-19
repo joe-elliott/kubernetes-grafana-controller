@@ -22,9 +22,9 @@ teardown(){
     run kubectl scale --replicas=0 deployment/kubernetes-grafana-test
     run kubectl scale --replicas=0 deployment/grafana
 
-    kubectl delete GrafanaDashboard --ignore-not-found=true --all
-    kubectl delete GrafanaNotificationChannel --ignore-not-found=true --all
-    kubectl delete GrafanaDataSource --ignore-not-found=true --all
+    kubectl delete Dashboard --ignore-not-found=true --all
+    kubectl delete AlertNotification --ignore-not-found=true --all
+    kubectl delete DataSource --ignore-not-found=true --all
 
     # clean up comparison files if they exist
     rm -f a.json
@@ -34,7 +34,7 @@ teardown(){
 #
 # dashboards
 #
-@test "creating a GrafanaDashboard object creates a Grafana Dashboard" {
+@test "creating a Dashboard object creates a Grafana Dashboard" {
     count=0
 
     for filename in dashboards/*.yaml; do
@@ -45,11 +45,11 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
+        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a GrafanaDashboard object deletes the Grafana Dashboard" {
+@test "deleting a Dashboard object deletes the Grafana Dashboard" {
     for filename in dashboards/*.yaml; do
         dashboardId=$(validatePostDashboard $filename)
 
@@ -65,12 +65,12 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
-        validateEventCount GrafanaDashboard Deleted $(objectNameFromFile $filename) 1
+        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEventCount Dashboard Deleted $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a GrafanaDashboard while the controller is not running deletes the dashboard in Grafana" {
+@test "deleting a Dashboard while the controller is not running deletes the dashboard in Grafana" {
     for filename in dashboards/*.yaml; do
         dashboardId=$(validatePostDashboard $filename)
 
@@ -92,11 +92,11 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
+        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "creating a GrafanaDashboard object creates the same dashboard in Grafana" {
+@test "creating a Dashboard object creates the same dashboard in Grafana" {
     count=0
 
     for filename in dashboards/*.yaml; do
@@ -105,11 +105,11 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
+        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "updating a GrafanaDashboard object updates the dashboard in Grafana" {
+@test "updating a Dashboard object updates the dashboard in Grafana" {
     count=0
     
     for filename in dashboards/*.yaml; do
@@ -118,7 +118,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 1
+        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
     done
 
     # the .update files have dashboards with the same ids and different contents. 
@@ -128,57 +128,57 @@ teardown(){
 
         validateDashboardCount $count
 
-        validateEventCount GrafanaDashboard Synced $(objectNameFromFile $filename) 2
+        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 2
     done
 }
 
 #
-# notification channels
+# alert notifications
 #
-@test "creating a GrafanaNotificationChannel object creates a Grafana Notification Channel" {
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
+@test "creating a AlertNotification object creates a Grafana Alert Notification" {
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
 
-        echo "Test Creating $filename ($channelId)"
+        echo "Test Creating $filename ($notificationId)"
 
         (( count++ ))
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a GrafanaNotificationChannel object deletes the Grafana Notification Channel" {
+@test "deleting a AlertNotification object deletes the Grafana AlertNotification" {
 
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
 
-        echo "Test Deleting $filename ($channelId)"
+        echo "Test Deleting $filename ($notificationId)"
 
         kubectl delete -f $filename
 
         sleep 5s
 
-        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
 
         # for some reason grafana 500s when you GET a non-existent alert-notifications?
         [ "$httpStatus" -eq "500" ]
 
-        validateNotificationChannelCount 0
+        validateAlertNotificationCount 0
 
-        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
-        validateEventCount GrafanaNotificationChannel Deleted $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Deleted $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a GrafanaNotificationChannel while the controller is not running deletes the notification channel in Grafana" {
+@test "deleting a AlertNotification while the controller is not running deletes the alert notification in Grafana" {
 
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
 
         kubectl scale --replicas=0 deployment/kubernetes-grafana-test
 
-        echo "Test Deleting $filename ($channelId)"
+        echo "Test Deleting $filename ($notificationId)"
 
         kubectl delete -f $filename
 
@@ -188,56 +188,56 @@ teardown(){
 
         sleep 10s
 
-        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
 
         # for some reason grafana 500s when you GET a non-existent alert-notifications?
         [ "$httpStatus" -eq "500" ]
 
-        validateNotificationChannelCount 0
+        validateAlertNotificationCount 0
 
-        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 }
 
 
-@test "creating a GrafanaNotificationChannel object creates the same channel in Grafana" {
+@test "creating a AlertNotification object creates the same notification in Grafana" {
     count=0
 
-    for filename in notification_channels/*.yaml; do
-        validateNotificationChannelContents $filename
+    for filename in alert_notifications/*.yaml; do
+        validateAlertNotificationContents $filename
 
         (( count++ ))
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "updating a GrafanaNotificationChannel object updates the channel in Grafana" {
+@test "updating a AlertNotification object updates the notification in Grafana" {
     count=0
     
-    for filename in notification_channels/*.yaml; do
-        validateNotificationChannelContents $filename
+    for filename in alert_notifications/*.yaml; do
+        validateAlertNotificationContents $filename
 
         (( count++ ))
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 
-    for filename in notification_channels/*.update; do
-        validateNotificationChannelContents $filename
+    for filename in alert_notifications/*.update; do
+        validateAlertNotificationContents $filename
 
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount GrafanaNotificationChannel Synced $(objectNameFromFile $filename) 2
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 2
     done
 }
 
 #
 # data sources
 #
-@test "creating a GrafanaDataSource object creates a Grafana DataSource" {
+@test "creating a DataSource object creates a Grafana DataSource" {
     count=0
 
     for filename in datasources/*.yaml; do
@@ -248,11 +248,11 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
+        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a GrafanaDataSource object deletes the Grafana DataSource" {
+@test "deleting a DataSource object deletes the Grafana DataSource" {
 
     for filename in datasources/*.yaml; do
         sourceId=$(validatePostDataSource $filename)
@@ -272,12 +272,12 @@ teardown(){
 
         validateDataSourceCount 0
 
-        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
-        validateEventCount GrafanaDataSource Deleted $(objectNameFromFile $filename) 1
+        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEventCount DataSource Deleted $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a GrafanaDataSource while the controller is not running deletes the datasource in Grafana" {
+@test "deleting a DataSource while the controller is not running deletes the datasource in Grafana" {
 
     for filename in datasources/*.yaml; do
         sourceId=$(validatePostDataSource $filename)
@@ -303,11 +303,11 @@ teardown(){
 
         validateDataSourceCount 0
 
-        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
+        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "creating a GrafanaDataSource object creates the same datasource in Grafana" {
+@test "creating a DataSource object creates the same datasource in Grafana" {
     count=0
 
     for filename in datasources/*.yaml; do
@@ -316,11 +316,11 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
+        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "updating a GrafanaDataSource object updates the datasource in Grafana" {
+@test "updating a DataSource object updates the datasource in Grafana" {
     count=0
     
     for filename in datasources/*.yaml; do
@@ -329,7 +329,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 1
+        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
     done
 
     for filename in datasources/*.update; do
@@ -337,6 +337,6 @@ teardown(){
 
         validateDataSourceCount $count
 
-        validateEventCount GrafanaDataSource Synced $(objectNameFromFile $filename) 2
+        validateEventCount DataSource Synced $(objectNameFromFile $filename) 2
     done
 }

@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// GrafanaDashboardInformer provides access to a shared informer and lister for
-// GrafanaDashboards.
-type GrafanaDashboardInformer interface {
+// AlertNotificationInformer provides access to a shared informer and lister for
+// AlertNotifications.
+type AlertNotificationInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.GrafanaDashboardLister
+	Lister() v1alpha1.AlertNotificationLister
 }
 
-type grafanaDashboardInformer struct {
+type alertNotificationInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewGrafanaDashboardInformer constructs a new informer for GrafanaDashboard type.
+// NewAlertNotificationInformer constructs a new informer for AlertNotification type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewGrafanaDashboardInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredGrafanaDashboardInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewAlertNotificationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredAlertNotificationInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredGrafanaDashboardInformer constructs a new informer for GrafanaDashboard type.
+// NewFilteredAlertNotificationInformer constructs a new informer for AlertNotification type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredGrafanaDashboardInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredAlertNotificationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.GrafanaV1alpha1().GrafanaDashboards(namespace).List(options)
+				return client.GrafanaV1alpha1().AlertNotifications(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.GrafanaV1alpha1().GrafanaDashboards(namespace).Watch(options)
+				return client.GrafanaV1alpha1().AlertNotifications(namespace).Watch(options)
 			},
 		},
-		&grafanav1alpha1.GrafanaDashboard{},
+		&grafanav1alpha1.AlertNotification{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *grafanaDashboardInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredGrafanaDashboardInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *alertNotificationInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredAlertNotificationInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *grafanaDashboardInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&grafanav1alpha1.GrafanaDashboard{}, f.defaultInformer)
+func (f *alertNotificationInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&grafanav1alpha1.AlertNotification{}, f.defaultInformer)
 }
 
-func (f *grafanaDashboardInformer) Lister() v1alpha1.GrafanaDashboardLister {
-	return v1alpha1.NewGrafanaDashboardLister(f.Informer().GetIndexer())
+func (f *alertNotificationInformer) Lister() v1alpha1.AlertNotificationLister {
+	return v1alpha1.NewAlertNotificationLister(f.Informer().GetIndexer())
 }

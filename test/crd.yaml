@@ -1,35 +1,35 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: grafanadashboards.grafana.k8s.io
+  name: dashboards.grafana.com
 spec:
-  group: grafana.k8s.io
+  group: grafana.com
   version: v1alpha1
   names:
-    kind: GrafanaDashboard
-    plural: grafanadashboards
+    kind: Dashboard
+    plural: dashboards
   scope: Namespaced
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: grafananotificationchannels.grafana.k8s.io
+  name: alertnotifications.grafana.com
 spec:
-  group: grafana.k8s.io
+  group: grafana.com
   version: v1alpha1
   names:
-    kind: GrafanaNotificationChannel
-    plural: grafananotificationchannels
+    kind: AlertNotification
+    plural: alertnotifications
   scope: Namespaced
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: grafanadatasources.grafana.k8s.io
+  name: datasources.grafana.com
 spec:
-  group: grafana.k8s.io
+  group: grafana.com
   version: v1alpha1
   names:
-    kind: GrafanaDataSource
-    plural: grafanadatasources
+    kind: DataSource
+    plural: datasources
   scope: Namespaced

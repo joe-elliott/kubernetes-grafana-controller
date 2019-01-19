@@ -2,50 +2,50 @@ package grafana
 
 type ClientFake struct {
 	address string
-	fakeUID string
+	fakeID  string
 
 	PostedJson *string
 }
 
-func NewGrafanaClientFake(address string, fakeUID string) *ClientFake {
+func NewGrafanaClientFake(address string, fakeID string) *ClientFake {
 
 	client := &ClientFake{
 		address:    address,
-		fakeUID:    fakeUID,
+		fakeID:     fakeID,
 		PostedJson: nil,
 	}
 
 	return client
 }
 
-func (client *ClientFake) PostDashboard(dashboardJSON string) (string, error) {
-	client.PostedJson = &dashboardJSON
+func (client *ClientFake) PostDashboard(json string) (string, error) {
+	client.PostedJson = &json
 
-	return client.fakeUID, nil
+	return client.fakeID, nil
 }
 
-func (client *ClientFake) DeleteDashboard(uid string) error {
+func (client *ClientFake) DeleteDashboard(id string) error {
 	return nil
 }
 
-func (client *ClientFake) GetAllDashboardUids() ([]string, error) {
+func (client *ClientFake) GetAllDashboardIds() ([]string, error) {
 	return nil, nil
 }
 
-func (client *ClientFake) PostNotificationChannel(notificationChannelJson string) (string, error) {
-	client.PostedJson = &notificationChannelJson
+func (client *ClientFake) PostAlertNotification(json string) (string, error) {
+	client.PostedJson = &json
 
-	return client.fakeUID, nil
+	return client.fakeID, nil
 }
 
-func (client *ClientFake) DeleteNotificationChannel(id string) error {
+func (client *ClientFake) DeleteAlertNotification(id string) error {
 	return nil
 }
 
-func (client *ClientFake) PostDataSource(notificationChannelJson string) (string, error) {
-	client.PostedJson = &notificationChannelJson
+func (client *ClientFake) PostDataSource(json string) (string, error) {
+	client.PostedJson = &json
 
-	return client.fakeUID, nil
+	return client.fakeID, nil
 }
 
 func (client *ClientFake) DeleteDataSource(id string) error {
@@ -56,6 +56,6 @@ func (client *ClientFake) GetAllDatasourceIds() ([]string, error) {
 	return nil, nil
 }
 
-func (client *ClientFake) GetAllNotificationChannelIds() ([]string, error) {
+func (client *ClientFake) GetAllAlertNotificationIds() ([]string, error) {
 	return nil, nil
 }

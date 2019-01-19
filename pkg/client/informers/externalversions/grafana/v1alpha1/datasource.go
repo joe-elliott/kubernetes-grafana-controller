@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// GrafanaNotificationChannelInformer provides access to a shared informer and lister for
-// GrafanaNotificationChannels.
-type GrafanaNotificationChannelInformer interface {
+// DataSourceInformer provides access to a shared informer and lister for
+// DataSources.
+type DataSourceInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.GrafanaNotificationChannelLister
+	Lister() v1alpha1.DataSourceLister
 }
 
-type grafanaNotificationChannelInformer struct {
+type dataSourceInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewGrafanaNotificationChannelInformer constructs a new informer for GrafanaNotificationChannel type.
+// NewDataSourceInformer constructs a new informer for DataSource type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewGrafanaNotificationChannelInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredGrafanaNotificationChannelInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewDataSourceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredDataSourceInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredGrafanaNotificationChannelInformer constructs a new informer for GrafanaNotificationChannel type.
+// NewFilteredDataSourceInformer constructs a new informer for DataSource type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredGrafanaNotificationChannelInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredDataSourceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.GrafanaV1alpha1().GrafanaNotificationChannels(namespace).List(options)
+				return client.GrafanaV1alpha1().DataSources(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.GrafanaV1alpha1().GrafanaNotificationChannels(namespace).Watch(options)
+				return client.GrafanaV1alpha1().DataSources(namespace).Watch(options)
 			},
 		},
-		&grafanav1alpha1.GrafanaNotificationChannel{},
+		&grafanav1alpha1.DataSource{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *grafanaNotificationChannelInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredGrafanaNotificationChannelInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *dataSourceInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredDataSourceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *grafanaNotificationChannelInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&grafanav1alpha1.GrafanaNotificationChannel{}, f.defaultInformer)
+func (f *dataSourceInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&grafanav1alpha1.DataSource{}, f.defaultInformer)
 }
 
-func (f *grafanaNotificationChannelInformer) Lister() v1alpha1.GrafanaNotificationChannelLister {
-	return v1alpha1.NewGrafanaNotificationChannelLister(f.Informer().GetIndexer())
+func (f *dataSourceInformer) Lister() v1alpha1.DataSourceLister {
+	return v1alpha1.NewDataSourceLister(f.Informer().GetIndexer())
 }

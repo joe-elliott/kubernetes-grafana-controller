@@ -1,9 +1,9 @@
-apiVersion: grafana.k8s.io/v1alpha1
-kind: GrafanaDashboard
+apiVersion: grafana.com/v1alpha1
+kind: Dashboard
 metadata:
   name: test-dash
 spec:
-  dashboardJson: '{
+  json: '{
   "__inputs": [],
   "__requires": [
     {

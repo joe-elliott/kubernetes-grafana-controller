@@ -29,12 +29,12 @@ var (
 // Adds the list of known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&GrafanaDashboard{},
-		&GrafanaDashboardList{},
-		&GrafanaNotificationChannel{},
-		&GrafanaNotificationChannelList{},
-		&GrafanaDataSource{},
-		&GrafanaDataSourceList{},
+		&Dashboard{},
+		&DashboardList{},
+		&AlertNotification{},
+		&AlertNotificationList{},
+		&DataSource{},
+		&DataSourceList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

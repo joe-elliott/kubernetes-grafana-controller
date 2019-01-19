@@ -31,7 +31,7 @@ validateDashboardCount() {
 
 #
 # validatePostDashboard <yaml file name>
-#   note that the dashboard file name must match the GrafanaDashboard object name ...
+#   note that the dashboard file name must match the Dashboard object name ...
 #    ... b/c i'm lazy
 #
 validatePostDashboard() {
@@ -44,7 +44,7 @@ validatePostDashboard() {
 
 	sleep 5s
 
-    dashboardId=$(kubectl get GrafanaDashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaUID}")
+    dashboardId=$(kubectl get Dashboard -o=jsonpath="{.items[?(@.metadata.name==\"${dashboardName}\")].status.grafanaID}")
 
     # check if exists in grafana
 	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
@@ -68,7 +68,7 @@ validateDashboardContents() {
 
     echo $dashboardJsonFromGrafana | jq '.dashboard | del(.version) | del(.id) | del (.uid)' > a.json
 
-    dashboardJsonFromYaml=$(grep -A9999 'dashboardJson' $filename)
+    dashboardJsonFromYaml=$(grep -A9999 'json' $filename)
     dashboardJsonFromYaml=${dashboardJsonFromYaml%?}   # strip final quote
     dashboardJsonFromYaml=${dashboardJsonFromYaml#*\'} # strip up to and including the first quote
 
@@ -88,71 +88,70 @@ validateDashboardContents() {
 }
 
 #
-# notification channel
-#
+# alert notifications
 #
 
-# validatePostNotificationChannel <yaml file name>
-#   note that the channel file name must match the GrafanaNotificationChannel object name ...
+# validatePostAlertNotification <yaml file name>
+#   note that the notification file name must match the AlertNotification object name ...
 #    ... b/c i'm lazy
 #
-validatePostNotificationChannel() {
+validatePostAlertNotification() {
     specfile=$1
 
-    channelName=$(objectNameFromFile $specfile)
+    notificationName=$(objectNameFromFile $specfile)
 
     # create in kubernetes
     kubectl apply -f $specfile >&2
 
 	sleep 5s
 
-    channelId=$(kubectl get GrafanaNotificationChannel -o=jsonpath="{.items[?(@.metadata.name==\"${channelName}\")].status.grafanaID}")
+    notificationId=$(kubectl get AlertNotification -o=jsonpath="{.items[?(@.metadata.name==\"${notificationName}\")].status.grafanaID}")
 
-    [ "$channelId" != "" ]
+    [ "$notificationId" != "" ]
 
     # check if exists in grafana
-	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
     [ "$httpStatus" -eq "200" ]
 
-    echo $channelId
+    echo $notificationId
 }
 
 
 #
-# validateNotificationChannelCount <count>
+# validateAlertNotificationCount <count>
 #   use grafana search api to confirm that the count is what is expected 
 #
-validateNotificationChannelCount() {
-    channelJson=$(curl --silent ${GRAFANA_URL}/api/alert-notifications)
+validateAlertNotificationCount() {
+    notificationJson=$(curl --silent ${GRAFANA_URL}/api/alert-notifications)
 
-    count=$(echo $channelJson | jq length)
+    count=$(echo $notificationJson | jq length)
 
     [ "$count" -eq "$1" ]
 }
 
 #
-# validateNotificationChannelContents <yaml file name>
-#   creates a Notification Channel and both verifies it exists and that its content matches
+# validateAlertNotificationContents <yaml file name>
+#   creates a AlertNotification and both verifies it exists and that its content matches
 #
-validateNotificationChannelContents() {
+validateAlertNotificationContents() {
     filename=$1
 
-    channelId=$(validatePostNotificationChannel $filename)
+    notificationId=$(validatePostAlertNotification $filename)
 
-    echo "Test Json Content of $filename ($channelId)"
+    echo "Test Json Content of $filename ($notificationId)"
 
-    channelJsonFromYaml=$(grep -A9999 'notificationChannelJson' $filename)
-    channelJsonFromYaml=${channelJsonFromYaml%?}   # strip final quote
-    channelJsonFromYaml=${channelJsonFromYaml#*\'} # strip up to and including the first quote
+    notificationJsonFromYaml=$(grep -A9999 'json' $filename)
+    notificationJsonFromYaml=${notificationJsonFromYaml%?}   # strip final quote
+    notificationJsonFromYaml=${notificationJsonFromYaml#*\'} # strip up to and including the first quote
 
-    echo $channelJsonFromYaml > b.json
+    echo $notificationJsonFromYaml > b.json
     fieldsToKeep=$(cat b.json | jq keys)
 
-    channelJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${channelId})
+    notificationJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/alert-notifications/${notificationId})
 
     # grafana can add fields to flesh out the object.  remove anything from grafana not present in the original
     #  spec file
-    echo $channelJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
+    echo $notificationJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
 
     equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
 
@@ -169,7 +168,7 @@ validateNotificationChannelContents() {
 }
 
 # validatePostDataSource <yaml file name>
-#   note that the channel file name must match the GrafanaDataSource object name ...
+#   note that the notification file name must match the DataSource object name ...
 #    ... b/c i'm lazy
 #
 validatePostDataSource() {
@@ -182,7 +181,7 @@ validatePostDataSource() {
 
 	sleep 5s
 
-    sourceId=$(kubectl get GrafanaDataSource -o=jsonpath="{.items[?(@.metadata.name==\"${sourceName}\")].status.grafanaID}")
+    sourceId=$(kubectl get DataSource -o=jsonpath="{.items[?(@.metadata.name==\"${sourceName}\")].status.grafanaID}")
 
     [ "$sourceId" != "" ]
 
@@ -216,7 +215,7 @@ validateDataSourceContents() {
 
     echo "Test Json Content of $filename ($sourceId)"
 
-    sourceJsonFromYaml=$(grep -A9999 'dataSourceJson' $filename)
+    sourceJsonFromYaml=$(grep -A9999 'json' $filename)
     sourceJsonFromYaml=${sourceJsonFromYaml%?}   # strip final quote
     sourceJsonFromYaml=${sourceJsonFromYaml#*\'} # strip up to and including the first quote
 
@@ -256,12 +255,12 @@ dumpState() {
     echo "-----------grafana logs--------------"
     kubectl logs $(kubectl get po -l=app=grafana --no-headers=true| cut -d ' ' -f 1)
 
-    echo "-----------GrafanaDashboards--------------"
-    kubectl describe GrafanaDashboard
-    echo "-----------GrafanaNotificationChannels--------------"
-    kubectl describe GrafanaNotificationChannel
-    echo "-----------GrafanaDataSources --------------"
-    kubectl describe GrafanaDataSource
+    echo "-----------Dashboards--------------"
+    kubectl describe Dashboard
+    echo "-----------AlertNotification--------------"
+    kubectl describe AlertNotification
+    echo "-----------DataSources --------------"
+    kubectl describe DataSource
 }
 
 #
@@ -281,7 +280,7 @@ objectNameFromFile() {
 #
 #  kubectl get events puts out events in this format:  grep by all
 # LAST SEEN   FIRST SEEN   COUNT   NAME                                                        KIND                         SUBOBJECT                                  TYPE      REASON                  SOURCE                                   MESSAGE
-# 31m         31m          2       other-dash.15784304888c3b93                                 GrafanaDashboard                                                        Normal    Synced                  grafana-dashboard-controller             Grafana Object synced successfully 
+# 31m         31m          2       other-dash.15784304888c3b93                                 Dashboard                                                        Normal    Synced                  grafana-dashboard-controller             Grafana Object synced successfully 
 #
 validateEventCount() {
     actualCount=$(kubectl get events | grep $1 | grep $2 | grep $3 | awk -F" " '{print $3}')

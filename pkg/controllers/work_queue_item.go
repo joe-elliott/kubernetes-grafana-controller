@@ -5,14 +5,14 @@ import "k8s.io/apimachinery/pkg/runtime"
 type WorkQueueItem struct {
 	key            string
 	originalObject runtime.Object
-	uuid           string
+	id             string
 }
 
-func NewWorkQueueItem(key string, originalObject runtime.Object, uuid string) WorkQueueItem {
+func NewWorkQueueItem(key string, originalObject runtime.Object, id string) WorkQueueItem {
 	return WorkQueueItem{
 		key:            key,
 		originalObject: originalObject,
-		uuid:           uuid,
+		id:             id,
 	}
 }
 
@@ -20,10 +20,10 @@ func NewResyncDeletedObjects() WorkQueueItem {
 	return WorkQueueItem{
 		key:            "",
 		originalObject: nil,
-		uuid:           "",
+		id:             "",
 	}
 }
 
 func (w *WorkQueueItem) isResyncDeletedObjects() bool {
-	return w.key == "" && w.originalObject == nil && w.uuid == ""
+	return w.key == "" && w.originalObject == nil && w.id == ""
 }
