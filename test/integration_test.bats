@@ -23,7 +23,7 @@ teardown(){
     run kubectl scale --replicas=0 deployment/grafana
 
     kubectl delete Dashboard --ignore-not-found=true --all
-    kubectl delete NotificationChannel --ignore-not-found=true --all
+    kubectl delete AlertNotification --ignore-not-found=true --all
     kubectl delete DataSource --ignore-not-found=true --all
 
     # clean up comparison files if they exist
@@ -133,52 +133,52 @@ teardown(){
 }
 
 #
-# notification channels
+# alert notifications
 #
-@test "creating a NotificationChannel object creates a Grafana Notification Channel" {
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
+@test "creating a AlertNotification object creates a Grafana Alert Notification" {
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
 
-        echo "Test Creating $filename ($channelId)"
+        echo "Test Creating $filename ($notificationId)"
 
         (( count++ ))
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount NotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a NotificationChannel object deletes the Grafana Notification Channel" {
+@test "deleting a AlertNotification object deletes the Grafana AlertNotification" {
 
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
 
-        echo "Test Deleting $filename ($channelId)"
+        echo "Test Deleting $filename ($notificationId)"
 
         kubectl delete -f $filename
 
         sleep 5s
 
-        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
 
         # for some reason grafana 500s when you GET a non-existent alert-notifications?
         [ "$httpStatus" -eq "500" ]
 
-        validateNotificationChannelCount 0
+        validateAlertNotificationCount 0
 
-        validateEventCount NotificationChannel Synced $(objectNameFromFile $filename) 1
-        validateEventCount NotificationChannel Deleted $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Deleted $(objectNameFromFile $filename) 1
     done
 }
 
-@test "deleting a NotificationChannel while the controller is not running deletes the notification channel in Grafana" {
+@test "deleting a AlertNotification while the controller is not running deletes the alert notification in Grafana" {
 
-    for filename in notification_channels/*.yaml; do
-        channelId=$(validatePostNotificationChannel $filename)
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
 
         kubectl scale --replicas=0 deployment/kubernetes-grafana-test
 
-        echo "Test Deleting $filename ($channelId)"
+        echo "Test Deleting $filename ($notificationId)"
 
         kubectl delete -f $filename
 
@@ -188,49 +188,49 @@ teardown(){
 
         sleep 10s
 
-        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${channelId})
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
 
         # for some reason grafana 500s when you GET a non-existent alert-notifications?
         [ "$httpStatus" -eq "500" ]
 
-        validateNotificationChannelCount 0
+        validateAlertNotificationCount 0
 
-        validateEventCount NotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 }
 
 
-@test "creating a NotificationChannel object creates the same channel in Grafana" {
+@test "creating a AlertNotification object creates the same notification in Grafana" {
     count=0
 
-    for filename in notification_channels/*.yaml; do
-        validateNotificationChannelContents $filename
+    for filename in alert_notifications/*.yaml; do
+        validateAlertNotificationContents $filename
 
         (( count++ ))
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount NotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 }
 
-@test "updating a NotificationChannel object updates the channel in Grafana" {
+@test "updating a AlertNotification object updates the notification in Grafana" {
     count=0
     
-    for filename in notification_channels/*.yaml; do
-        validateNotificationChannelContents $filename
+    for filename in alert_notifications/*.yaml; do
+        validateAlertNotificationContents $filename
 
         (( count++ ))
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount NotificationChannel Synced $(objectNameFromFile $filename) 1
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
     done
 
-    for filename in notification_channels/*.update; do
-        validateNotificationChannelContents $filename
+    for filename in alert_notifications/*.update; do
+        validateAlertNotificationContents $filename
 
-        validateNotificationChannelCount $count
+        validateAlertNotificationCount $count
 
-        validateEventCount NotificationChannel Synced $(objectNameFromFile $filename) 2
+        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 2
     done
 }
 
