@@ -7,31 +7,31 @@ import (
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// NotificationChannel is a specification for a NotificationChannel resource
-type NotificationChannel struct {
+// AlertNotification is a specification for a AlertNotification resource
+type AlertNotification struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   NotificationChannelSpec   `json:"spec"`
-	Status NotificationChannelStatus `json:"status"`
+	Spec   AlertNotificationSpec   `json:"spec"`
+	Status AlertNotificationStatus `json:"status"`
 }
 
-// NotificationChannelSpec is the spec for a NotificationChannel resource
-type NotificationChannelSpec struct {
+// AlertNotificationSpec is the spec for a AlertNotification resource
+type AlertNotificationSpec struct {
 	JSON string `json:"json"`
 }
 
-// NotificationChannelStatus is the status for a NotificationChannel resource
-type NotificationChannelStatus struct {
+// AlertNotificationStatus is the status for a AlertNotification resource
+type AlertNotificationStatus struct {
 	GrafanaID string `json:"grafanaID"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// NotificationChannelList is a list of NotificationChannel resources
-type NotificationChannelList struct {
+// AlertNotificationList is a list of AlertNotification resources
+type AlertNotificationList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 
-	Items []NotificationChannel `json:"items"`
+	Items []AlertNotification `json:"items"`
 }

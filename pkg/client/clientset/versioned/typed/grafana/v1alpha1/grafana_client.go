@@ -28,14 +28,18 @@ import (
 
 type GrafanaV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	AlertNotificationsGetter
 	DashboardsGetter
 	DataSourcesGetter
-	NotificationChannelsGetter
 }
 
 // GrafanaV1alpha1Client is used to interact with features provided by the grafana.com group.
 type GrafanaV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *GrafanaV1alpha1Client) AlertNotifications(namespace string) AlertNotificationInterface {
+	return newAlertNotifications(c, namespace)
 }
 
 func (c *GrafanaV1alpha1Client) Dashboards(namespace string) DashboardInterface {
@@ -44,10 +48,6 @@ func (c *GrafanaV1alpha1Client) Dashboards(namespace string) DashboardInterface 
 
 func (c *GrafanaV1alpha1Client) DataSources(namespace string) DataSourceInterface {
 	return newDataSources(c, namespace)
-}
-
-func (c *GrafanaV1alpha1Client) NotificationChannels(namespace string) NotificationChannelInterface {
-	return newNotificationChannels(c, namespace)
 }
 
 // NewForConfig creates a new GrafanaV1alpha1Client for the given config.

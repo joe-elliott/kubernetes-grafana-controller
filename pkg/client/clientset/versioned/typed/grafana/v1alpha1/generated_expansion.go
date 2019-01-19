@@ -18,8 +18,8 @@ limitations under the License.
 
 package v1alpha1
 
+type AlertNotificationExpansion interface{}
+
 type DashboardExpansion interface{}
 
 type DataSourceExpansion interface{}
-
-type NotificationChannelExpansion interface{}

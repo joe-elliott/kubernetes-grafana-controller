@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// NotificationChannelInformer provides access to a shared informer and lister for
-// NotificationChannels.
-type NotificationChannelInformer interface {
+// AlertNotificationInformer provides access to a shared informer and lister for
+// AlertNotifications.
+type AlertNotificationInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.NotificationChannelLister
+	Lister() v1alpha1.AlertNotificationLister
 }
 
-type notificationChannelInformer struct {
+type alertNotificationInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewNotificationChannelInformer constructs a new informer for NotificationChannel type.
+// NewAlertNotificationInformer constructs a new informer for AlertNotification type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewNotificationChannelInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredNotificationChannelInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewAlertNotificationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredAlertNotificationInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredNotificationChannelInformer constructs a new informer for NotificationChannel type.
+// NewFilteredAlertNotificationInformer constructs a new informer for AlertNotification type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredNotificationChannelInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredAlertNotificationInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.GrafanaV1alpha1().NotificationChannels(namespace).List(options)
+				return client.GrafanaV1alpha1().AlertNotifications(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.GrafanaV1alpha1().NotificationChannels(namespace).Watch(options)
+				return client.GrafanaV1alpha1().AlertNotifications(namespace).Watch(options)
 			},
 		},
-		&grafanav1alpha1.NotificationChannel{},
+		&grafanav1alpha1.AlertNotification{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *notificationChannelInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredNotificationChannelInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *alertNotificationInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredAlertNotificationInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *notificationChannelInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&grafanav1alpha1.NotificationChannel{}, f.defaultInformer)
+func (f *alertNotificationInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&grafanav1alpha1.AlertNotification{}, f.defaultInformer)
 }
 
-func (f *notificationChannelInformer) Lister() v1alpha1.NotificationChannelLister {
-	return v1alpha1.NewNotificationChannelLister(f.Informer().GetIndexer())
+func (f *alertNotificationInformer) Lister() v1alpha1.AlertNotificationLister {
+	return v1alpha1.NewAlertNotificationLister(f.Informer().GetIndexer())
 }

@@ -18,6 +18,14 @@ limitations under the License.
 
 package v1alpha1
 
+// AlertNotificationListerExpansion allows custom methods to be added to
+// AlertNotificationLister.
+type AlertNotificationListerExpansion interface{}
+
+// AlertNotificationNamespaceListerExpansion allows custom methods to be added to
+// AlertNotificationNamespaceLister.
+type AlertNotificationNamespaceListerExpansion interface{}
+
 // DashboardListerExpansion allows custom methods to be added to
 // DashboardLister.
 type DashboardListerExpansion interface{}
@@ -33,11 +41,3 @@ type DataSourceListerExpansion interface{}
 // DataSourceNamespaceListerExpansion allows custom methods to be added to
 // DataSourceNamespaceLister.
 type DataSourceNamespaceListerExpansion interface{}
-
-// NotificationChannelListerExpansion allows custom methods to be added to
-// NotificationChannelLister.
-type NotificationChannelListerExpansion interface{}
-
-// NotificationChannelNamespaceListerExpansion allows custom methods to be added to
-// NotificationChannelNamespaceLister.
-type NotificationChannelNamespaceListerExpansion interface{}

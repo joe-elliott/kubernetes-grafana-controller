@@ -24,12 +24,12 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
+	// AlertNotifications returns a AlertNotificationInformer.
+	AlertNotifications() AlertNotificationInformer
 	// Dashboards returns a DashboardInformer.
 	Dashboards() DashboardInformer
 	// DataSources returns a DataSourceInformer.
 	DataSources() DataSourceInformer
-	// NotificationChannels returns a NotificationChannelInformer.
-	NotificationChannels() NotificationChannelInformer
 }
 
 type version struct {
@@ -43,6 +43,11 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
+// AlertNotifications returns a AlertNotificationInformer.
+func (v *version) AlertNotifications() AlertNotificationInformer {
+	return &alertNotificationInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
 // Dashboards returns a DashboardInformer.
 func (v *version) Dashboards() DashboardInformer {
 	return &dashboardInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
@@ -51,9 +56,4 @@ func (v *version) Dashboards() DashboardInformer {
 // DataSources returns a DataSourceInformer.
 func (v *version) DataSources() DataSourceInformer {
 	return &dataSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// NotificationChannels returns a NotificationChannelInformer.
-func (v *version) NotificationChannels() NotificationChannelInformer {
-	return &notificationChannelInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

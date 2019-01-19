@@ -29,16 +29,16 @@ type FakeGrafanaV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeGrafanaV1alpha1) AlertNotifications(namespace string) v1alpha1.AlertNotificationInterface {
+	return &FakeAlertNotifications{c, namespace}
+}
+
 func (c *FakeGrafanaV1alpha1) Dashboards(namespace string) v1alpha1.DashboardInterface {
 	return &FakeDashboards{c, namespace}
 }
 
 func (c *FakeGrafanaV1alpha1) DataSources(namespace string) v1alpha1.DataSourceInterface {
 	return &FakeDataSources{c, namespace}
-}
-
-func (c *FakeGrafanaV1alpha1) NotificationChannels(namespace string) v1alpha1.NotificationChannelInterface {
-	return &FakeNotificationChannels{c, namespace}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
