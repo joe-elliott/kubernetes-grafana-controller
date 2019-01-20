@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -45,12 +44,7 @@ func NewController(controllerAgentName string,
 		AddFunc: controller.enqueueWorkQueueItem,
 		UpdateFunc: func(old, new interface{}) {
 
-			oldSpec := reflect.ValueOf(old).Elem().FieldByName("Spec").Interface()
-			newSpec := reflect.ValueOf(new).Elem().FieldByName("Spec").Interface()
-
-			if !reflect.DeepEqual(oldSpec, newSpec) {
-				controller.enqueueWorkQueueItem(new)
-			}
+			controller.enqueueWorkQueueItem(new)
 		},
 		DeleteFunc: controller.enqueueWorkQueueItem,
 	})
