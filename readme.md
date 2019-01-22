@@ -76,3 +76,7 @@ metadata:
 spec:
   json: <data source json as string>
 ```
+
+## DataSources
+
+This controller requires the `CustomResourceSubresources` feature gate to enabled.  This has been enabled by default since k8s 1.11.
