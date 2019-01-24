@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-
-#minikube stop
-#minikube delete
-
 set -ex
 
 minikube start
@@ -18,6 +14,8 @@ kubectl delete deployment --ignore-not-found=true $IMAGE_NAME
 kubectl create clusterrolebinding $IMAGE_NAME --clusterrole=cluster-admin --serviceaccount=default:default
 kubectl run $IMAGE_NAME --image=$IMAGE_NAME --image-pull-policy=Never
 
+kubectl delete --ignore-not-found=true -f crd.yaml
 kubectl create -f crd.yaml
 
+kubectl delete --ignore-not-found=true -f grafana.yaml
 kubectl apply -f grafana.yaml
