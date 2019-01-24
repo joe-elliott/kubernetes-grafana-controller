@@ -45,7 +45,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -65,8 +65,8 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
-        validateEventCount Dashboard Deleted $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
+        validateEvents Dashboard Deleted $(objectNameFromFile $filename)
     done
 }
 
@@ -92,7 +92,7 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -105,7 +105,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -118,7 +118,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 
     # the .update files have dashboards with the same ids and different contents. 
@@ -128,7 +128,7 @@ teardown(){
 
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 2
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -144,7 +144,7 @@ teardown(){
         (( count++ ))
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -166,8 +166,8 @@ teardown(){
 
         validateAlertNotificationCount 0
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
-        validateEventCount AlertNotification Deleted $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+        validateEvents AlertNotification Deleted $(objectNameFromFile $filename)
     done
 }
 
@@ -195,7 +195,7 @@ teardown(){
 
         validateAlertNotificationCount 0
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -209,7 +209,7 @@ teardown(){
         (( count++ ))
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -222,7 +222,7 @@ teardown(){
         (( count++ ))
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 
     for filename in alert_notifications/*.update; do
@@ -230,7 +230,7 @@ teardown(){
 
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 2
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -248,7 +248,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -272,8 +272,8 @@ teardown(){
 
         validateDataSourceCount 0
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
-        validateEventCount DataSource Deleted $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
+        validateEvents DataSource Deleted $(objectNameFromFile $filename)
     done
 }
 
@@ -303,7 +303,7 @@ teardown(){
 
         validateDataSourceCount 0
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -316,7 +316,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -329,7 +329,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 
     for filename in datasources/*.update; do
@@ -337,6 +337,6 @@ teardown(){
 
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 2
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }

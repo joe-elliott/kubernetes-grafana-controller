@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-minikube stop
-minikube delete
+#minikube stop
+#minikube delete
 
 set -ex
 

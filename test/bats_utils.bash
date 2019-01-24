@@ -4,6 +4,9 @@ export MINIKUBE_WANTREPORTERRORPROMPT=false
 GRAFANA_URL=""
 
 validateGrafanaUrl() {
+
+    run kubectl wait pod -l app=grafana --for condition=ready --timeout=30s
+
     # get grafana url
     GRAFANA_URL=$(minikube service grafana --url --interval=1 --wait=60)
 
@@ -248,7 +251,7 @@ validateDataSourceContents() {
 #
 dumpState() {
     echo "-----------events--------------"
-    kubectl get events
+    kubectl get events -o=custom-columns=NAME:.involvedObject.name,KIND:.involvedObject.kind,REASON:.reason
 
     echo "-----------controller logs--------------"
     kubectl logs $(kubectl get po -l=run=kubernetes-grafana-test --no-headers=true | cut -d ' ' -f 1)
@@ -276,19 +279,8 @@ objectNameFromFile() {
 }
 
 #
-# validateEventCount <datatype> <eventname> <object name> <expected count>
+# validateEvents <datatype> <eventname> <object name>
 #
-#  kubectl get events puts out events in this format:  grep by all
-# LAST SEEN   FIRST SEEN   COUNT   NAME                                                        KIND                         SUBOBJECT                                  TYPE      REASON                  SOURCE                                   MESSAGE
-# 31m         31m          2       other-dash.15784304888c3b93                                 Dashboard                                                        Normal    Synced                  grafana-dashboard-controller             Grafana Object synced successfully 
-#
-validateEventCount() {
-    actualCount=$(kubectl get events | grep $1 | grep $2 | grep $3 | awk -F" " '{print $3}')
-    expectedCount=$4
-
-    if [ "$actualCount" != "$expectedCount" ]; then
-        echo "$actualCount does not equal expected $expectedCount"
-    fi
-
-    [ "$actualCount" == "$expectedCount" ]
+validateEvents() {
+    kubectl get events -o=custom-columns=NAME:.involvedObject.name,KIND:.involvedObject.kind,REASON:.reason | grep $1 | grep $2 | grep $3
 }
