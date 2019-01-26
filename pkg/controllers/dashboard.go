@@ -121,10 +121,6 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 
 func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafanav1alpha1.Dashboard, id string) error {
 
-	if grafanaDashboard.Status.GrafanaID == id {
-		return nil
-	}
-
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
@@ -135,7 +131,7 @@ func (s *DashboardSyncer) updateGrafanaDashboardStatus(grafanaDashboard *grafana
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := s.grafanaclientset.GrafanaV1alpha1().Dashboards(grafanaDashboard.Namespace).Update(grafanaDashboardCopy)
+	_, err := s.grafanaclientset.GrafanaV1alpha1().Dashboards(grafanaDashboard.Namespace).UpdateStatus(grafanaDashboardCopy)
 	return err
 }
 

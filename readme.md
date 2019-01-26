@@ -17,6 +17,10 @@ The primary motivator for creating this controller is to allow development teams
     	Path to a kubeconfig. Only required if out-of-cluster.
   -master string
     	The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.
+  -resync duration
+    	Periodic interval in which to force resync objects. (default 30s)
+  -resync-delete duration
+    	Periodic interval in which to force resync deleted objects.  Pass 0s to disable. (default 30s)
 
 klog
 
@@ -76,3 +80,7 @@ metadata:
 spec:
   json: <data source json as string>
 ```
+
+## DataSources
+
+This controller requires the `CustomResourceSubresources` feature gate to enabled.  This has been enabled by default since k8s 1.11.

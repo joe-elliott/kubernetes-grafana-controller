@@ -162,10 +162,6 @@ func (s *DataSourceSyncer) resyncDeletedObjects() error {
 
 func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *grafanav1alpha1.DataSource, id string) error {
 
-	if grafanaDataSource.Status.GrafanaID == id {
-		return nil
-	}
-
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
@@ -176,7 +172,7 @@ func (s *DataSourceSyncer) updateGrafanaDataSourceStatus(grafanaDataSource *graf
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := s.grafanaclientset.GrafanaV1alpha1().DataSources(grafanaDataSource.Namespace).Update(grafanaDataSourceCopy)
+	_, err := s.grafanaclientset.GrafanaV1alpha1().DataSources(grafanaDataSource.Namespace).UpdateStatus(grafanaDataSourceCopy)
 	return err
 }
 

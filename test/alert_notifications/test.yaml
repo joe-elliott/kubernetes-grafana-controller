@@ -4,7 +4,7 @@ metadata:
   name: test
 spec:
   json: '{
-  "name": "new alert notification",
+  "name": "test",
   "type":  "email",
   "isDefault": false,
   "sendReminder": false,

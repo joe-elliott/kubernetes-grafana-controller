@@ -5,7 +5,7 @@ metadata:
 spec:
   json: '{
   "orgId": 1,
-  "name": "Prometheus",
+  "name": "test",
   "type": "prometheus",
   "typeLogoUrl": "",
   "access": "proxy",

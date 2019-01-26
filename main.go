@@ -21,6 +21,7 @@ var (
 	kubeconfig         string
 	grafanaURL         string
 	resyncDeletePeriod time.Duration
+	resyncPeriod       time.Duration
 )
 
 func init() {
@@ -28,6 +29,7 @@ func init() {
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.")
 	flag.DurationVar(&resyncDeletePeriod, "resync-delete", time.Second*30, "Periodic interval in which to force resync deleted objects.  Pass 0s to disable.")
+	flag.DurationVar(&resyncPeriod, "resync", time.Second*30, "Periodic interval in which to force resync objects.")
 
 	klog.InitFlags(nil)
 }
@@ -54,7 +56,7 @@ func main() {
 	}
 
 	grafanaClient := grafana.NewClient(grafanaURL)
-	informerFactory := informers.NewSharedInformerFactory(client, time.Second*30)
+	informerFactory := informers.NewSharedInformerFactory(client, resyncPeriod)
 
 	var allControllers []*controllers.Controller
 

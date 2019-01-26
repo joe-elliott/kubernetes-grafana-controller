@@ -45,7 +45,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -65,8 +65,8 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
-        validateEventCount Dashboard Deleted $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
+        validateEvents Dashboard Deleted $(objectNameFromFile $filename)
     done
 }
 
@@ -92,7 +92,7 @@ teardown(){
 
         validateDashboardCount 0
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -105,7 +105,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -118,7 +118,7 @@ teardown(){
         (( count++ ))
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 1
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
 
     # the .update files have dashboards with the same ids and different contents. 
@@ -128,7 +128,23 @@ teardown(){
 
         validateDashboardCount $count
 
-        validateEventCount Dashboard Synced $(objectNameFromFile $filename) 2
+        validateEvents Dashboard Synced $(objectNameFromFile $filename)
+    done
+}
+
+@test "state is resynced after deleting a dashboard in grafana" {
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
+
+        httpStatus=$(curl -X DELETE --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+        [ "$httpStatus" -eq "200" ]
+
+        sleep 30s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+        [ "$httpStatus" -eq "200" ]
     done
 }
 
@@ -144,7 +160,7 @@ teardown(){
         (( count++ ))
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -166,8 +182,8 @@ teardown(){
 
         validateAlertNotificationCount 0
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
-        validateEventCount AlertNotification Deleted $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+        validateEvents AlertNotification Deleted $(objectNameFromFile $filename)
     done
 }
 
@@ -195,7 +211,7 @@ teardown(){
 
         validateAlertNotificationCount 0
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -209,7 +225,7 @@ teardown(){
         (( count++ ))
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -222,7 +238,7 @@ teardown(){
         (( count++ ))
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 1
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
 
     for filename in alert_notifications/*.update; do
@@ -230,7 +246,24 @@ teardown(){
 
         validateAlertNotificationCount $count
 
-        validateEventCount AlertNotification Synced $(objectNameFromFile $filename) 2
+        validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+    done
+}
+
+@test "state is resynced after deleting an alert notification in grafana" {
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
+
+        httpStatus=$(curl -X DELETE --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
+
+        [ "$httpStatus" -eq "200" ]
+
+        sleep 30s
+
+        response=$(curl -s ${GRAFANA_URL}/api/alert-notifications)
+        count=$(echo $response | jq "[.[] | select(.name == \"$(objectNameFromFile $filename)\")] | length")
+
+        [ "$count" -eq "1" ]
     done
 }
 
@@ -248,7 +281,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -272,8 +305,8 @@ teardown(){
 
         validateDataSourceCount 0
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
-        validateEventCount DataSource Deleted $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
+        validateEvents DataSource Deleted $(objectNameFromFile $filename)
     done
 }
 
@@ -303,7 +336,7 @@ teardown(){
 
         validateDataSourceCount 0
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -316,7 +349,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
 
@@ -329,7 +362,7 @@ teardown(){
         (( count++ ))
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 1
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 
     for filename in datasources/*.update; do
@@ -337,6 +370,24 @@ teardown(){
 
         validateDataSourceCount $count
 
-        validateEventCount DataSource Synced $(objectNameFromFile $filename) 2
+        validateEvents DataSource Synced $(objectNameFromFile $filename)
+    done
+}
+
+@test "state is resynced after deleting a datasoure in grafana" {
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        httpStatus=$(curl -X DELETE --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+
+        [ "$httpStatus" -eq "200" ]
+
+        sleep 30s
+
+        response=$(curl -s ${GRAFANA_URL}/api/datasources)
+        echo $response
+        count=$(echo $response | jq "[.[] | select(.name == \"$(objectNameFromFile $filename)\")] | length")
+
+        [ "$count" -eq "1" ]
     done
 }

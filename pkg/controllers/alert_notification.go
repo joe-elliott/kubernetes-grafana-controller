@@ -118,10 +118,6 @@ func (s *AlertNotificationSyncer) syncHandler(item WorkQueueItem) error {
 
 func (s *AlertNotificationSyncer) updateGrafanaAlertNotificationStatus(grafanaAlertNotification *v1alpha1.AlertNotification, id string) error {
 
-	if grafanaAlertNotification.Status.GrafanaID == id {
-		return nil
-	}
-
 	// NEVER modify objects from the store. It's a read-only, local cache.
 	// You can use DeepCopy() to make a deep copy of original object and modify this copy
 	// Or create a copy manually for better performance
@@ -132,7 +128,7 @@ func (s *AlertNotificationSyncer) updateGrafanaAlertNotificationStatus(grafanaAl
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
 
-	_, err := s.grafanaclientset.GrafanaV1alpha1().AlertNotifications(grafanaAlertNotification.Namespace).Update(grafanaAlertNotificationCopy)
+	_, err := s.grafanaclientset.GrafanaV1alpha1().AlertNotifications(grafanaAlertNotification.Namespace).UpdateStatus(grafanaAlertNotificationCopy)
 	return err
 }
 
