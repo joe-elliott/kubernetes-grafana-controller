@@ -373,3 +373,21 @@ teardown(){
         validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
 }
+
+@test "state is resynced after deleting a datasoure in grafana" {
+    for filename in datasources/*.yaml; do
+        sourceId=$(validatePostDataSource $filename)
+
+        httpStatus=$(curl -X DELETE --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/datasources/${sourceId})
+
+        [ "$httpStatus" -eq "200" ]
+
+        sleep 30s
+
+        response=$(curl -s ${GRAFANA_URL}/api/datasources)
+        echo $response
+        count=$(echo $response | jq "[.[] | select(.name == \"$(objectNameFromFile $filename)\")] | length")
+
+        [ "$count" -eq "1" ]
+    done
+}
