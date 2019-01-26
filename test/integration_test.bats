@@ -250,6 +250,23 @@ teardown(){
     done
 }
 
+@test "state is resynced after deleting an alert notification in grafana" {
+    for filename in alert_notifications/*.yaml; do
+        notificationId=$(validatePostAlertNotification $filename)
+
+        httpStatus=$(curl -X DELETE --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
+
+        [ "$httpStatus" -eq "200" ]
+
+        sleep 30s
+
+        response=$(curl -s ${GRAFANA_URL}/api/alert-notifications)
+        count=$(echo $response | jq "[.[] | select(.name == \"$(objectNameFromFile $filename)\")] | length")
+
+        [ "$count" -eq "1" ]
+    done
+}
+
 #
 # data sources
 #
