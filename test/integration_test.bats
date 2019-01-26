@@ -132,6 +132,22 @@ teardown(){
     done
 }
 
+@test "state is resynced after deleting a dashboard in grafana" {
+    for filename in dashboards/*.yaml; do
+        dashboardId=$(validatePostDashboard $filename)
+
+        httpStatus=$(curl -X DELETE --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+        [ "$httpStatus" -eq "200" ]
+
+        sleep 30s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
+
+        [ "$httpStatus" -eq "200" ]
+    done
+}
+
 #
 # alert notifications
 #

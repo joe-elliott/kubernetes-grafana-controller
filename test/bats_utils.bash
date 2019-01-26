@@ -7,6 +7,9 @@ validateGrafanaUrl() {
 
     run kubectl wait pod -l app=grafana --for condition=ready --timeout=30s
 
+    # ugh
+    sleep 5s
+
     # get grafana url
     GRAFANA_URL=$(minikube service grafana --url --interval=1 --wait=60)
 

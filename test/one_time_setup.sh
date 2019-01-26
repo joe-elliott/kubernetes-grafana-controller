@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-minikube start
+#minikube start
 
 IMAGE_NAME=kubernetes-grafana-test
 
