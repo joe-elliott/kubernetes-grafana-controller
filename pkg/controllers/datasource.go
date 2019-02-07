@@ -97,7 +97,7 @@ func (s *DataSourceSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	id, err := s.grafanaClient.PostDataSource(grafanaDataSource.Spec.JSON)
+	id, err := s.grafanaClient.PostDataSource(grafanaDataSource.Spec.JSON, grafanaDataSource.Status.GrafanaID)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a

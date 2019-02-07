@@ -6,7 +6,10 @@ import (
 	"fmt"
 
 	"github.com/imroc/req"
+	"k8s.io/apimachinery/pkg/util/runtime"
 )
+
+const NO_ID = ""
 
 type Interface interface {
 	PostDashboard(string) (string, error)
@@ -17,7 +20,7 @@ type Interface interface {
 	DeleteAlertNotification(string) error
 	GetAllAlertNotificationIds() ([]string, error)
 
-	PostDataSource(string) (string, error)
+	PostDataSource(string, string) (string, error)
 	DeleteDataSource(string) error
 	GetAllDataSourceIds() ([]string, error)
 }
@@ -195,53 +198,24 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 	return ids, nil
 }
 
-func (client *Client) PostDataSource(dataSourceJson string) (string, error) {
+func (client *Client) PostDataSource(dataSourceJson string, id string) (string, error) {
 
-	// Grafana throws a 500 if you post 2 datasources with the same name
-	//  search for a matching datasources and put these changes to it
-
-	var postDataSource map[string]interface{}
-	err := json.Unmarshal([]byte(dataSourceJson), &postDataSource)
+	dataSourceJson, err := sanitizeObject(dataSourceJson)
 
 	if err != nil {
 		return "", err
 	}
 
-	// Request existing notification channels
-	resp, err := req.Get(client.address + "/api/datasources")
-
-	var responseBody []map[string]interface{}
-	err = resp.ToJSON(&responseBody)
-
-	if err != nil {
-		return "", err
-	}
-
-	var matchingDataSource *map[string]interface{}
-
-	for _, channel := range responseBody {
-		if channel["name"] == postDataSource["name"] {
-			//found the thing
-			matchingDataSource = &channel
-			break
-		}
-	}
-
-	if matchingDataSource != nil {
-
-		if (*matchingDataSource)["id"] == nil {
-			return "", errors.New("Found a matching datasource but id is nil")
-		}
-
-		// grafana requires an ID on put
-		postDataSource["id"] = (*matchingDataSource)["id"]
-		postJSON, err := json.Marshal(postDataSource)
+	if id != NO_ID {
+		id, err := client.putGrafanaObject(dataSourceJson, fmt.Sprintf("/api/datasources/%v", id), "id")
 
 		if err != nil {
-			return "", err
-		}
+			runtime.HandleError(err)
 
-		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/datasources/%v", postDataSource["id"]), "id")
+			return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
+		} else {
+			return id, err
+		}
 
 	} else {
 		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
@@ -347,4 +321,24 @@ func (client *Client) putGrafanaObject(putJSON string, path string, idField stri
 
 func responseIsSuccess(resp *req.Resp) bool {
 	return resp.Response().StatusCode < 300 && resp.Response().StatusCode >= 200
+}
+
+func sanitizeObject(obj string) (string, error) {
+	var jsonObject map[string]interface{}
+
+	err := json.Unmarshal([]byte(obj), &jsonObject)
+	if err != nil {
+		return "", err
+	}
+
+	delete(jsonObject, "id")
+	delete(jsonObject, "uid")
+	delete(jsonObject, "version")
+
+	sanitizedBytes, err := json.Marshal(jsonObject)
+	if err != nil {
+		return "", err
+	}
+
+	return string(sanitizedBytes), nil
 }
