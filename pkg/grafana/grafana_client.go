@@ -13,7 +13,7 @@ import (
 const NO_ID = ""
 
 type Interface interface {
-	PostDashboard(string) (string, error)
+	PostDashboard(string, string) (string, error)
 	DeleteDashboard(string) error
 	GetAllDashboardIds() ([]string, error)
 
@@ -39,7 +39,21 @@ func NewClient(address string) *Client {
 	return client
 }
 
-func (client *Client) PostDashboard(dashboardJSON string) (string, error) {
+func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, error) {
+	dashboardJSON, err := sanitizeObject(dashboardJSON)
+
+	if err != nil {
+		return "", err
+	}
+
+	if uid != NO_ID {
+		dashboardJSON, err = setId(dashboardJSON, "uid", uid)
+
+		if err != nil {
+			return "", err
+		}
+	}
+
 	postJSON := fmt.Sprintf(`{
 		"dashboard": %v,
 		"folderId": 0,
@@ -329,11 +343,11 @@ func setId(obj string, idField string, idValue string) (string, error) {
 	}
 
 	intValue, err := strconv.Atoi(idValue)
-	if err != nil {
-		return "", err
+	if err == nil {
+		jsonObject[idField] = intValue
+	} else {
+		jsonObject[idField] = idValue
 	}
-
-	jsonObject[idField] = intValue
 
 	bytes, err := json.Marshal(jsonObject)
 	if err != nil {
