@@ -332,7 +332,6 @@ func sanitizeObject(obj string) (string, error) {
 	}
 
 	delete(jsonObject, "id")
-	delete(jsonObject, "uid")
 	delete(jsonObject, "version")
 
 	sanitizedBytes, err := json.Marshal(jsonObject)
