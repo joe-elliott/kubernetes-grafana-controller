@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/labels"
@@ -9,7 +8,6 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/klog"
 
 	"kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
@@ -79,48 +77,24 @@ func (s *DashboardSyncer) updateObject(object runtime.Object) error {
 	return nil
 }
 
-func (s *DashboardSyncer) resyncDeletedObjects() error {
-
-	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
-	ids, err := s.grafanaClient.GetAllDashboardIds()
+func (s *DashboardSyncer) getAllKubernetesObjectIDs() ([]string, error) {
+	dashboards, err := s.grafanaDashboardsLister.List(labels.Everything())
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	desiredDashboards, err := s.grafanaDashboardsLister.List(labels.Everything())
+	ids := make([]string, 0)
 
-	if err != nil {
-		return err
+	for _, dashboard := range dashboards {
+		ids = append(ids, dashboard.Status.GrafanaID)
 	}
 
-	for _, id := range ids {
-		var found = false
+	return ids, nil
+}
 
-		for _, dashboard := range desiredDashboards {
-
-			if dashboard.Status.GrafanaID == "" {
-				return errors.New("found dashboard with unitialized state, bailing")
-			}
-
-			if dashboard.Status.GrafanaID == id {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			klog.Infof("Dashboard %v found in grafana but not k8s.  Deleting.", id)
-			err = s.grafanaClient.DeleteDashboard(id)
-
-			// if one fails just go ahead and bail out.  controlling logic will requeue
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
+func (s *DashboardSyncer) getAllGrafanaObjectIDs() ([]string, error) {
+	return s.grafanaClient.GetAllDashboardIds()
 }
 
 func (s *DashboardSyncer) createWorkQueueItem(obj interface{}) *WorkQueueItem {

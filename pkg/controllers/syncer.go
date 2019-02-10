@@ -5,10 +5,14 @@ import (
 )
 
 type Syncer interface {
-	resyncDeletedObjects() error
 	createWorkQueueItem(obj interface{}) *WorkQueueItem
-
-	getRuntimeObjectByName(name string, namespace string) (runtime.Object, error)
 	deleteObjectById(id string) error
+
+	// support basic sync handling
+	getRuntimeObjectByName(name string, namespace string) (runtime.Object, error)
 	updateObject(object runtime.Object) error
+
+	// support deleted objects resync
+	getAllKubernetesObjectIDs() ([]string, error)
+	getAllGrafanaObjectIDs() ([]string, error)
 }

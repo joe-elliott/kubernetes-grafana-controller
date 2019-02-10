@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/labels"
@@ -9,7 +8,6 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/klog"
 
 	"kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
@@ -48,47 +46,24 @@ func NewDataSourceController(
 	return controller
 }
 
-func (s *DataSourceSyncer) resyncDeletedObjects() error {
-	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
-	ids, err := s.grafanaClient.GetAllDataSourceIds()
+func (s *DataSourceSyncer) getAllKubernetesObjectIDs() ([]string, error) {
+	dataSources, err := s.grafanaDataSourcesLister.List(labels.Everything())
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	desiredDataSources, err := s.grafanaDataSourcesLister.List(labels.Everything())
+	ids := make([]string, 0)
 
-	if err != nil {
-		return err
+	for _, dataSource := range dataSources {
+		ids = append(ids, dataSource.Status.GrafanaID)
 	}
 
-	for _, id := range ids {
-		var found = false
+	return ids, nil
+}
 
-		for _, datasource := range desiredDataSources {
-
-			if datasource.Status.GrafanaID == "" {
-				return errors.New("found datasource with unitialized state, bailing")
-			}
-
-			if datasource.Status.GrafanaID == id {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			klog.Infof("Datasource %v found in grafana but not k8s.  Deleting.", id)
-			err = s.grafanaClient.DeleteDataSource(id)
-
-			// if one fails just go ahead and bail out.  controlling logic will requeue
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
+func (s *DataSourceSyncer) getAllGrafanaObjectIDs() ([]string, error) {
+	return s.grafanaClient.GetAllDataSourceIds()
 }
 
 func (s *DataSourceSyncer) getRuntimeObjectByName(name string, namespace string) (runtime.Object, error) {

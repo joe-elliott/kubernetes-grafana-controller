@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+	"kubernetes-grafana-controller/pkg/grafana"
 	"time"
 
 	grafanascheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
@@ -148,7 +150,7 @@ func (c *Controller) processNextWorkItem() bool {
 
 		if item.isResyncDeletedObjects() {
 
-			if err := c.syncer.resyncDeletedObjects(); err != nil {
+			if err := c.resyncDeletedObjects(); err != nil {
 				c.workqueue.AddRateLimited(item)
 				return fmt.Errorf("error resyncing all %s, requeuing", err.Error())
 			}
@@ -211,6 +213,50 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 	}
 
 	c.recorder.Event(runtimeObject, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	return nil
+}
+
+func (c *Controller) resyncDeletedObjects() error {
+
+	// get all dashboards in grafana.  anything in grafana that's not in k8s gets nuked
+	kubernetesIDs, err := c.syncer.getAllKubernetesObjectIDs()
+
+	if err != nil {
+		return err
+	}
+
+	grafanaIDs, err := c.syncer.getAllGrafanaObjectIDs()
+
+	if err != nil {
+		return err
+	}
+
+	for _, grafanaID := range grafanaIDs {
+		var found = false
+
+		for _, kubernetesID := range kubernetesIDs {
+
+			if kubernetesID == grafana.NO_ID {
+				return errors.New("found kubernetes object with unitialized id, bailing")
+			}
+
+			if kubernetesID == grafanaID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			klog.Infof("Object found in grafana but not k8s.  Deleting")
+			err = c.syncer.deleteObjectById(grafanaID)
+
+			// if one fails just go ahead and bail out.  controlling logic will requeue
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
