@@ -99,7 +99,7 @@ func (s *DashboardSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	id, err := s.grafanaClient.PostDashboard(grafanaDashboard.Spec.JSON)
+	id, err := s.grafanaClient.PostDashboard(grafanaDashboard.Spec.JSON, grafanaDashboard.Status.GrafanaID)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
