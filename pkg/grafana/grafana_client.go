@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/imroc/req"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -16,7 +17,7 @@ type Interface interface {
 	DeleteDashboard(string) error
 	GetAllDashboardIds() ([]string, error)
 
-	PostAlertNotification(string) (string, error)
+	PostAlertNotification(string, string) (string, error)
 	DeleteAlertNotification(string) error
 	GetAllAlertNotificationIds() ([]string, error)
 
@@ -85,53 +86,30 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	return ids, nil
 }
 
-func (client *Client) PostAlertNotification(alertNotificationJson string) (string, error) {
-
-	// Grafana throws a 500 if you post 2 notification channels with the same name
-	//  search for a matching notification channel and put these changes to it
-
-	var postChannel map[string]interface{}
-	err := json.Unmarshal([]byte(alertNotificationJson), &postChannel)
+func (client *Client) PostAlertNotification(alertNotificationJson string, id string) (string, error) {
+	alertNotificationJson, err := sanitizeObject(alertNotificationJson)
 
 	if err != nil {
 		return "", err
 	}
 
-	// Request existing notification channels
-	resp, err := req.Get(client.address + "/api/alert-notifications")
-
-	var responseBody []map[string]interface{}
-	err = resp.ToJSON(&responseBody)
-
-	if err != nil {
-		return "", err
-	}
-
-	var matchingChannel *map[string]interface{}
-
-	for _, channel := range responseBody {
-		if channel["name"] == postChannel["name"] {
-			//found the thing
-			matchingChannel = &channel
-			break
-		}
-	}
-
-	if matchingChannel != nil {
-
-		if (*matchingChannel)["id"] == nil {
-			return "", errors.New("Found a matching channel but id is nil")
-		}
-
-		// grafana requires an ID on put
-		postChannel["id"] = (*matchingChannel)["id"]
-		postJSON, err := json.Marshal(postChannel)
+	if id != NO_ID {
+		// alert notification requires the id in the object for unknown reasons
+		alertNotificationJson, err = setId(alertNotificationJson, "id", id)
 
 		if err != nil {
 			return "", err
 		}
 
-		return client.putGrafanaObject(string(postJSON), fmt.Sprintf("/api/alert-notifications/%v", postChannel["id"]), "id")
+		id, err := client.putGrafanaObject(alertNotificationJson, fmt.Sprintf("/api/alert-notifications/%v", id), "id")
+
+		if err != nil {
+			runtime.HandleError(err)
+
+			return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
+		} else {
+			return id, err
+		}
 
 	} else {
 		return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
@@ -340,4 +318,27 @@ func sanitizeObject(obj string) (string, error) {
 	}
 
 	return string(sanitizedBytes), nil
+}
+
+func setId(obj string, idField string, idValue string) (string, error) {
+	var jsonObject map[string]interface{}
+
+	err := json.Unmarshal([]byte(obj), &jsonObject)
+	if err != nil {
+		return "", err
+	}
+
+	intValue, err := strconv.Atoi(idValue)
+	if err != nil {
+		return "", err
+	}
+
+	jsonObject[idField] = intValue
+
+	bytes, err := json.Marshal(jsonObject)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
 }

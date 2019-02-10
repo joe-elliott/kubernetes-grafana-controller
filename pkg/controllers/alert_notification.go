@@ -96,7 +96,7 @@ func (s *AlertNotificationSyncer) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
-	id, err := s.grafanaClient.PostAlertNotification(grafanaAlertNotification.Spec.JSON)
+	id, err := s.grafanaClient.PostAlertNotification(grafanaAlertNotification.Spec.JSON, grafanaAlertNotification.Status.GrafanaID)
 
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a

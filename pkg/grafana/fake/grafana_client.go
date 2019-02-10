@@ -32,7 +32,7 @@ func (client *ClientFake) GetAllDashboardIds() ([]string, error) {
 	return nil, nil
 }
 
-func (client *ClientFake) PostAlertNotification(json string) (string, error) {
+func (client *ClientFake) PostAlertNotification(json string, id string) (string, error) {
 	client.PostedJson = &json
 
 	return client.fakeID, nil
