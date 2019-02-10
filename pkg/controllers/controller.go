@@ -2,12 +2,19 @@ package controllers
 
 import (
 	"fmt"
+	"kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	"time"
 
+	grafanascheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+
+	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	"k8s.io/klog"
 )
@@ -25,6 +32,7 @@ type Controller struct {
 	informerSynced cache.InformerSynced
 
 	workqueue workqueue.RateLimitingInterface
+	recorder  record.EventRecorder
 }
 
 func NewController(controllerAgentName string,
@@ -32,10 +40,21 @@ func NewController(controllerAgentName string,
 	kubeclientset kubernetes.Interface,
 	syncer Syncer) *Controller {
 
+	// Create event broadcaster
+	// Add grafana-controller types to the default Kubernetes Scheme so Events can be
+	// logged for grafana-controller types.
+	utilruntime.Must(grafanascheme.AddToScheme(scheme.Scheme))
+	klog.V(4).Info("Creating event broadcaster")
+	eventBroadcaster := record.NewBroadcaster()
+	eventBroadcaster.StartLogging(klog.Infof)
+	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeclientset.CoreV1().Events("")})
+	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+
 	controller := &Controller{
 		workqueue:      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), controllerAgentName),
 		informerSynced: informer.HasSynced,
 		syncer:         syncer,
+		recorder:       recorder,
 	}
 
 	klog.Info("Setting up event handlers")
@@ -137,7 +156,7 @@ func (c *Controller) processNextWorkItem() bool {
 
 			// Run the syncHandler, passing it the namespace/name string of the
 			// GrafanaDashboard resource to be synced.
-			if err := c.syncer.syncHandler(item); err != nil {
+			if err := c.syncHandler(item); err != nil {
 				// Put the item back on the workqueue to handle any transient errors.
 				c.workqueue.AddRateLimited(item)
 				return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
@@ -157,6 +176,42 @@ func (c *Controller) processNextWorkItem() bool {
 	}
 
 	return true
+}
+
+func (c *Controller) syncHandler(item WorkQueueItem) error {
+	// Convert the namespace/name string into a distinct namespace and name
+	namespace, name, err := cache.SplitMetaNamespaceKey(item.key)
+	if err != nil {
+		utilruntime.HandleError(fmt.Errorf("invalid resource key: %s", item.key))
+		return nil
+	}
+
+	// Get the DataSource resource with this namespace/name
+	runtimeObject, err := c.syncer.getRuntimeObjectByName(name, namespace)
+	if err != nil {
+
+		if k8serrors.IsNotFound(err) {
+			utilruntime.HandleError(fmt.Errorf("Grafana Object '%s' in work queue no longer exists", item.key))
+
+			// object was deleted, so delete from grafana
+			err = c.syncer.deleteObjectById(item.id)
+
+			if err == nil {
+				c.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
+			}
+		}
+
+		return err
+	}
+
+	err = c.syncer.updateObject(runtimeObject)
+
+	if err != nil {
+		return err
+	}
+
+	c.recorder.Event(runtimeObject, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
+	return nil
 }
 
 func (c *Controller) enqueueResyncDeletedObjects() {
