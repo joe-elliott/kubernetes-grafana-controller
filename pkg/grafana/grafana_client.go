@@ -175,29 +175,6 @@ func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 	return ids, nil
 }
 
-func (client *Client) GetAllDataSourceIds() ([]string, error) {
-	var resp *req.Resp
-	var err error
-	var datasources []map[string]interface{}
-
-	// Request existing notification channels
-	if resp, err = req.Get(client.address + "/api/datasources"); err != nil {
-		return nil, err
-	}
-
-	if err = resp.ToJSON(&datasources); err != nil {
-		return nil, err
-	}
-
-	var ids []string
-
-	for _, datasource := range datasources {
-		ids = append(ids, fmt.Sprintf("%v", datasource["id"]))
-	}
-
-	return ids, nil
-}
-
 func (client *Client) PostDataSource(dataSourceJson string, id string) (string, error) {
 
 	dataSourceJson, err := sanitizeObject(dataSourceJson)
@@ -234,6 +211,29 @@ func (client *Client) DeleteDataSource(id string) error {
 	}
 
 	return nil
+}
+
+func (client *Client) GetAllDataSourceIds() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var datasources []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/datasources"); err != nil {
+		return nil, err
+	}
+
+	if err = resp.ToJSON(&datasources); err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	for _, datasource := range datasources {
+		ids = append(ids, fmt.Sprintf("%v", datasource["id"]))
+	}
+
+	return ids, nil
 }
 
 //
