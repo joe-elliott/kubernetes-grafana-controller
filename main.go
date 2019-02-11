@@ -2,8 +2,12 @@ package main
 
 import (
 	"flag"
+	"log"
+	"net/http"
 	"sync"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
@@ -17,17 +21,21 @@ import (
 )
 
 var (
-	masterURL          string
-	kubeconfig         string
-	grafanaURL         string
-	resyncDeletePeriod time.Duration
-	resyncPeriod       time.Duration
+	masterURL               string
+	kubeconfig              string
+	grafanaURL              string
+	prometheusListenAddress string
+	prometheusPath          string
+	resyncDeletePeriod      time.Duration
+	resyncPeriod            time.Duration
 )
 
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&grafanaURL, "grafana", "http://grafana", "The address of the Grafana server.")
+	flag.StringVar(&prometheusListenAddress, "prometheus-listen-address", ":8080", "The address to listen on for Prometheus scrapes.")
+	flag.StringVar(&prometheusPath, "prometheus-path", "/metrics", "The path to publish Prometheus metrics to.")
 	flag.DurationVar(&resyncDeletePeriod, "resync-delete", time.Second*30, "Periodic interval in which to force resync deleted objects.  Pass 0s to disable.")
 	flag.DurationVar(&resyncPeriod, "resync", time.Second*30, "Periodic interval in which to force resync objects.")
 
@@ -92,6 +100,15 @@ func main() {
 			}
 		}(controller)
 	}
+
+	// start prometheus
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		http.Handle(prometheusPath, promhttp.Handler())
+		log.Fatal(http.ListenAndServe(prometheusListenAddress, nil))
+	}()
 
 	wg.Wait()
 }
