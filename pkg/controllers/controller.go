@@ -37,10 +37,11 @@ type Controller struct {
 	recorder  record.EventRecorder
 }
 
-func NewController(controllerAgentName string,
-	informer cache.SharedIndexInformer,
+func NewController(informer cache.SharedIndexInformer,
 	kubeclientset kubernetes.Interface,
 	syncer Syncer) *Controller {
+
+	controllerAgentName := "grafana-" + syncer.getType() + "-controller"
 
 	// Create event broadcaster
 	// Add grafana-controller types to the default Kubernetes Scheme so Events can be

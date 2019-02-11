@@ -5,6 +5,7 @@ import (
 )
 
 type Syncer interface {
+	getType() string
 	createWorkQueueItem(obj interface{}) *WorkQueueItem
 	deleteObjectById(id string) error
 

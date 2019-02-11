@@ -38,12 +38,15 @@ func NewAlertNotificationController(
 		grafanaclientset:               grafanaclientset,
 	}
 
-	controller := NewController(controllerAgentName,
-		grafanaAlertNotificationInformer.Informer(),
+	controller := NewController(grafanaAlertNotificationInformer.Informer(),
 		kubeclientset,
 		syncer)
 
 	return controller
+}
+
+func (s *AlertNotificationSyncer) getType() string {
+	return "alert-notification"
 }
 
 func (s *AlertNotificationSyncer) getRuntimeObjectByName(name string, namespace string) (runtime.Object, error) {

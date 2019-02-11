@@ -38,12 +38,15 @@ func NewDashboardController(
 		grafanaclientset:        grafanaclientset,
 	}
 
-	controller := NewController(controllerAgentName,
-		grafanaDashboardInformer.Informer(),
+	controller := NewController(grafanaDashboardInformer.Informer(),
 		kubeclientset,
 		syncer)
 
 	return controller
+}
+
+func (s *DashboardSyncer) getType() string {
+	return "dashboard"
 }
 
 func (s *DashboardSyncer) getRuntimeObjectByName(name string, namespace string) (runtime.Object, error) {

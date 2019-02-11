@@ -30,20 +30,21 @@ func NewDataSourceController(
 	grafanaClient grafana.Interface,
 	grafanaDataSourceInformer informers.DataSourceInformer) *Controller {
 
-	controllerAgentName := "grafana-DataSource-controller"
-
 	syncer := &DataSourceSyncer{
 		grafanaDataSourcesLister: grafanaDataSourceInformer.Lister(),
 		grafanaClient:            grafanaClient,
 		grafanaclientset:         grafanaclientset,
 	}
 
-	controller := NewController(controllerAgentName,
-		grafanaDataSourceInformer.Informer(),
+	controller := NewController(grafanaDataSourceInformer.Informer(),
 		kubeclientset,
 		syncer)
 
 	return controller
+}
+
+func (s *DashboardSyncer) getType() string {
+	return "datasource"
 }
 
 func (s *DataSourceSyncer) getAllKubernetesObjectIDs() ([]string, error) {
