@@ -50,27 +50,30 @@ var (
 	*/
 	GrafanaPostLatencyMilliseconds = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Name:      "grafana_post_latency_ms",
-			Help:      "Kubernetes Grafana Controllers Grafana Update Latency (milliseconds)",
+			Namespace:  namespace,
+			Name:       "grafana_post_latency_ms",
+			Help:       "Kubernetes Grafana Controllers Grafana Update Latency (milliseconds)",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{"type"},
 	)
 
 	GrafanaPutLatencyMilliseconds = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Name:      "grafana_put_latency_ms",
-			Help:      "Kubernetes Grafana Controllers Grafana Update Latency (milliseconds)",
+			Namespace:  namespace,
+			Name:       "grafana_put_latency_ms",
+			Help:       "Kubernetes Grafana Controllers Grafana Update Latency (milliseconds)",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{"type"},
 	)
 
 	GrafanaDeleteLatencyMilliseconds = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
-			Namespace: namespace,
-			Name:      "grafana_delete_latency_ms",
-			Help:      "Kubernetes Grafana Controllers Grafana Update Latency (milliseconds)",
+			Namespace:  namespace,
+			Name:       "grafana_delete_latency_ms",
+			Help:       "Kubernetes Grafana Controllers Grafana Update Latency (milliseconds)",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
 		[]string{"type"},
 	)
