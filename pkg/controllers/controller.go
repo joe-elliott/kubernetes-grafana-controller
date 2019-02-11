@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	"kubernetes-grafana-controller/pkg/grafana"
+	"kubernetes-grafana-controller/pkg/prometheus"
 	"time"
 
 	grafanascheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
@@ -150,24 +151,25 @@ func (c *Controller) processNextWorkItem() bool {
 		}
 
 		if item.isResyncDeletedObjects() {
+			prometheus.ResyncDeletedTotal.WithLabelValues(c.syncer.getType()).Inc()
 
 			if err := c.resyncDeletedObjects(); err != nil {
+				prometheus.ErrorTotal.Inc()
+
 				c.workqueue.AddRateLimited(item)
 				return fmt.Errorf("error resyncing all %s, requeuing", err.Error())
 			}
 		} else {
 
-			// Run the syncHandler, passing it the namespace/name string of the
-			// GrafanaDashboard resource to be synced.
 			if err := c.syncHandler(item); err != nil {
-				// Put the item back on the workqueue to handle any transient errors.
+				prometheus.ErrorTotal.Inc()
+
 				c.workqueue.AddRateLimited(item)
 				return fmt.Errorf("error syncing '%s': %s, requeuing", item.key, err.Error())
 			}
 		}
 
-		// Finally, if no error occurs we Forget this item so it does not
-		// get queued again until anothePostDashboardr change happens.
+		// remove from queue
 		c.workqueue.Forget(obj)
 		klog.Infof("Successfully synced '%s'", item.key)
 		return nil
@@ -200,6 +202,7 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 			err = c.syncer.deleteObjectById(item.id)
 
 			if err == nil {
+				prometheus.DeletedObjectTotal.WithLabelValues(c.syncer.getType()).Inc()
 				c.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
 			}
 		}
@@ -213,6 +216,7 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 		return err
 	}
 
+	prometheus.UpdatedObjectTotal.WithLabelValues(c.syncer.getType()).Inc()
 	c.recorder.Event(runtimeObject, corev1.EventTypeNormal, SuccessSynced, MessageResourceSynced)
 	return nil
 }
