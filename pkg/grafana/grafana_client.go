@@ -73,6 +73,7 @@ func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, e
 
 func (client *Client) DeleteDashboard(id string) error {
 	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeDashboard).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return err
@@ -142,6 +143,7 @@ func (client *Client) PostAlertNotification(alertNotificationJson string, id str
 
 func (client *Client) DeleteAlertNotification(id string) error {
 	resp, err := req.Delete(client.address + "/api/alert-notifications/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeAlertNotification).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return err
@@ -205,6 +207,7 @@ func (client *Client) PostDataSource(dataSourceJson string, id string) (string, 
 
 func (client *Client) DeleteDataSource(id string) error {
 	resp, err := req.Delete(client.address + "/api/datasources/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeDataSource).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return err
