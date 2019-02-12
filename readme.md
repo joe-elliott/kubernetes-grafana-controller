@@ -21,6 +21,10 @@ The primary motivator for creating this controller is to allow development teams
     	Periodic interval in which to force resync objects. (default 30s)
   -resync-delete duration
     	Periodic interval in which to force resync deleted objects.  Pass 0s to disable. (default 30s)
+  -prometheus-listen-address string
+    	The address to listen on for Prometheus scrapes. (default ":8080")
+  -prometheus-path string
+    	The path to publish Prometheus metrics to. (default "/metrics")
 
 klog
 
@@ -43,6 +47,12 @@ klog
   -vmodule value
     	comma-separated list of pattern=N settings for file-filtered logging
 ```
+
+## Metrics
+
+The kubernetes-grafana-controller publishes a metrics in the prometheus format.  These include error totals, grafana latencies and other totals.
+
+https://github.com/number101010/kubernetes-grafana-controller/blob/master/pkg/prometheus/prometheus.go
 
 ## Custom Resource Definitions
 
