@@ -4,6 +4,10 @@ import "github.com/prometheus/client_golang/prometheus"
 
 const (
 	namespace = "grafana_controller"
+
+	TypeAlertNotification = "alert-notification"
+	TypeDashboard         = "dashboard"
+	TypeDataSource        = "datasource"
 )
 
 var (
@@ -68,6 +72,26 @@ var (
 		[]string{"type"},
 	)
 
+	GrafanaGetLatencyMilliseconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Name:       "grafana_get_latency_ms",
+			Help:       "Kubernetes Grafana Controllers Grafana Get Latency (milliseconds)",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+		},
+		[]string{"type"},
+	)
+
+	GrafanaSearchLatencyMilliseconds = prometheus.NewSummaryVec(
+		prometheus.SummaryOpts{
+			Namespace:  namespace,
+			Name:       "grafana_search_latency_ms",
+			Help:       "Kubernetes Grafana Controllers Grafana Search Latency (milliseconds)",
+			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
+		},
+		[]string{"type"},
+	)
+
 	GrafanaDeleteLatencyMilliseconds = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
 			Namespace:  namespace,
@@ -97,5 +121,7 @@ func init() {
 	prometheus.MustRegister(GrafanaPostLatencyMilliseconds)
 	prometheus.MustRegister(GrafanaPutLatencyMilliseconds)
 	prometheus.MustRegister(GrafanaDeleteLatencyMilliseconds)
+	prometheus.MustRegister(GrafanaGetLatencyMilliseconds)
+	prometheus.MustRegister(GrafanaSearchLatencyMilliseconds)
 	prometheus.MustRegister(GrafanaWastedPutTotal)
 }

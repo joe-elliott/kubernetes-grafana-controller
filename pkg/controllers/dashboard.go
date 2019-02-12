@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"kubernetes-grafana-controller/pkg/prometheus"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -46,7 +47,7 @@ func NewDashboardController(
 }
 
 func (s *DashboardSyncer) getType() string {
-	return "dashboard"
+	return prometheus.TypeDashboard
 }
 
 func (s *DashboardSyncer) getRuntimeObjectByName(name string, namespace string) (runtime.Object, error) {

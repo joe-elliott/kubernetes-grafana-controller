@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"kubernetes-grafana-controller/pkg/prometheus"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -46,7 +47,7 @@ func NewAlertNotificationController(
 }
 
 func (s *AlertNotificationSyncer) getType() string {
-	return "alert-notification"
+	return prometheus.TypeAlertNotification
 }
 
 func (s *AlertNotificationSyncer) getRuntimeObjectByName(name string, namespace string) (runtime.Object, error) {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"kubernetes-grafana-controller/pkg/prometheus"
+
 	"github.com/imroc/req"
 	"k8s.io/apimachinery/pkg/util/runtime"
 )
@@ -119,6 +121,7 @@ func (client *Client) PostAlertNotification(alertNotificationJson string, id str
 
 		if err != nil {
 			runtime.HandleError(err)
+			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeAlertNotification).Inc()
 
 			return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
 		} else {
@@ -180,6 +183,7 @@ func (client *Client) PostDataSource(dataSourceJson string, id string) (string, 
 
 		if err != nil {
 			runtime.HandleError(err)
+			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeDataSource).Inc()
 
 			return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
 		} else {
