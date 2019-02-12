@@ -44,7 +44,7 @@ func NewDataSourceController(
 	return controller
 }
 
-func (s *DashboardSyncer) getType() string {
+func (s *DataSourceSyncer) getType() string {
 	return prometheus.TypeDataSource
 }
 

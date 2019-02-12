@@ -31,8 +31,6 @@ func NewDashboardController(
 	grafanaClient grafana.Interface,
 	grafanaDashboardInformer informers.DashboardInformer) *Controller {
 
-	controllerAgentName := "grafana-dashboard-controller"
-
 	syncer := &DashboardSyncer{
 		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
 		grafanaClient:           grafanaClient,

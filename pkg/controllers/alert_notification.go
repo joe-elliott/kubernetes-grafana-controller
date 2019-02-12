@@ -31,8 +31,6 @@ func NewAlertNotificationController(
 	grafanaClient grafana.Interface,
 	grafanaAlertNotificationInformer informers.AlertNotificationInformer) *Controller {
 
-	controllerAgentName := "grafana-alertnotification-controller"
-
 	syncer := &AlertNotificationSyncer{
 		grafanaAlertNotificationLister: grafanaAlertNotificationInformer.Lister(),
 		grafanaClient:                  grafanaClient,
