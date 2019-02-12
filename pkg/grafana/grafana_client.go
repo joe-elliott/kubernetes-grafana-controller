@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"kubernetes-grafana-controller/pkg/prometheus"
 
@@ -30,6 +31,11 @@ type Interface interface {
 
 type Client struct {
 	address string
+}
+
+func init() {
+	// cost is required for prom metrics
+	req.SetFlags(req.LstdFlags | req.Lcost)
 }
 
 func NewClient(address string) *Client {
@@ -88,6 +94,7 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	if resp, err = req.Get(client.address + "/api/search"); err != nil {
 		return nil, err
 	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeDashboard).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err = resp.ToJSON(&dashboards); err != nil {
 		return nil, err
@@ -156,6 +163,7 @@ func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 	if resp, err = req.Get(client.address + "/api/alert-notifications"); err != nil {
 		return nil, err
 	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeAlertNotification).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err = resp.ToJSON(&channels); err != nil {
 		return nil, err
@@ -218,6 +226,7 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 	if resp, err = req.Get(client.address + "/api/datasources"); err != nil {
 		return nil, err
 	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeDataSource).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err = resp.ToJSON(&datasources); err != nil {
 		return nil, err
