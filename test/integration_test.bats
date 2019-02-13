@@ -314,6 +314,9 @@ teardown(){
         validateDataSourceCount $count
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms datasource
+        validateMetrics grafana_controller_updated_object_total datasource
     done
 }
 
@@ -339,6 +342,11 @@ teardown(){
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
         validateEvents DataSource Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms datasource
+        validateMetrics grafana_controller_updated_object_total datasource
+        validateMetrics grafana_controller_grafana_delete_latency_ms datasource
+        validateMetrics grafana_controller_deleted_object_total datasource
     done
 }
 
@@ -369,6 +377,8 @@ teardown(){
         validateDataSourceCount 0
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_resynced_deleted_total datasoure
     done
 }
 
@@ -403,6 +413,12 @@ teardown(){
         validateDataSourceCount $count
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms datasource
+        validateMetrics grafana_controller_grafana_put_latency_ms datasource
+        validateMetrics grafana_controller_updated_object_total datasource
+        validateMetrics grafana_controller_grafana_delete_latency_ms datasource
+        validateMetrics grafana_controller_deleted_object_total datasource
     done
 }
 
