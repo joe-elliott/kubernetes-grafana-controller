@@ -12,6 +12,7 @@ setup(){
     run kubectl scale --replicas=1 deployment/grafana
 
     validateGrafanaUrl
+    validateControllerUrl
 }
 
 teardown(){
@@ -46,6 +47,9 @@ teardown(){
         validateDashboardCount $count
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
+        
+        validateMetrics grafana_controller_grafana_post_latency_ms dashboard
+        validateMetrics grafana_controller_updated_object_total dashboard
     done
 }
 
@@ -67,6 +71,11 @@ teardown(){
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
         validateEvents Dashboard Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms dashboard
+        validateMetrics grafana_controller_updated_object_total dashboard
+        validateMetrics grafana_controller_grafana_delete_latency_ms dashboard
+        validateMetrics grafana_controller_deleted_object_total dashboard
     done
 }
 
@@ -129,6 +138,11 @@ teardown(){
         validateDashboardCount $count
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms dashboard
+        validateMetrics grafana_controller_updated_object_total dashboard
+        validateMetrics grafana_controller_grafana_delete_latency_ms dashboard
+        validateMetrics grafana_controller_deleted_object_total dashboard
     done
 }
 
@@ -145,6 +159,8 @@ teardown(){
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
 
         [ "$httpStatus" -eq "200" ]
+
+        validateMetrics grafana_controller_resynced_deleted_total dashboard
     done
 }
 
