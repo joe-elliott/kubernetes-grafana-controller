@@ -143,8 +143,6 @@ teardown(){
 
         validateMetrics grafana_controller_grafana_post_latency_ms dashboard
         validateMetrics grafana_controller_updated_object_total dashboard
-        validateMetrics grafana_controller_grafana_delete_latency_ms dashboard
-        validateMetrics grafana_controller_deleted_object_total dashboard
     done
 }
 
@@ -277,8 +275,6 @@ teardown(){
         validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
         validateMetrics grafana_controller_grafana_put_latency_ms alert-notification
         validateMetrics grafana_controller_updated_object_total alert-notification
-        validateMetrics grafana_controller_grafana_delete_latency_ms alert-notification
-        validateMetrics grafana_controller_deleted_object_total alert-notification
     done
 }
 
@@ -417,8 +413,6 @@ teardown(){
         validateMetrics grafana_controller_grafana_post_latency_ms datasource
         validateMetrics grafana_controller_grafana_put_latency_ms datasource
         validateMetrics grafana_controller_updated_object_total datasource
-        validateMetrics grafana_controller_grafana_delete_latency_ms datasource
-        validateMetrics grafana_controller_deleted_object_total datasource
     done
 }
 
