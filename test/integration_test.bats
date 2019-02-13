@@ -102,6 +102,8 @@ teardown(){
         validateDashboardCount 0
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_resynced_deleted_total dashboard
     done
 }
 
@@ -159,8 +161,6 @@ teardown(){
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/dashboards/uid/${dashboardId})
 
         [ "$httpStatus" -eq "200" ]
-
-        validateMetrics grafana_controller_resynced_deleted_total dashboard
     done
 }
 
@@ -177,6 +177,9 @@ teardown(){
         validateAlertNotificationCount $count
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
+        validateMetrics grafana_controller_updated_object_total alert-notification
     done
 }
 
@@ -200,6 +203,11 @@ teardown(){
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
         validateEvents AlertNotification Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notifications
+        validateMetrics grafana_controller_updated_object_total alert-notifications
+        validateMetrics grafana_controller_grafana_delete_latency_ms alert-notifications
+        validateMetrics grafana_controller_deleted_object_total alert-notifications
     done
 }
 
@@ -228,6 +236,8 @@ teardown(){
         validateAlertNotificationCount 0
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_resynced_deleted_total alert-notification
     done
 }
 
@@ -263,6 +273,12 @@ teardown(){
         validateAlertNotificationCount $count
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
+        validateMetrics grafana_controller_grafana_put_latency_ms alert-notification
+        validateMetrics grafana_controller_updated_object_total alert-notification
+        validateMetrics grafana_controller_grafana_delete_latency_ms alert-notification
+        validateMetrics grafana_controller_deleted_object_total alert-notification
     done
 }
 
