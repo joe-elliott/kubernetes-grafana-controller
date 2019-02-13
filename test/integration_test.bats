@@ -202,10 +202,10 @@ teardown(){
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
         validateEvents AlertNotification Deleted $(objectNameFromFile $filename)
 
-        validateMetrics grafana_controller_grafana_post_latency_ms alert-notifications
-        validateMetrics grafana_controller_updated_object_total alert-notifications
-        validateMetrics grafana_controller_grafana_delete_latency_ms alert-notifications
-        validateMetrics grafana_controller_deleted_object_total alert-notifications
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
+        validateMetrics grafana_controller_updated_object_total alert-notification
+        validateMetrics grafana_controller_grafana_delete_latency_ms alert-notification
+        validateMetrics grafana_controller_deleted_object_total alert-notification
     done
 }
 
