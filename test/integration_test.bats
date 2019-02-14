@@ -374,7 +374,7 @@ teardown(){
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
 
-        validateMetrics grafana_controller_resynced_deleted_total datasoure
+        validateMetrics grafana_controller_resynced_deleted_total datasource
     done
 }
 
