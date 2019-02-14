@@ -13,6 +13,7 @@ kubectl delete deployment --ignore-not-found=true $IMAGE_NAME
 
 kubectl create clusterrolebinding $IMAGE_NAME --clusterrole=cluster-admin --serviceaccount=default:default
 kubectl run $IMAGE_NAME --image=$IMAGE_NAME --image-pull-policy=Never
+kubectl delete service $IMAGE_NAME
 kubectl expose deployment $IMAGE_NAME --port=80 --target-port=8080 --type=NodePort
 
 kubectl delete --ignore-not-found=true -f crd.yaml
