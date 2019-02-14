@@ -79,7 +79,7 @@ func (client *Client) DeleteDashboard(id string) error {
 		return err
 	}
 
-	if !responseIsSuccess(resp) {
+	if !responseIsSuccessOrNotFound(resp) {
 		return errors.New(resp.Response().Status)
 	}
 
@@ -149,7 +149,7 @@ func (client *Client) DeleteAlertNotification(id string) error {
 		return err
 	}
 
-	if !responseIsSuccess(resp) {
+	if !responseIsSuccessOrNotFound(resp) {
 		return errors.New(resp.Response().Status)
 	}
 
@@ -213,7 +213,7 @@ func (client *Client) DeleteDataSource(id string) error {
 		return err
 	}
 
-	if !responseIsSuccess(resp) {
+	if !responseIsSuccessOrNotFound(resp) {
 		return errors.New(resp.Response().Status)
 	}
 
@@ -331,6 +331,10 @@ func (client *Client) putGrafanaObject(putJSON string, path string, idField stri
 
 func responseIsSuccess(resp *req.Resp) bool {
 	return resp.Response().StatusCode < 300 && resp.Response().StatusCode >= 200
+}
+
+func responseIsSuccessOrNotFound(resp *req.Resp) bool {
+	return responseIsSuccess(resp) || resp.Response().StatusCode == 404
 }
 
 func sanitizeObject(obj string) (string, error) {
