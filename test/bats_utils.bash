@@ -2,6 +2,7 @@ export MINIKUBE_WANTUPDATENOTIFICATION=false
 export MINIKUBE_WANTREPORTERRORPROMPT=false
 
 GRAFANA_URL=""
+CONTROLLER_URL=""
 
 validateGrafanaUrl() {
 
@@ -10,11 +11,19 @@ validateGrafanaUrl() {
     # ugh
     sleep 5s
 
-    # get grafana url
+    # urls
     GRAFANA_URL=$(minikube service grafana --url --interval=1 --wait=60)
 
     echo "grafana url: " $GRAFANA_URL
     httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL})
+
+    [ "$httpStatus" -eq "200" ]
+}
+
+validateControllerUrl() {
+    CONTROLLER_URL=$(minikube service kubernetes-grafana-test --url)
+
+    httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${CONTROLLER_URL}/metrics)
 
     [ "$httpStatus" -eq "200" ]
 }
@@ -248,6 +257,21 @@ validateDataSourceContents() {
     rm a.json
     rm b.json
 }
+
+#
+# validateMetrics <metric name> <object type> <value>
+#   confirms the metric name exists for the object type and value...kind of
+#
+validateMetrics() {
+    metrics=$(curl --silent ${CONTROLLER_URL}/metrics)
+
+    if [ -n "$3" ]; then
+        echo $metrics | grep $1 | grep $2 | grep $3
+    else
+        echo $metrics | grep $1 | grep $2
+    fi
+}
+
 
 #
 # utils

@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
+
+	"kubernetes-grafana-controller/pkg/prometheus"
 
 	"github.com/imroc/req"
 	"k8s.io/apimachinery/pkg/util/runtime"
@@ -28,6 +31,11 @@ type Interface interface {
 
 type Client struct {
 	address string
+}
+
+func init() {
+	// cost is required for prom metrics
+	req.SetFlags(req.LstdFlags | req.Lcost)
 }
 
 func NewClient(address string) *Client {
@@ -60,11 +68,12 @@ func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, e
 		"overwrite": true
 	}`, dashboardJSON)
 
-	return client.postGrafanaObject(postJSON, "/api/dashboards/db", "uid")
+	return client.postGrafanaObject(postJSON, "/api/dashboards/db", "uid", prometheus.TypeDashboard)
 }
 
 func (client *Client) DeleteDashboard(id string) error {
 	resp, err := req.Delete(client.address + "/api/dashboards/uid/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeDashboard).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return err
@@ -86,6 +95,7 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	if resp, err = req.Get(client.address + "/api/search"); err != nil {
 		return nil, err
 	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeDashboard).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err = resp.ToJSON(&dashboards); err != nil {
 		return nil, err
@@ -115,23 +125,25 @@ func (client *Client) PostAlertNotification(alertNotificationJson string, id str
 			return "", err
 		}
 
-		id, err := client.putGrafanaObject(alertNotificationJson, fmt.Sprintf("/api/alert-notifications/%v", id), "id")
+		id, err := client.putGrafanaObject(alertNotificationJson, fmt.Sprintf("/api/alert-notifications/%v", id), "id", prometheus.TypeAlertNotification)
 
 		if err != nil {
 			runtime.HandleError(err)
+			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeAlertNotification).Inc()
 
-			return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
+			return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id", prometheus.TypeAlertNotification)
 		} else {
 			return id, err
 		}
 
 	} else {
-		return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id")
+		return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id", prometheus.TypeAlertNotification)
 	}
 }
 
 func (client *Client) DeleteAlertNotification(id string) error {
 	resp, err := req.Delete(client.address + "/api/alert-notifications/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeAlertNotification).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return err
@@ -153,6 +165,7 @@ func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 	if resp, err = req.Get(client.address + "/api/alert-notifications"); err != nil {
 		return nil, err
 	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeAlertNotification).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err = resp.ToJSON(&channels); err != nil {
 		return nil, err
@@ -176,23 +189,25 @@ func (client *Client) PostDataSource(dataSourceJson string, id string) (string, 
 	}
 
 	if id != NO_ID {
-		id, err := client.putGrafanaObject(dataSourceJson, fmt.Sprintf("/api/datasources/%v", id), "id")
+		id, err := client.putGrafanaObject(dataSourceJson, fmt.Sprintf("/api/datasources/%v", id), "id", prometheus.TypeDataSource)
 
 		if err != nil {
 			runtime.HandleError(err)
+			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeDataSource).Inc()
 
-			return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
+			return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id", prometheus.TypeDataSource)
 		} else {
 			return id, err
 		}
 
 	} else {
-		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id")
+		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id", prometheus.TypeDataSource)
 	}
 }
 
 func (client *Client) DeleteDataSource(id string) error {
 	resp, err := req.Delete(client.address + "/api/datasources/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeDataSource).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return err
@@ -214,6 +229,7 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 	if resp, err = req.Get(client.address + "/api/datasources"); err != nil {
 		return nil, err
 	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeDataSource).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err = resp.ToJSON(&datasources); err != nil {
 		return nil, err
@@ -232,7 +248,7 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 // shared
 //
 
-func (client *Client) postGrafanaObject(postJSON string, path string, idField string) (string, error) {
+func (client *Client) postGrafanaObject(postJSON string, path string, idField string, prometheusType string) (string, error) {
 	var responseBody map[string]interface{}
 
 	header := req.Header{
@@ -240,6 +256,7 @@ func (client *Client) postGrafanaObject(postJSON string, path string, idField st
 	}
 
 	resp, err := req.Post(client.address+path, header, postJSON)
+	prometheus.GrafanaPostLatencyMilliseconds.WithLabelValues(prometheusType).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return "", err
@@ -271,7 +288,7 @@ func (client *Client) postGrafanaObject(postJSON string, path string, idField st
 	return idString, nil
 }
 
-func (client *Client) putGrafanaObject(putJSON string, path string, idField string) (string, error) {
+func (client *Client) putGrafanaObject(putJSON string, path string, idField string, prometheusType string) (string, error) {
 	var responseBody map[string]interface{}
 
 	header := req.Header{
@@ -279,6 +296,7 @@ func (client *Client) putGrafanaObject(putJSON string, path string, idField stri
 	}
 
 	resp, err := req.Put(client.address+path, header, putJSON)
+	prometheus.GrafanaPutLatencyMilliseconds.WithLabelValues(prometheusType).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
 		return "", err

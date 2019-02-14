@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"kubernetes-grafana-controller/pkg/prometheus"
 
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,20 +31,21 @@ func NewDashboardController(
 	grafanaClient grafana.Interface,
 	grafanaDashboardInformer informers.DashboardInformer) *Controller {
 
-	controllerAgentName := "grafana-dashboard-controller"
-
 	syncer := &DashboardSyncer{
 		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
 		grafanaClient:           grafanaClient,
 		grafanaclientset:        grafanaclientset,
 	}
 
-	controller := NewController(controllerAgentName,
-		grafanaDashboardInformer.Informer(),
+	controller := NewController(grafanaDashboardInformer.Informer(),
 		kubeclientset,
 		syncer)
 
 	return controller
+}
+
+func (s *DashboardSyncer) getType() string {
+	return prometheus.TypeDashboard
 }
 
 func (s *DashboardSyncer) getRuntimeObjectByName(name string, namespace string) (runtime.Object, error) {

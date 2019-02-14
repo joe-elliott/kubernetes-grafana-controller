@@ -12,6 +12,7 @@ setup(){
     run kubectl scale --replicas=1 deployment/grafana
 
     validateGrafanaUrl
+    validateControllerUrl
 }
 
 teardown(){
@@ -46,6 +47,9 @@ teardown(){
         validateDashboardCount $count
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
+        
+        validateMetrics grafana_controller_grafana_post_latency_ms dashboard
+        validateMetrics grafana_controller_updated_object_total dashboard
     done
 }
 
@@ -67,6 +71,11 @@ teardown(){
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
         validateEvents Dashboard Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms dashboard
+        validateMetrics grafana_controller_updated_object_total dashboard
+        validateMetrics grafana_controller_grafana_delete_latency_ms dashboard
+        validateMetrics grafana_controller_deleted_object_total dashboard
     done
 }
 
@@ -93,6 +102,8 @@ teardown(){
         validateDashboardCount 0
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_resynced_deleted_total dashboard
     done
 }
 
@@ -129,6 +140,9 @@ teardown(){
         validateDashboardCount $count
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms dashboard
+        validateMetrics grafana_controller_updated_object_total dashboard
     done
 }
 
@@ -161,6 +175,9 @@ teardown(){
         validateAlertNotificationCount $count
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
+        validateMetrics grafana_controller_updated_object_total alert-notification
     done
 }
 
@@ -184,6 +201,11 @@ teardown(){
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
         validateEvents AlertNotification Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
+        validateMetrics grafana_controller_updated_object_total alert-notification
+        validateMetrics grafana_controller_grafana_delete_latency_ms alert-notification
+        validateMetrics grafana_controller_deleted_object_total alert-notification
     done
 }
 
@@ -212,6 +234,8 @@ teardown(){
         validateAlertNotificationCount 0
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_resynced_deleted_total alert-notification
     done
 }
 
@@ -247,6 +271,10 @@ teardown(){
         validateAlertNotificationCount $count
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
+        validateMetrics grafana_controller_grafana_put_latency_ms alert-notification
+        validateMetrics grafana_controller_updated_object_total alert-notification
     done
 }
 
@@ -282,6 +310,9 @@ teardown(){
         validateDataSourceCount $count
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms datasource
+        validateMetrics grafana_controller_updated_object_total datasource
     done
 }
 
@@ -307,6 +338,11 @@ teardown(){
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
         validateEvents DataSource Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms datasource
+        validateMetrics grafana_controller_updated_object_total datasource
+        validateMetrics grafana_controller_grafana_delete_latency_ms datasource
+        validateMetrics grafana_controller_deleted_object_total datasource
     done
 }
 
@@ -337,6 +373,8 @@ teardown(){
         validateDataSourceCount 0
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_resynced_deleted_total datasource
     done
 }
 
@@ -371,6 +409,10 @@ teardown(){
         validateDataSourceCount $count
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms datasource
+        validateMetrics grafana_controller_grafana_put_latency_ms datasource
+        validateMetrics grafana_controller_updated_object_total datasource
     done
 }
 

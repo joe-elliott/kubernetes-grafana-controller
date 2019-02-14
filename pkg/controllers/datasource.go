@@ -14,6 +14,7 @@ import (
 	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana/v1alpha1"
 	listers "kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
 	"kubernetes-grafana-controller/pkg/grafana"
+	"kubernetes-grafana-controller/pkg/prometheus"
 )
 
 // DataSourceSyncer is the controller implementation for DataSource resources
@@ -30,20 +31,21 @@ func NewDataSourceController(
 	grafanaClient grafana.Interface,
 	grafanaDataSourceInformer informers.DataSourceInformer) *Controller {
 
-	controllerAgentName := "grafana-DataSource-controller"
-
 	syncer := &DataSourceSyncer{
 		grafanaDataSourcesLister: grafanaDataSourceInformer.Lister(),
 		grafanaClient:            grafanaClient,
 		grafanaclientset:         grafanaclientset,
 	}
 
-	controller := NewController(controllerAgentName,
-		grafanaDataSourceInformer.Informer(),
+	controller := NewController(grafanaDataSourceInformer.Informer(),
 		kubeclientset,
 		syncer)
 
 	return controller
+}
+
+func (s *DataSourceSyncer) getType() string {
+	return prometheus.TypeDataSource
 }
 
 func (s *DataSourceSyncer) getAllKubernetesObjectIDs() ([]string, error) {
