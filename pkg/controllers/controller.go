@@ -196,7 +196,8 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 	if err != nil {
 
 		if k8serrors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("Grafana Object '%s' in work queue no longer exists", item.key))
+			utilruntime.HandleError(fmt.Errorf("Grafana Object '%s' in work queue no longer exists. Deleting", item.key))
+			prometheus.ErrorTotal.Inc()
 
 			// object was deleted, so delete from grafana
 			err = c.syncer.deleteObjectById(item.id)
