@@ -5,7 +5,7 @@ import "k8s.io/apimachinery/pkg/runtime"
 type WorkQueueItemType int
 
 const (
-	Update        = 1
+	AddOrUpdate   = 1
 	Delete        = 2
 	ResyncDeleted = 3
 )
