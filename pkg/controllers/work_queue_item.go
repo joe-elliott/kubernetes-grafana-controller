@@ -5,6 +5,7 @@ import "k8s.io/apimachinery/pkg/runtime"
 type WorkQueueItemType int
 
 const (
+	None          = 0
 	AddOrUpdate   = 1
 	Delete        = 2
 	ResyncDeleted = 3
@@ -17,9 +18,9 @@ type WorkQueueItem struct {
 	id             string
 }
 
-func NewWorkQueueItem(itemType WorkQueueItemType, key string, originalObject runtime.Object, id string) WorkQueueItem {
+func NewWorkQueueItem(key string, originalObject runtime.Object, id string) WorkQueueItem {
 	return WorkQueueItem{
-		itemType:       itemType,
+		itemType:       None,
 		key:            key,
 		originalObject: originalObject,
 		id:             id,
