@@ -272,7 +272,6 @@ validateMetrics() {
     fi
 }
 
-
 #
 # utils
 #

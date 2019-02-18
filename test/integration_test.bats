@@ -51,6 +51,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_post_latency_ms dashboard
         validateMetrics grafana_controller_updated_object_total dashboard
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "deleting a Dashboard object deletes the Grafana Dashboard" {
@@ -77,6 +79,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_delete_latency_ms dashboard
         validateMetrics grafana_controller_deleted_object_total dashboard
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "deleting a Dashboard while the controller is not running deletes the dashboard in Grafana" {
@@ -105,6 +109,8 @@ teardown(){
 
         validateMetrics grafana_controller_resynced_deleted_total dashboard
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "creating a Dashboard object creates the same dashboard in Grafana" {
@@ -118,6 +124,8 @@ teardown(){
 
         validateEvents Dashboard Synced $(objectNameFromFile $filename)
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "updating a Dashboard object updates the dashboard in Grafana" {
@@ -144,6 +152,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_post_latency_ms dashboard
         validateMetrics grafana_controller_updated_object_total dashboard
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "state is resynced after deleting a dashboard in grafana" {
@@ -160,6 +170,8 @@ teardown(){
 
         [ "$httpStatus" -eq "200" ]
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 #
@@ -179,6 +191,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_post_latency_ms alert-notification
         validateMetrics grafana_controller_updated_object_total alert-notification
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "deleting a AlertNotification object deletes the Grafana AlertNotification" {
@@ -207,6 +221,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_delete_latency_ms alert-notification
         validateMetrics grafana_controller_deleted_object_total alert-notification
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "deleting a AlertNotification while the controller is not running deletes the alert notification in Grafana" {
@@ -237,6 +253,8 @@ teardown(){
 
         validateMetrics grafana_controller_resynced_deleted_total alert-notification
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 
@@ -251,6 +269,8 @@ teardown(){
 
         validateEvents AlertNotification Synced $(objectNameFromFile $filename)
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "updating a AlertNotification object updates the notification in Grafana" {
@@ -276,6 +296,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_put_latency_ms alert-notification
         validateMetrics grafana_controller_updated_object_total alert-notification
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "state is resynced after deleting an alert notification in grafana" {
@@ -293,6 +315,8 @@ teardown(){
 
         [ "$count" -eq "1" ]
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 #
@@ -314,6 +338,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_post_latency_ms datasource
         validateMetrics grafana_controller_updated_object_total datasource
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "deleting a DataSource object deletes the Grafana DataSource" {
@@ -344,6 +370,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_delete_latency_ms datasource
         validateMetrics grafana_controller_deleted_object_total datasource
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "deleting a DataSource while the controller is not running deletes the datasource in Grafana" {
@@ -376,6 +404,8 @@ teardown(){
 
         validateMetrics grafana_controller_resynced_deleted_total datasource
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "creating a DataSource object creates the same datasource in Grafana" {
@@ -389,6 +419,8 @@ teardown(){
 
         validateEvents DataSource Synced $(objectNameFromFile $filename)
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "updating a DataSource object updates the datasource in Grafana" {
@@ -414,6 +446,8 @@ teardown(){
         validateMetrics grafana_controller_grafana_put_latency_ms datasource
         validateMetrics grafana_controller_updated_object_total datasource
     done
+
+    validateMetrics grafana_controller_error_total 0
 }
 
 @test "state is resynced after deleting a datasoure in grafana" {
@@ -432,4 +466,6 @@ teardown(){
 
         [ "$count" -eq "1" ]
     done
+
+    validateMetrics grafana_controller_error_total 0
 }

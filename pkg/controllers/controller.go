@@ -64,12 +64,16 @@ func NewController(informer cache.SharedIndexInformer,
 	klog.Info("Setting up event handlers")
 	// Set up an event handler for when GrafanaDashboard resources change
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: controller.enqueueWorkQueueItem,
+		AddFunc: func(toAdd interface{}) {
+			controller.enqueueWorkQueueItem(toAdd, AddOrUpdate)
+		},
 		UpdateFunc: func(old, new interface{}) {
 
-			controller.enqueueWorkQueueItem(new)
+			controller.enqueueWorkQueueItem(new, AddOrUpdate)
 		},
-		DeleteFunc: controller.enqueueWorkQueueItem,
+		DeleteFunc: func(toDelete interface{}) {
+			controller.enqueueWorkQueueItem(toDelete, Delete)
+		},
 	})
 
 	return controller
@@ -191,12 +195,25 @@ func (c *Controller) syncHandler(item WorkQueueItem) error {
 		return nil
 	}
 
+	if item.itemType == Delete {
+		// object was deleted, so delete from grafana
+		err = c.syncer.deleteObjectById(item.id)
+
+		if err == nil {
+			prometheus.DeletedObjectTotal.WithLabelValues(c.syncer.getType()).Inc()
+			c.recorder.Event(item.originalObject, corev1.EventTypeNormal, SuccessDeleted, MessageResourceDeleted)
+		}
+
+		return err
+	}
+
 	// Get the DataSource resource with this namespace/name
 	runtimeObject, err := c.syncer.getRuntimeObjectByName(name, namespace)
 	if err != nil {
 
 		if k8serrors.IsNotFound(err) {
-			utilruntime.HandleError(fmt.Errorf("Grafana Object '%s' in work queue no longer exists", item.key))
+			utilruntime.HandleError(fmt.Errorf("Grafana Object '%s' in work queue no longer exists? Deleting", item.key))
+			prometheus.ErrorTotal.Inc()
 
 			// object was deleted, so delete from grafana
 			err = c.syncer.deleteObjectById(item.id)
@@ -269,9 +286,10 @@ func (c *Controller) enqueueResyncDeletedObjects() {
 	c.workqueue.AddRateLimited(NewResyncDeletedObjects())
 }
 
-func (c *Controller) enqueueWorkQueueItem(obj interface{}) {
+func (c *Controller) enqueueWorkQueueItem(obj interface{}, itemType WorkQueueItemType) {
 
 	item := c.syncer.createWorkQueueItem(obj)
+	item.itemType = itemType
 
 	if item != nil {
 		c.workqueue.AddRateLimited(*item)
