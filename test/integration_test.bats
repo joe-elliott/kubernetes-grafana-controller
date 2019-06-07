@@ -207,9 +207,7 @@ teardown(){
         sleep 5s
 
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
-
-        # for some reason grafana 500s when you GET a non-existent alert-notifications?
-        [ "$httpStatus" -eq "500" ]
+        [ "$httpStatus" -eq "404" ]
 
         validateAlertNotificationCount 0
 
@@ -243,9 +241,7 @@ teardown(){
         sleep 10s
 
         httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/alert-notifications/${notificationId})
-
-        # for some reason grafana 500s when you GET a non-existent alert-notifications?
-        [ "$httpStatus" -eq "500" ]
+        [ "$httpStatus" -eq "404" ]
 
         validateAlertNotificationCount 0
 
