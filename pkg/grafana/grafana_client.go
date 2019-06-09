@@ -52,7 +52,7 @@ func NewClient(address string) *Client {
 }
 
 func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, error) {
-	dashboardJSON, err := sanitizeObject(dashboardJSON)
+	dashboardJSON, err := sanitizeObject(dashboardJSON, false)
 
 	if err != nil {
 		return "", err
@@ -115,7 +115,7 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 }
 
 func (client *Client) PostAlertNotification(alertNotificationJson string, id string) (string, error) {
-	alertNotificationJson, err := sanitizeObject(alertNotificationJson)
+	alertNotificationJson, err := sanitizeObject(alertNotificationJson, false)
 
 	if err != nil {
 		return "", err
@@ -186,7 +186,7 @@ func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 
 func (client *Client) PostDataSource(dataSourceJson string, id string) (string, error) {
 
-	dataSourceJson, err := sanitizeObject(dataSourceJson)
+	dataSourceJson, err := sanitizeObject(dataSourceJson, false)
 
 	if err != nil {
 		return "", err
@@ -250,26 +250,26 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 
 func (client *Client) PostFolder(folderJson string, id string) (string, error) {
 
-	folderJson, err := sanitizeObject(folderJson)
+	folderJson, err := sanitizeObject(folderJson, true)
 
 	if err != nil {
 		return "", err
 	}
 
 	if id != NO_ID {
-		id, err := client.putGrafanaObject(folderJson, fmt.Sprintf("/api/folders/%v", id), "id", prometheus.TypeFolder)
+		id, err := client.putGrafanaObject(folderJson, fmt.Sprintf("/api/folders/%v", id), "uid", prometheus.TypeFolder)
 
 		if err != nil {
 			runtime.HandleError(err)
 			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeFolder).Inc()
 
-			return client.postGrafanaObject(folderJson, "/api/folders", "id", prometheus.TypeFolder)
+			return client.postGrafanaObject(folderJson, "/api/folders", "uid", prometheus.TypeFolder)
 		} else {
 			return id, err
 		}
 
 	} else {
-		return client.postGrafanaObject(folderJson, "/api/folders", "id", prometheus.TypeFolder)
+		return client.postGrafanaObject(folderJson, "/api/folders", "uid", prometheus.TypeFolder)
 	}
 }
 
@@ -306,7 +306,7 @@ func (client *Client) GetAllFolderIds() ([]string, error) {
 	var ids []string
 
 	for _, folder := range folders {
-		ids = append(ids, fmt.Sprintf("%v", folder["id"]))
+		ids = append(ids, fmt.Sprintf("%v", folder["uid"]))
 	}
 
 	return ids, nil
@@ -405,7 +405,7 @@ func responseIsSuccessOrNotFound(resp *req.Resp) bool {
 	return responseIsSuccess(resp) || resp.Response().StatusCode == 404
 }
 
-func sanitizeObject(obj string) (string, error) {
+func sanitizeObject(obj string, addOverwrite bool) (string, error) {
 	var jsonObject map[string]interface{}
 
 	err := json.Unmarshal([]byte(obj), &jsonObject)
@@ -415,6 +415,11 @@ func sanitizeObject(obj string) (string, error) {
 
 	delete(jsonObject, "id")
 	delete(jsonObject, "version")
+
+	// some grafana apis require overwrite = true to ignore versions
+	if addOverwrite {
+		jsonObject["overwrite"] = true
+	}
 
 	sanitizedBytes, err := json.Marshal(jsonObject)
 	if err != nil {
