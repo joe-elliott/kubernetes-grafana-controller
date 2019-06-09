@@ -59,3 +59,17 @@ func (client *ClientFake) GetAllDatasourceIds() ([]string, error) {
 func (client *ClientFake) GetAllAlertNotificationIds() ([]string, error) {
 	return nil, nil
 }
+
+func (client *ClientFake) PostFolder(json string, id string) (string, error) {
+	client.PostedJson = &json
+
+	return client.fakeID, nil
+}
+
+func (client *ClientFake) DeleteFolder(id string) error {
+	return nil
+}
+
+func (client *ClientFake) GetAllFolderIds() ([]string, error) {
+	return nil, nil
+}

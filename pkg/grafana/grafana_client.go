@@ -27,6 +27,10 @@ type Interface interface {
 	PostDataSource(string, string) (string, error)
 	DeleteDataSource(string) error
 	GetAllDataSourceIds() ([]string, error)
+
+	PostFolder(string, string) (string, error)
+	DeleteFolder(string) error
+	GetAllFolderIds() ([]string, error)
 }
 
 type Client struct {
@@ -239,6 +243,70 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 
 	for _, datasource := range datasources {
 		ids = append(ids, fmt.Sprintf("%v", datasource["id"]))
+	}
+
+	return ids, nil
+}
+
+func (client *Client) PostFolder(folderJson string, id string) (string, error) {
+
+	folderJson, err := sanitizeObject(folderJson)
+
+	if err != nil {
+		return "", err
+	}
+
+	if id != NO_ID {
+		id, err := client.putGrafanaObject(folderJson, fmt.Sprintf("/api/folders/%v", id), "id", prometheus.TypeFolder)
+
+		if err != nil {
+			runtime.HandleError(err)
+			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeFolder).Inc()
+
+			return client.postGrafanaObject(folderJson, "/api/folders", "id", prometheus.TypeFolder)
+		} else {
+			return id, err
+		}
+
+	} else {
+		return client.postGrafanaObject(folderJson, "/api/folders", "id", prometheus.TypeFolder)
+	}
+}
+
+func (client *Client) DeleteFolder(id string) error {
+	resp, err := req.Delete(client.address + "/api/folders/" + id)
+	prometheus.GrafanaDeleteLatencyMilliseconds.WithLabelValues(prometheus.TypeFolder).Observe(float64(resp.Cost() / time.Millisecond))
+
+	if err != nil {
+		return err
+	}
+
+	if !responseIsSuccessOrNotFound(resp) {
+		return errors.New(resp.Response().Status)
+	}
+
+	return nil
+}
+
+func (client *Client) GetAllFolderIds() ([]string, error) {
+	var resp *req.Resp
+	var err error
+	var folders []map[string]interface{}
+
+	// Request existing notification channels
+	if resp, err = req.Get(client.address + "/api/folders"); err != nil {
+		return nil, err
+	}
+	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeFolder).Observe(float64(resp.Cost() / time.Millisecond))
+
+	if err = resp.ToJSON(&folders); err != nil {
+		return nil, err
+	}
+
+	var ids []string
+
+	for _, folder := range folders {
+		ids = append(ids, fmt.Sprintf("%v", folder["id"]))
 	}
 
 	return ids, nil

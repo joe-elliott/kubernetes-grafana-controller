@@ -83,6 +83,11 @@ func main() {
 		grafanaClient,
 		informerFactory.Grafana().V1alpha1().DataSources()))
 
+	allControllers = append(allControllers, controllers.NewFolderController(client,
+		kubeClient,
+		grafanaClient,
+		informerFactory.Grafana().V1alpha1().Folders()))
+
 	stopCh := signals.SetupSignalHandler()
 
 	informerFactory.Start(stopCh)
