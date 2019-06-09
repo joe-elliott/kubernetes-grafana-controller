@@ -35,6 +35,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&AlertNotificationList{},
 		&DataSource{},
 		&DataSourceList{},
+		&Folder{},
+		&FolderList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

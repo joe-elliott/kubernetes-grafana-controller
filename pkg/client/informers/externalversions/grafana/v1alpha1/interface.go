@@ -30,6 +30,8 @@ type Interface interface {
 	Dashboards() DashboardInformer
 	// DataSources returns a DataSourceInformer.
 	DataSources() DataSourceInformer
+	// Folders returns a FolderInformer.
+	Folders() FolderInformer
 }
 
 type version struct {
@@ -56,4 +58,9 @@ func (v *version) Dashboards() DashboardInformer {
 // DataSources returns a DataSourceInformer.
 func (v *version) DataSources() DataSourceInformer {
 	return &dataSourceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Folders returns a FolderInformer.
+func (v *version) Folders() FolderInformer {
+	return &folderInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
