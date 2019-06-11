@@ -108,6 +108,12 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	var ids []string
 
 	for _, dashboard := range dashboards {
+
+		// folders will show up under the search api just like dashboards.  skip them or the resync logic will delete folders
+		if dashboard["type"] == "dash-folder" {
+			continue
+		}
+
 		ids = append(ids, dashboard["uid"].(string))
 	}
 
