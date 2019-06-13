@@ -17,6 +17,7 @@ const NO_ID = ""
 
 type Interface interface {
 	PostDashboard(string, string) (string, error)
+	PostDashboardWithFolder(string, string, string) (string, error)
 	DeleteDashboard(string) error
 	GetAllDashboardIds() ([]string, error)
 
@@ -52,6 +53,10 @@ func NewClient(address string) *Client {
 }
 
 func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, error) {
+	return client.PostDashboardWithFolder(dashboardJSON, "0", uid)
+}
+
+func (client *Client) PostDashboardWithFolder(dashboardJSON string, folderId string, uid string) (string, error) {
 	dashboardJSON, err := sanitizeObject(dashboardJSON, false)
 
 	if err != nil {
@@ -68,9 +73,9 @@ func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, e
 
 	postJSON := fmt.Sprintf(`{
 		"dashboard": %v,
-		"folderId": 0,
+		"folderId": %v,
 		"overwrite": true
-	}`, dashboardJSON)
+	}`, dashboardJSON, folderId)
 
 	response, err := client.postGrafanaObject(postJSON, "/api/dashboards/db", prometheus.TypeDashboard)
 

@@ -18,7 +18,13 @@ func NewGrafanaClientFake(address string, fakeID string) *ClientFake {
 	return client
 }
 
-func (client *ClientFake) PostDashboard(json string) (string, error) {
+func (client *ClientFake) PostDashboard(json string, uid string) (string, error) {
+	client.PostedJson = &json
+
+	return client.fakeID, nil
+}
+
+func (client *ClientFake) PostDashboardWithFolder(json string, folderId string, uid string) (string, error) {
 	client.PostedJson = &json
 
 	return client.fakeID, nil
