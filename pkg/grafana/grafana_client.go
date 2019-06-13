@@ -72,7 +72,13 @@ func (client *Client) PostDashboard(dashboardJSON string, uid string) (string, e
 		"overwrite": true
 	}`, dashboardJSON)
 
-	return client.postGrafanaObject(postJSON, "/api/dashboards/db", "uid", prometheus.TypeDashboard)
+	response, err := client.postGrafanaObject(postJSON, "/api/dashboards/db", prometheus.TypeDashboard)
+
+	if err != nil {
+		return "", err
+	}
+
+	return getField(response, "uid")
 }
 
 func (client *Client) DeleteDashboard(id string) error {
@@ -121,13 +127,20 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 }
 
 func (client *Client) PostAlertNotification(alertNotificationJson string, id string) (string, error) {
+	var response map[string]interface{}
 	alertNotificationJson, err := sanitizeObject(alertNotificationJson, false)
 
 	if err != nil {
 		return "", err
 	}
 
-	if id != NO_ID {
+	if id == NO_ID {
+		response, err = client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", prometheus.TypeAlertNotification)
+
+		if err != nil {
+			return "", err
+		}
+	} else {
 		// alert notification requires the id in the object for unknown reasons
 		alertNotificationJson, err = setId(alertNotificationJson, "id", id)
 
@@ -135,20 +148,22 @@ func (client *Client) PostAlertNotification(alertNotificationJson string, id str
 			return "", err
 		}
 
-		id, err := client.putGrafanaObject(alertNotificationJson, fmt.Sprintf("/api/alert-notifications/%v", id), "id", prometheus.TypeAlertNotification)
+		response, err = client.putGrafanaObject(alertNotificationJson, fmt.Sprintf("/api/alert-notifications/%v", id), prometheus.TypeAlertNotification)
 
+		// try a put if the post fails
 		if err != nil {
 			runtime.HandleError(err)
 			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeAlertNotification).Inc()
 
-			return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id", prometheus.TypeAlertNotification)
-		} else {
-			return id, err
-		}
+			response, err = client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", prometheus.TypeAlertNotification)
 
-	} else {
-		return client.postGrafanaObject(alertNotificationJson, "/api/alert-notifications", "id", prometheus.TypeAlertNotification)
+			if err != nil {
+				return "", err
+			}
+		}
 	}
+
+	return getField(response, "id")
 }
 
 func (client *Client) DeleteAlertNotification(id string) error {
@@ -191,28 +206,35 @@ func (client *Client) GetAllAlertNotificationIds() ([]string, error) {
 }
 
 func (client *Client) PostDataSource(dataSourceJson string, id string) (string, error) {
-
+	var response map[string]interface{}
 	dataSourceJson, err := sanitizeObject(dataSourceJson, false)
 
 	if err != nil {
 		return "", err
 	}
 
-	if id != NO_ID {
-		id, err := client.putGrafanaObject(dataSourceJson, fmt.Sprintf("/api/datasources/%v", id), "id", prometheus.TypeDataSource)
+	if id == NO_ID {
+		response, err = client.postGrafanaObject(dataSourceJson, "/api/datasources", prometheus.TypeDataSource)
+
+		if err != nil {
+			return "", err
+		}
+	} else {
+		response, err = client.putGrafanaObject(dataSourceJson, fmt.Sprintf("/api/datasources/%v", id), prometheus.TypeDataSource)
 
 		if err != nil {
 			runtime.HandleError(err)
 			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeDataSource).Inc()
 
-			return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id", prometheus.TypeDataSource)
-		} else {
-			return id, err
-		}
+			response, err = client.postGrafanaObject(dataSourceJson, "/api/datasources", prometheus.TypeDataSource)
 
-	} else {
-		return client.postGrafanaObject(dataSourceJson, "/api/datasources", "id", prometheus.TypeDataSource)
+			if err != nil {
+				return "", err
+			}
+		}
 	}
+
+	return getField(response, "id")
 }
 
 func (client *Client) DeleteDataSource(id string) error {
@@ -255,28 +277,35 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 }
 
 func (client *Client) PostFolder(folderJson string, id string) (string, error) {
-
+	var response map[string]interface{}
 	folderJson, err := sanitizeObject(folderJson, true)
 
 	if err != nil {
 		return "", err
 	}
 
-	if id != NO_ID {
-		id, err := client.putGrafanaObject(folderJson, fmt.Sprintf("/api/folders/%v", id), "uid", prometheus.TypeFolder)
+	if id == NO_ID {
+		response, err = client.postGrafanaObject(folderJson, "/api/folders", prometheus.TypeFolder)
+
+		if err != nil {
+			return "", err
+		}
+	} else {
+		response, err = client.putGrafanaObject(folderJson, fmt.Sprintf("/api/folders/%v", id), prometheus.TypeFolder)
 
 		if err != nil {
 			runtime.HandleError(err)
 			prometheus.GrafanaWastedPutTotal.WithLabelValues(prometheus.TypeFolder).Inc()
 
-			return client.postGrafanaObject(folderJson, "/api/folders", "uid", prometheus.TypeFolder)
-		} else {
-			return id, err
-		}
+			response, err = client.postGrafanaObject(folderJson, "/api/folders", prometheus.TypeFolder)
 
-	} else {
-		return client.postGrafanaObject(folderJson, "/api/folders", "uid", prometheus.TypeFolder)
+			if err != nil {
+				return "", err
+			}
+		}
 	}
+
+	return getField(response, "uid")
 }
 
 func (client *Client) DeleteFolder(id string) error {
@@ -322,7 +351,7 @@ func (client *Client) GetAllFolderIds() ([]string, error) {
 // shared
 //
 
-func (client *Client) postGrafanaObject(postJSON string, path string, idField string, prometheusType string) (string, error) {
+func (client *Client) postGrafanaObject(postJSON string, path string, prometheusType string) (map[string]interface{}, error) {
 	var responseBody map[string]interface{}
 
 	header := req.Header{
@@ -333,36 +362,27 @@ func (client *Client) postGrafanaObject(postJSON string, path string, idField st
 	prometheus.GrafanaPostLatencyMilliseconds.WithLabelValues(prometheusType).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if resp == nil {
-		return "", errors.New("Error and response are nil")
+		return nil, errors.New("Error and response are nil")
 	}
 
 	if !responseIsSuccess(resp) {
-		return "", errors.New(resp.Response().Status)
+		return nil, errors.New(resp.Response().Status)
 	}
 
 	err = resp.ToJSON(&responseBody)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	id, ok := responseBody[idField]
-
-	if !ok {
-		return "", fmt.Errorf("Response Body did not have field %s", idField)
-	}
-
-	// is there a better way to generically convert to string?
-	idString := fmt.Sprintf("%v", id)
-
-	return idString, nil
+	return responseBody, nil
 }
 
-func (client *Client) putGrafanaObject(putJSON string, path string, idField string, prometheusType string) (string, error) {
+func (client *Client) putGrafanaObject(putJSON string, path string, prometheusType string) (map[string]interface{}, error) {
 	var responseBody map[string]interface{}
 
 	header := req.Header{
@@ -373,34 +393,25 @@ func (client *Client) putGrafanaObject(putJSON string, path string, idField stri
 	prometheus.GrafanaPutLatencyMilliseconds.WithLabelValues(prometheusType).Observe(float64(resp.Cost() / time.Millisecond))
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if resp == nil {
-		return "", errors.New("Error and response are nil")
+		return nil, errors.New("Error and response are nil")
 	}
 
 	if !responseIsSuccess(resp) {
 		body, _ := resp.ToString()
-		return "", errors.New(resp.Response().Status + ": " + body)
+		return nil, errors.New(resp.Response().Status + ": " + body)
 	}
 
 	err = resp.ToJSON(&responseBody)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	id, ok := responseBody[idField]
-
-	if !ok {
-		return "", fmt.Errorf("Response Body did not have field %s", idField)
-	}
-
-	// is there a better way to generically convert to string?
-	idString := fmt.Sprintf("%v", id)
-
-	return idString, nil
+	return responseBody, nil
 }
 
 func responseIsSuccess(resp *req.Resp) bool {
@@ -456,4 +467,18 @@ func setId(obj string, idField string, idValue string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func getField(obj map[string]interface{}, field string) (string, error) {
+
+	id, ok := obj[field]
+
+	if !ok {
+		return "", fmt.Errorf("Map did not have field %s", field)
+	}
+
+	// is there a better way to generically convert to string?
+	idString := fmt.Sprintf("%v", id)
+
+	return idString, nil
 }
