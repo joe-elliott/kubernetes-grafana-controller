@@ -63,7 +63,7 @@ func (s *FolderSyncer) updateObject(object runtime.Object) error {
 		return fmt.Errorf("expected folder in but got %#v", object)
 	}
 
-	id, err := s.grafanaClient.PostFolder(grafanaFolder.Spec.JSON, grafanaFolder.Status.GrafanaID)
+	id, idForDashboards, err := s.grafanaClient.PostFolder(grafanaFolder.Spec.JSON, grafanaFolder.Status.GrafanaID)
 
 	if err != nil {
 		return err
@@ -71,6 +71,7 @@ func (s *FolderSyncer) updateObject(object runtime.Object) error {
 
 	grafanaFolderCopy := grafanaFolder.DeepCopy()
 	grafanaFolderCopy.Status.GrafanaID = id
+	grafanaFolderCopy.Status.GrafanaIDForDashboards = idForDashboards
 
 	_, err = s.grafanaclientset.GrafanaV1alpha1().Folders(grafanaFolder.Namespace).UpdateStatus(grafanaFolderCopy)
 	if err != nil {
