@@ -18,7 +18,8 @@ type Dashboard struct {
 
 // DashboardSpec is the spec for a Dashboard resource
 type DashboardSpec struct {
-	JSON string `json:"json"`
+	FolderName string `json:"folderName"`
+	JSON       string `json:"json"`
 }
 
 // DashboardStatus is the status for a Dashboard resource
