@@ -28,7 +28,7 @@ type Interface interface {
 	DeleteDataSource(string) error
 	GetAllDataSourceIds() ([]string, error)
 
-	PostFolder(string, string) (string, error)
+	PostFolder(string, string) (string, string, error)
 	DeleteFolder(string) error
 	GetAllFolderIds() ([]string, error)
 }
@@ -276,19 +276,19 @@ func (client *Client) GetAllDataSourceIds() ([]string, error) {
 	return ids, nil
 }
 
-func (client *Client) PostFolder(folderJson string, id string) (string, error) {
+func (client *Client) PostFolder(folderJson string, id string) (string, string, error) {
 	var response map[string]interface{}
 	folderJson, err := sanitizeObject(folderJson, true)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if id == NO_ID {
 		response, err = client.postGrafanaObject(folderJson, "/api/folders", prometheus.TypeFolder)
 
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 	} else {
 		response, err = client.putGrafanaObject(folderJson, fmt.Sprintf("/api/folders/%v", id), prometheus.TypeFolder)
@@ -300,12 +300,22 @@ func (client *Client) PostFolder(folderJson string, id string) (string, error) {
 			response, err = client.postGrafanaObject(folderJson, "/api/folders", prometheus.TypeFolder)
 
 			if err != nil {
-				return "", err
+				return "", "", err
 			}
 		}
 	}
 
-	return getField(response, "uid")
+	uid, err := getField(response, "uid")
+	if err != nil {
+		return "", "", err
+	}
+
+	id, err = getField(response, "id")
+	if err != nil {
+		return "", "", err
+	}
+
+	return uid, id, nil
 }
 
 func (client *Client) DeleteFolder(id string) error {

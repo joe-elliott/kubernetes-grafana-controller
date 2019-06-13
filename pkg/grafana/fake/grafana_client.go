@@ -60,10 +60,10 @@ func (client *ClientFake) GetAllAlertNotificationIds() ([]string, error) {
 	return nil, nil
 }
 
-func (client *ClientFake) PostFolder(json string, id string) (string, error) {
+func (client *ClientFake) PostFolder(json string, id string) (string, int, error) {
 	client.PostedJson = &json
 
-	return client.fakeID, nil
+	return client.fakeID, 0, nil
 }
 
 func (client *ClientFake) DeleteFolder(id string) error {
