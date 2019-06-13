@@ -24,7 +24,7 @@ type FolderSpec struct {
 // FolderStatus is the status for a Folder resource
 type FolderStatus struct {
 	GrafanaID              string `json:"grafanaID"`
-	GrafanaIDForDashboards int    `json:"grafanaIDForDashboards"`
+	GrafanaIDForDashboards string `json:"grafanaIDForDashboards"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
