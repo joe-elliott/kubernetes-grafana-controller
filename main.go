@@ -71,7 +71,8 @@ func main() {
 	allControllers = append(allControllers, controllers.NewDashboardController(client,
 		kubeClient,
 		grafanaClient,
-		informerFactory.Grafana().V1alpha1().Dashboards()))
+		informerFactory.Grafana().V1alpha1().Dashboards(),
+		informerFactory.Grafana().V1alpha1().Folders()))
 
 	allControllers = append(allControllers, controllers.NewAlertNotificationController(client,
 		kubeClient,
