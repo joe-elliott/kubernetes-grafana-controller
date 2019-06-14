@@ -26,6 +26,7 @@ teardown(){
     kubectl delete Dashboard --ignore-not-found=true --all
     kubectl delete AlertNotification --ignore-not-found=true --all
     kubectl delete DataSource --ignore-not-found=true --all
+    kubectl delete Folder --ignore-not-found=true --all
 
     # clean up comparison files if they exist
     rm -f a.json
@@ -50,6 +51,34 @@ teardown(){
         
         validateMetrics grafana_controller_grafana_post_latency_ms folder
         validateMetrics grafana_controller_updated_object_total folder
+    done
+
+    validateMetrics grafana_controller_error_total 0
+}
+
+@test "deleting a Folder object deletes the Grafana Folder" {
+    for filename in folders/*.yaml; do
+        folderId=$(validatePostFolder $filename)
+
+        echo "Test Deleting $filename ($folderId)"
+
+        kubectl delete -f $filename
+
+        sleep 5s
+
+        httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/folders/${folderId})
+
+        [ "$httpStatus" -eq "404" ]
+
+        validateFolderCount 0
+
+        validateEvents Folder Synced $(objectNameFromFile $filename)
+        validateEvents Folder Deleted $(objectNameFromFile $filename)
+
+        validateMetrics grafana_controller_grafana_post_latency_ms folder
+        validateMetrics grafana_controller_updated_object_total folder
+        validateMetrics grafana_controller_grafana_delete_latency_ms folder
+        validateMetrics grafana_controller_deleted_object_total folder
     done
 
     validateMetrics grafana_controller_error_total 0

@@ -26,6 +26,7 @@ teardown(){
     kubectl delete Dashboard --ignore-not-found=true --all
     kubectl delete AlertNotification --ignore-not-found=true --all
     kubectl delete DataSource --ignore-not-found=true --all
+    kubectl delete Folder --ignore-not-found=true --all
 
     # clean up comparison files if they exist
     rm -f a.json
