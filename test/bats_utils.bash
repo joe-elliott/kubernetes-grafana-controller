@@ -29,6 +29,46 @@ validateControllerUrl() {
 }
 
 #
+# validateFolderCount <count>
+#   use grafana folder api to confirm that the count is what is expected 
+#
+validateFolderCount() {
+    folderJson=$(curl --silent ${GRAFANA_URL}/api/folders)
+
+    count=$(echo $folderJson | jq length)
+
+    if [ "$count" -ne "$1" ]; then
+        echo "count: $count param: $1"
+    fi
+
+    [ "$count" -eq "$1" ]
+}
+
+#
+# validatePostFolder <yaml file name>
+#   note that the dashboard file name must match the Dashboard object name ...
+#    ... b/c i'm lazy
+#
+validatePostFolder() {
+    specfile=$1
+
+    folderName=$(objectNameFromFile $specfile)
+
+    # create in kubernetes
+    kubectl apply -f $specfile >&2
+
+	sleep 5s
+
+    folderId=$(kubectl get Folder -o=jsonpath="{.items[?(@.metadata.name==\"${folderName}\")].status.grafanaID}")
+
+    # check if exists in grafana
+	httpStatus=$(curl --silent --output /dev/null --write-out "%{http_code}" ${GRAFANA_URL}/api/folders/${dashboardId})
+    [ "$httpStatus" -eq "200" ]
+
+    echo $folderId
+}
+
+#
 # validateDashboardCount <count>
 #   use grafana search api to confirm that the count is what is expected 
 #
