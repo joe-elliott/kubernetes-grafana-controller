@@ -69,6 +69,41 @@ validatePostFolder() {
 }
 
 #
+# validateFolderContents <yaml file name>
+#   creates a folder and both verifies it exists and that its content matches
+#
+validateFolderContents() {
+    filename=$1
+
+    folderId=$(validatePostFolder $filename)
+
+    echo "Test Json Content of $filename ($folderId)"
+
+    folderJsonFromGrafana=$(curl --silent ${GRAFANA_URL}/api/folders/${folderId})
+
+    folderJsonFromYaml=$(grep -A9999 'json' $filename)
+    folderJsonFromYaml=${folderJsonFromYaml%?}   # strip final quote
+    folderJsonFromYaml=${folderJsonFromYaml#*\'} # strip up to and including the first quote
+
+    echo $folderJsonFromYaml > b.json
+    fieldsToKeep=$(cat b.json | jq keys)
+
+    echo $folderJsonFromGrafana | jq --arg keys "$fieldsToKeep" 'with_entries( select( .key as $k | any($keys | fromjson[]; . == $k) ) )' > a.json
+
+    equal=$(jq --argfile a a.json --argfile b b.json -n '$a == $b')
+
+    if [ "$equal" != "true" ]; then
+        run diff <(jq -S . a.json) <(jq -S . b.json)
+        echo $output
+    fi
+
+    [ "$equal" = "true" ]
+
+    rm a.json
+    rm b.json
+}
+
+#
 # validateDashboardCount <count>
 #   use grafana search api to confirm that the count is what is expected 
 #

@@ -7,14 +7,8 @@ spec:
   "id":1,
   "uid": "nErXDvCkzz",
   "title": "Departmenet ABC",
-  "url": "/dashboards/f/nErXDvCkzz/department-abc",
   "hasAcl": false,
   "canSave": true,
   "canEdit": true,
-  "canAdmin": true,
-  "createdBy": "admin",
-  "created": "2018-01-31T17:43:12+01:00",
-  "updatedBy": "admin",
-  "updated": "2018-01-31T17:43:12+01:00",
-  "version": 1
+  "canAdmin": true
 }'

@@ -36,6 +36,13 @@ $ bats integration_test.bats
  ✓ creating a DataSource object creates the same datasource in Grafana
  ✓ updating a DataSource object updates the datasource in Grafana
  ✓ state is resynced after deleting a datasoure in grafana
+ ✓ creating a Folder object creates a Grafana Folder
+ ✓ deleting a Folder object deletes the Grafana Folder
+ ✓ deleting a Folder while the controller is not running deletes the folder in Grafana
+ ✓ creating a Folder object creates the same folder in Grafana
+ ✓ updating a Folder object updates the folder in Grafana
+ ✓ state is resynced after deleting a folder in grafana
+
 ```
 
 ### Dependencies
