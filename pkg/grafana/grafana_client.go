@@ -107,7 +107,7 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	var dashboards []map[string]interface{}
 
 	// Request existing notification channels
-	if resp, err = req.Get(client.address + "/api/search"); err != nil {
+	if resp, err = req.Get(client.address + "/api/search?type=dash-db"); err != nil {
 		return nil, err
 	}
 	prometheus.GrafanaGetLatencyMilliseconds.WithLabelValues(prometheus.TypeDashboard).Observe(float64(resp.Cost() / time.Millisecond))
@@ -119,12 +119,6 @@ func (client *Client) GetAllDashboardIds() ([]string, error) {
 	var ids []string
 
 	for _, dashboard := range dashboards {
-
-		// folders will show up under the search api just like dashboards.  skip them or the resync logic will delete folders
-		if dashboard["type"] == "dash-folder" {
-			continue
-		}
-
 		ids = append(ids, dashboard["uid"].(string))
 	}
 
