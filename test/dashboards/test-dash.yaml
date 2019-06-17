@@ -3,7 +3,6 @@ kind: Dashboard
 metadata:
   name: test-dash
 spec:
-  folderName: test
   json: '{
   "__inputs": [],
   "__requires": [
