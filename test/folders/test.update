@@ -4,7 +4,6 @@ metadata:
   name: test
 spec:
   json: '{
-  "id":1,
   "uid": "nErXDvCkzz",
   "title": "Department ABC",
   "hasAcl": false,
