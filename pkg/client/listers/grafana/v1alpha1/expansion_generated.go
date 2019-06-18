@@ -41,3 +41,11 @@ type DataSourceListerExpansion interface{}
 // DataSourceNamespaceListerExpansion allows custom methods to be added to
 // DataSourceNamespaceLister.
 type DataSourceNamespaceListerExpansion interface{}
+
+// FolderListerExpansion allows custom methods to be added to
+// FolderLister.
+type FolderListerExpansion interface{}
+
+// FolderNamespaceListerExpansion allows custom methods to be added to
+// FolderNamespaceLister.
+type FolderNamespaceListerExpansion interface{}

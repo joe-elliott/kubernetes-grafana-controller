@@ -8,6 +8,7 @@ const (
 	TypeAlertNotification = "alert-notification"
 	TypeDashboard         = "dashboard"
 	TypeDataSource        = "datasource"
+	TypeFolder            = "folder"
 )
 
 var (

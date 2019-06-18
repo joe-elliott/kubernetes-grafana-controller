@@ -71,7 +71,8 @@ func main() {
 	allControllers = append(allControllers, controllers.NewDashboardController(client,
 		kubeClient,
 		grafanaClient,
-		informerFactory.Grafana().V1alpha1().Dashboards()))
+		informerFactory.Grafana().V1alpha1().Dashboards(),
+		informerFactory.Grafana().V1alpha1().Folders()))
 
 	allControllers = append(allControllers, controllers.NewAlertNotificationController(client,
 		kubeClient,
@@ -82,6 +83,11 @@ func main() {
 		kubeClient,
 		grafanaClient,
 		informerFactory.Grafana().V1alpha1().DataSources()))
+
+	allControllers = append(allControllers, controllers.NewFolderController(client,
+		kubeClient,
+		grafanaClient,
+		informerFactory.Grafana().V1alpha1().Folders()))
 
 	stopCh := signals.SetupSignalHandler()
 

@@ -31,6 +31,7 @@ type GrafanaV1alpha1Interface interface {
 	AlertNotificationsGetter
 	DashboardsGetter
 	DataSourcesGetter
+	FoldersGetter
 }
 
 // GrafanaV1alpha1Client is used to interact with features provided by the grafana.com group.
@@ -48,6 +49,10 @@ func (c *GrafanaV1alpha1Client) Dashboards(namespace string) DashboardInterface 
 
 func (c *GrafanaV1alpha1Client) DataSources(namespace string) DataSourceInterface {
 	return newDataSources(c, namespace)
+}
+
+func (c *GrafanaV1alpha1Client) Folders(namespace string) FolderInterface {
+	return newFolders(c, namespace)
 }
 
 // NewForConfig creates a new GrafanaV1alpha1Client for the given config.

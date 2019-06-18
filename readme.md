@@ -66,7 +66,19 @@ kind: Dashboard
 metadata:
   name: test
 spec:
+  folderName: <optional name of a folder object to place this dashboard in>
   json: <dashboard json as string>
+```
+
+### Folders
+
+```
+apiVersion: grafana.com/v1alpha1
+kind: Folder
+metadata:
+  name: test
+spec:
+  json: <folder json as string>
 ```
 
 ### AlertNotifications (Notification Channels)

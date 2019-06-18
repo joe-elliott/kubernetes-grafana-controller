@@ -23,3 +23,5 @@ type AlertNotificationExpansion interface{}
 type DashboardExpansion interface{}
 
 type DataSourceExpansion interface{}
+
+type FolderExpansion interface{}

@@ -59,6 +59,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().Dashboards().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("datasources"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().DataSources().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("folders"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Grafana().V1alpha1().Folders().Informer()}, nil
 
 	}
 

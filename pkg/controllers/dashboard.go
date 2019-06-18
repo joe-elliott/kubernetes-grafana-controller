@@ -20,6 +20,7 @@ import (
 // DashboardSyncer is the controller implementation for Dashboard resources
 type DashboardSyncer struct {
 	grafanaDashboardsLister listers.DashboardLister
+	grafanaFoldersLister    listers.FolderLister
 	grafanaClient           grafana.Interface
 	grafanaclientset        clientset.Interface
 }
@@ -29,10 +30,12 @@ func NewDashboardController(
 	grafanaclientset clientset.Interface,
 	kubeclientset kubernetes.Interface,
 	grafanaClient grafana.Interface,
-	grafanaDashboardInformer informers.DashboardInformer) *Controller {
+	grafanaDashboardInformer informers.DashboardInformer,
+	grafanaFolderInformer informers.FolderInformer) *Controller {
 
 	syncer := &DashboardSyncer{
 		grafanaDashboardsLister: grafanaDashboardInformer.Lister(),
+		grafanaFoldersLister:    grafanaFolderInformer.Lister(),
 		grafanaClient:           grafanaClient,
 		grafanaclientset:        grafanaclientset,
 	}
@@ -57,13 +60,25 @@ func (s *DashboardSyncer) deleteObjectById(id string) error {
 }
 
 func (s *DashboardSyncer) updateObject(object runtime.Object) error {
+	var err error
+	var id string
 
 	grafanaDashboard, ok := object.(*v1alpha1.Dashboard)
 	if !ok {
 		return fmt.Errorf("expected dashboard in but got %#v", object)
 	}
 
-	id, err := s.grafanaClient.PostDashboard(grafanaDashboard.Spec.JSON, grafanaDashboard.Status.GrafanaID)
+	if grafanaDashboard.Spec.FolderName != "" {
+		folder, err := s.grafanaFoldersLister.Folders(grafanaDashboard.Namespace).Get(grafanaDashboard.Spec.FolderName)
+
+		if err != nil {
+			return err
+		}
+
+		id, err = s.grafanaClient.PostDashboardWithFolder(grafanaDashboard.Spec.JSON, folder.Status.GrafanaIDForDashboards, grafanaDashboard.Status.GrafanaID)
+	} else {
+		id, err = s.grafanaClient.PostDashboard(grafanaDashboard.Spec.JSON, grafanaDashboard.Status.GrafanaID)
+	}
 
 	if err != nil {
 		return err

@@ -41,6 +41,10 @@ func (c *FakeGrafanaV1alpha1) DataSources(namespace string) v1alpha1.DataSourceI
 	return &FakeDataSources{c, namespace}
 }
 
+func (c *FakeGrafanaV1alpha1) Folders(namespace string) v1alpha1.FolderInterface {
+	return &FakeFolders{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeGrafanaV1alpha1) RESTClient() rest.Interface {
