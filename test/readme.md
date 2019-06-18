@@ -42,7 +42,9 @@ $ bats integration_test.bats
  ✓ creating a Folder object creates the same folder in Grafana
  ✓ updating a Folder object updates the folder in Grafana
  ✓ state is resynced after deleting a folder in grafana
+ ✓ creating a Dashboard in a Folder object creates a Grafana Dashboard in a Folder
 
+25 tests, 0 failures
 ```
 
 ### Dependencies
