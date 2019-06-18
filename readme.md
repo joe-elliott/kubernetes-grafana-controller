@@ -52,7 +52,7 @@ klog
 
 The kubernetes-grafana-controller publishes a metrics in the prometheus format.  These include error totals, grafana latencies and other totals.
 
-https://github.com/number101010/kubernetes-grafana-controller/blob/master/pkg/prometheus/prometheus.go
+https://github.com/joe-elliott/kubernetes-grafana-controller/blob/master/pkg/prometheus/prometheus.go
 
 ## Custom Resource Definitions
 
