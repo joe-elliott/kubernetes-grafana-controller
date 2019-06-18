@@ -608,3 +608,26 @@ teardown(){
 
     validateMetrics grafana_controller_error_total 0
 }
+
+@test "creating a Dashboard in a Folder object creates a Grafana Dashboard in a Folder" {
+
+    folderId=$(validatePostFolder 'folders/test.yaml')
+    
+    sleep 5s
+
+    kubectl create -f folders/dash-folder.test
+
+    sleep 5s
+
+    echo "Test Creating folder ($folderId)"
+
+    folderIntId=$(curl --silent ${GRAFANA_URL}/api/folders/${folderId} | jq '.id')
+
+    echo "Checking folder int id $folderIntId"
+
+    dashboardCount=$(curl --silent ${GRAFANA_URL}/api/search?folderIds=${folderIntId} | jq '. | length ')
+
+    echo "dashboardCount: $dashboardCount"
+
+    [ "$dashboardCount" = "1" ]
+}
