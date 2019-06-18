@@ -1,0 +1,14 @@
+apiVersion: grafana.com/v1alpha1
+kind: Folder
+metadata:
+  name: test
+spec:
+  json: '{
+  "id":1,
+  "uid": "nErXDvCkzz",
+  "title": "Department ABC",
+  "hasAcl": false,
+  "canSave": true,
+  "canEdit": true,
+  "canAdmin": true
+}'
