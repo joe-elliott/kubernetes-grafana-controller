@@ -7,10 +7,10 @@ import (
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/record"
 
-	grafanacontroller "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
-	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
-	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
-	grafana "kubernetes-grafana-controller/pkg/grafana/fake"
+	grafanacontroller "github.com/joe-elliott/kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
+	informers "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	grafana "github.com/joe-elliott/kubernetes-grafana-controller/pkg/grafana/fake"
 )
 
 func newGrafanaDashboard(name string, dashboardJson string) *grafanacontroller.GrafanaDashboard {

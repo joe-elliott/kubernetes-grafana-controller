@@ -9,11 +9,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
-	"kubernetes-grafana-controller/pkg/controllers"
-	"kubernetes-grafana-controller/pkg/grafana"
-	"kubernetes-grafana-controller/pkg/signals"
+	clientset "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	informers "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/controllers"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/grafana"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/signals"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"

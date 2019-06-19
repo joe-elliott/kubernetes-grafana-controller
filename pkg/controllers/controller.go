@@ -3,12 +3,12 @@ package controllers
 import (
 	"errors"
 	"fmt"
-	"kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
-	"kubernetes-grafana-controller/pkg/grafana"
-	"kubernetes-grafana-controller/pkg/prometheus"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/grafana"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/prometheus"
 	"time"
 
-	grafanascheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+	grafanascheme "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"

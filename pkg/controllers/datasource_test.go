@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
-	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions"
-	grafana "kubernetes-grafana-controller/pkg/grafana/fake"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/fake"
+	informers "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions"
+	grafana "github.com/joe-elliott/kubernetes-grafana-controller/pkg/grafana/fake"
 	"testing"
 
-	grafanacontroller "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
+	grafanacontroller "github.com/joe-elliott/kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"

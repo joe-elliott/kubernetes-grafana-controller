@@ -19,10 +19,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	grafanav1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
-	versioned "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
+	grafanav1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
+	versioned "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

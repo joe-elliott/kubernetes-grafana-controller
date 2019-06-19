@@ -19,9 +19,9 @@ limitations under the License.
 package fake
 
 import (
-	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	grafanav1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
-	fakegrafanav1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1/fake"
+	clientset "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	grafanav1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
+	fakegrafanav1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1/fake"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"

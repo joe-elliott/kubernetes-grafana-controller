@@ -19,7 +19,7 @@ limitations under the License.
 package versioned
 
 import (
-	grafanav1alpha1 "kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
+	grafanav1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/typed/grafana/v1alpha1"
 
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"

@@ -19,8 +19,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
-	scheme "kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
+	scheme "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned/scheme"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
