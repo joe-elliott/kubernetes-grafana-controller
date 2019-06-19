@@ -9,4 +9,7 @@ FROM alpine:latest
 
 WORKDIR /root/
 COPY --from=build /src/app .
+
+USER nobody:nobody
+
 CMD ["./app"] 
