@@ -1,10 +1,12 @@
-FROM golang:1.11 as build
-WORKDIR /go/src/kubernetes-grafana-controller
+FROM golang:1.12 as build
+WORKDIR /src
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+RUN go mod download && \
+    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
 FROM alpine:latest  
+
 WORKDIR /root/
-COPY --from=build /go/src/kubernetes-grafana-controller/app .
+COPY --from=build /src/app .
 CMD ["./app"] 
