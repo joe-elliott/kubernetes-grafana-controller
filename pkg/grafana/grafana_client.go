@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"kubernetes-grafana-controller/pkg/prometheus"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/prometheus"
 
 	"github.com/imroc/req"
 	"k8s.io/apimachinery/pkg/util/runtime"

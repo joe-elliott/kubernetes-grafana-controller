@@ -19,8 +19,8 @@ limitations under the License.
 package grafana
 
 import (
-	v1alpha1 "kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana/v1alpha1"
-	internalinterfaces "kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana/v1alpha1"
+	internalinterfaces "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

@@ -9,12 +9,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
-	"kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
-	clientset "kubernetes-grafana-controller/pkg/client/clientset/versioned"
-	informers "kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana/v1alpha1"
-	listers "kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
-	"kubernetes-grafana-controller/pkg/grafana"
-	"kubernetes-grafana-controller/pkg/prometheus"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/apis/grafana/v1alpha1"
+	clientset "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned"
+	informers "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions/grafana/v1alpha1"
+	listers "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/listers/grafana/v1alpha1"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/grafana"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/prometheus"
 )
 
 // DataSourceSyncer is the controller implementation for DataSource resources

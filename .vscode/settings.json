@@ -5,5 +5,6 @@
         "glide.lock": true,
         "vendor": true
     },
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "go.formatTool": "goimports"
 }

@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"kubernetes-grafana-controller/pkg/apis/grafana"
+	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/apis/grafana"
 )
 
 // SchemeGroupVersion is group version used to register these objects
