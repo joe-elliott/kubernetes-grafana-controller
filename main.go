@@ -9,7 +9,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	clientset "./pkg/client/clientset/versioned"
+	clientset "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/clientset/versioned"
 	informers "github.com/joe-elliott/kubernetes-grafana-controller/pkg/client/informers/externalversions"
 	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/controllers"
 	"github.com/joe-elliott/kubernetes-grafana-controller/pkg/grafana"
