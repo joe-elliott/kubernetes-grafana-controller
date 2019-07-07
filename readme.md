@@ -1,6 +1,6 @@
 # kubernetes-grafana-controller
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/number101010/kubernetes-grafana-controller)](https://goreportcard.com/report/github.com/number101010/kubernetes-grafana-controller)
+[![Go Report Card](https://goreportcard.com/badge/github.com/joe-elliott/kubernetes-grafana-controller)](https://goreportcard.com/report/github.com/joe-elliott/kubernetes-grafana-controller)
 
 This controller will maintain the state of a Grafana instance by syncing it with objects created in Kubernetes.  It is under active development.
 
